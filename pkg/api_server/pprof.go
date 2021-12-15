@@ -33,13 +33,13 @@ func newPprofServer(registerPath, webPath string) *pprofServer {
 		reg, _ := regexp.Compile(`(` + webPath + `|/[a-zA-Z]+)`)
 		path := registerPath + reg.ReplaceAllString(r.URL.Path, "")
 		sampleType := r.URL.Query().Get("si")
-		s.redirectProfile(w, r, path, sampleType)
+		s.redirect(w, r, path, sampleType)
 	})
 
 	return s
 }
 
-func (s *pprofServer) redirectProfile(w http.ResponseWriter, r *http.Request, path, sampleType string) {
+func (s *pprofServer) redirect(w http.ResponseWriter, r *http.Request, path, sampleType string) {
 	http.Redirect(w, r, path+"?si="+sampleType, http.StatusSeeOther)
 }
 
@@ -49,7 +49,7 @@ func (s *pprofServer) register(w http.ResponseWriter, r *http.Request, data []by
 
 	curPath := path.Join(s.webPath, id) + "/"
 	if _, ok := s.exits[id]; ok {
-		s.redirectProfile(w, r, curPath, sampleType)
+		s.redirect(w, r, curPath, sampleType)
 		return
 	}
 
@@ -84,7 +84,7 @@ func (s *pprofServer) register(w http.ResponseWriter, r *http.Request, data []by
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	s.redirectProfile(w, r, curPath, sampleType)
+	s.redirect(w, r, curPath, sampleType)
 }
 
 func (s *pprofServer) web(w http.ResponseWriter, r *http.Request) {
