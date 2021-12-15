@@ -14,11 +14,21 @@
   import moment from 'moment'
   import * as echarts from 'echarts';
   import {ElLoading} from 'element-plus'
-
+  import {formatTooltip,formatUnit} from '@/utils/chart'
   const canvas = ref(null)
   const canvasBox = ref(null)
-
   let chart = null
+
+  const getCanvasWidthHeight = () => {
+    if (canvasBox.value) {
+      let {offsetWidth, offsetHeight} = canvasBox.value || {}
+      return {
+        width: offsetWidth || 800,
+        height: offsetHeight || 400
+      }
+    }
+  }
+
   const props = defineProps({
     index: {
       type: [String, Number],
@@ -42,50 +52,9 @@
       }
     }
   })
-  const getCanvasWidthHeight = () => {
-    if (canvasBox.value) {
-      let {offsetWidth, offsetHeight} = canvasBox.value || {}
-      return {
-        width: offsetWidth || 800,
-        height: offsetHeight || 400
-      }
-    }
-  }
-
-  const formatUnit = (value,unit)=>{
-    if (unit === "bytes"){
-      if (null == value || value == '') {
-        return "0 Bytes";
-      }
-      var unitArr = new Array("Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB");
-      var index = 0;
-      var srcsize = parseFloat(value);
-      index = Math.floor(Math.log(srcsize) / Math.log(1024));
-      var size = srcsize / Math.pow(1024, index);
-      size = size.toFixed(2);//保留的小数位数
-      return size + unitArr[index];
-    }else if (unit === "nanoseconds"){
-      if (null == value || value == '') {
-        return "0";
-      }
-      var unitArr = new Array("ns", "us", "ms", "s");
-      var index = 0;
-      var srcsize = parseFloat(value);
-      index = Math.floor(Math.log(srcsize) / Math.log(1000));
-      if (index > 3){
-        index = 3
-      }
-      var size = srcsize / Math.pow(1000, index);
-      size = size.toFixed(2);//保留的小数位数
-      return size + unitArr[index];
-    }
-    else if (unit === "count"){
-      return value
-    }
-    return value+unit
-  }
 
   const setChart = ({data = [], title} = {}) => {
+    console.log("set chart")
     nextTick(() => {
       var unit = ""
       const baseSetting = {
@@ -107,7 +76,7 @@
         grid: {
           left: 100,
           right: 300,
-          top:80,
+          top: 80,
         },
         dataZoom: {
           start: 0,
@@ -128,8 +97,8 @@
         },
         yAxis: {
           axisLabel: {
-            formatter:(params)=>{
-              return  formatUnit(params,unit)
+            formatter: (params) => {
+              return formatUnit(params, unit)
             },
           }
         },
@@ -139,25 +108,14 @@
           axisPointer: {
             animation: false
           },
-          formatter:(params)=>{
-            console.log(params)
-            var val = formatUnit(params.data.value[1],unit)
-
-            return `<div style="margin: 0px 0 0;line-height:1;">
-                        <div style="font-size:14px;color:#666;font-weight:400;line-height:1;">`+params.seriesName+`</div>
-                        <div style="margin: 10px 0 0;line-height:1;"><div style="margin: 0px 0 0;line-height:1;">
-                        <span style="display:inline-block;margin-right:4px;border-radius:10px;width:10px;height:10px;background-color:`+params.color+`;"></span>
-                        <span style="float:right;margin-left:10px;font-size:14px;color:#666;font-weight:900">`+val+`</span>
-                        <div style="clear:both"></div></div><div style="clear:both"></div>
-                        </div>
-                        <div style="clear:both"></div>
-                     </div>`
+          formatter: (params) => {
+            return formatTooltip(params, unit)
           },
         },
         series: []
       }
-      const echartData = []
 
+      const echartData = []
       if (data) {
         let count = 0
         for (const meta of data) {
@@ -180,6 +138,7 @@
           echartData.push(item)
         }
       }
+
       if (!chart) {
         let {width, height} = getCanvasWidthHeight()
         chart = echarts.init(canvas.value, null, {
@@ -188,7 +147,7 @@
           height
         });
         chart.on('click', function (params) {
-          window.open(`${baseConfig.reqUrl}/web/profile/${params.data.sourceData.ProfileID}`)
+          window.open(`${baseConfig.reqUrl}/pprof/register/${params.data.sourceData.ProfileID}?si=${title}`)
         });
       }
       chart.setOption(Object.assign(chartOptions, {
@@ -199,7 +158,6 @@
   }
 
   onMounted(() => {
-    setChart()
     window.addEventListener('resize', () => {
       if (chart) {
         let {width, height} = getCanvasWidthHeight()
@@ -212,7 +170,6 @@
   })
 
   watch(() => [props.type, props.projects, props.timeRange], () => {
-
     if (props.type) {
       let sampleType = props.type
       let targetList = props.projects
@@ -241,6 +198,7 @@
   })
 
 </script>
+
 <style lang="scss" scoped>
   .canvas {
     width: 100%;
