@@ -5,42 +5,38 @@ import (
 	"time"
 
 	"github.com/fsnotify/fsnotify"
-
 	"github.com/spf13/viper"
 )
 
-func LoadConfig(configPath string, fn func(configmap CollectorConfig)) {
+func LoadConfig(configPath string, fn func(configmap Config)) {
 	conf := viper.New()
 	conf.SetConfigFile(configPath)
 	conf.SetConfigType("yaml")
 
 	err := conf.ReadInConfig()
 	if err != nil {
-		panic(fmt.Errorf("Fatal error config file: %w \n", err))
+		panic(fmt.Errorf("Fatal error config file: %w", err))
 	}
 
-	var collectorConfig CollectorConfig
-	err = conf.UnmarshalKey("collector", &collectorConfig)
+	var config Config
+	err = conf.UnmarshalKey("collector", &config)
 	if err != nil {
-		panic(fmt.Errorf("Fatal error config collectorConfig: %w \n", err))
+		panic(fmt.Errorf("Fatal error config Config: %w", err))
 	}
 
 	conf.OnConfigChange(func(in fsnotify.Event) {
-
-		var collectorConfig CollectorConfig
-		err = conf.UnmarshalKey("collector", &collectorConfig)
+		var newConfig Config
+		err = conf.UnmarshalKey("collector", &newConfig)
 		if err != nil {
-			panic(fmt.Errorf("Fatal error config collectorConfig: %w \n", err))
+			panic(fmt.Errorf("Fatal error config Config: %w", err))
 		}
-		fn(collectorConfig)
+		fn(newConfig)
 	})
-
 	conf.WatchConfig()
-
-	fn(collectorConfig)
+	fn(config)
 }
 
-type CollectorConfig struct {
+type Config struct {
 	Name          string
 	TargetConfigs map[string]*TargetConfig
 }

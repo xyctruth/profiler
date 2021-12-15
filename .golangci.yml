@@ -1,0 +1,36 @@
+run:
+  timeout: 10m
+
+  skip-files:
+    - ".*_test.go$"
+
+linters:
+  enable:
+    - asciicheck
+    - depguard
+    - dogsled
+    - durationcheck
+    - errcheck
+    - errorlint
+    - exportloopref
+    - gci
+    - gofmt
+    - goimports
+    - gosec
+    - misspell
+    - nakedret
+    - nilerr
+    - nolintlint
+    - revive
+    - wastedassign
+issues:
+  exclude-rules:
+    - linters:
+        - gosec
+      text: "G108:"
+    - linters:
+        - govet
+      text: "sigchanyzer: misuse of unbuffered os.Signal channel as argument to signal.Notify"
+    - linters:
+        - staticcheck
+      text: "SA1017:"

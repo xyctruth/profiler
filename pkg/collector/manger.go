@@ -4,9 +4,8 @@ import (
 	"reflect"
 	"sync"
 
-	"github.com/xyctruth/profiler/pkg/storage"
-
 	log "github.com/sirupsen/logrus"
+	"github.com/xyctruth/profiler/pkg/storage"
 )
 
 type Manger struct {
@@ -32,7 +31,7 @@ func (manger *Manger) Stop() {
 	log.Info("collector manger exit ")
 }
 
-func (manger *Manger) Load(config CollectorConfig) {
+func (manger *Manger) Load(config Config) {
 	// delete old collector
 	for k, collector := range manger.collectors {
 		if _, ok := config.TargetConfigs[k]; !ok {

@@ -1,4 +1,4 @@
-package api_server
+package apiserver
 
 import (
 	"flag"
@@ -24,7 +24,7 @@ type pprofServer struct {
 func newPprofServer(registerPath, webPath string) *pprofServer {
 	s := &pprofServer{
 		mux:          http.NewServeMux(),
-		exits:        make(map[string]struct{}, 0),
+		exits:        make(map[string]struct{}),
 		registerPath: registerPath,
 		webPath:      webPath,
 	}
@@ -158,7 +158,7 @@ func (p *pprofFlags) ExtraUsage() string {
 // Parse implements the plugin.FlagSet interface.
 func (p *pprofFlags) Parse(usage func()) []string {
 	p.s.Usage = usage
-	p.s.Parse(p.args)
+	_ = p.s.Parse(p.args)
 	args := p.s.Args()
 	if len(args) == 0 {
 		usage()

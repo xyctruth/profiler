@@ -7,14 +7,12 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/xyctruth/profiler/pkg/storage/badger"
-
-	"github.com/xyctruth/profiler/pkg/storage"
-
 	"github.com/felixge/fgprof"
 	log "github.com/sirupsen/logrus"
-	"github.com/xyctruth/profiler/pkg/api_server"
+	"github.com/xyctruth/profiler/pkg/apiserver"
 	"github.com/xyctruth/profiler/pkg/collector"
+	"github.com/xyctruth/profiler/pkg/storage"
+	"github.com/xyctruth/profiler/pkg/storage/badger"
 )
 
 var (
@@ -37,7 +35,7 @@ func main() {
 
 	store := badger.NewStore(storagePath)
 	collectorManger := runCollector(configPath, store)
-	apiServer := runApiServer(store)
+	apiServer := runAPIServer(store)
 
 	quit := make(chan os.Signal)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
@@ -48,15 +46,15 @@ func main() {
 	store.Release()
 }
 
-func runApiServer(store storage.Store) *api_server.ApiServer {
-	apiServer := api_server.NewApiServer(":8080", store)
+func runAPIServer(store storage.Store) *apiserver.APIServer {
+	apiServer := apiserver.NewAPIServer(":8080", store)
 	go apiServer.Run()
 	return apiServer
 }
 
 func runCollector(configPath string, store storage.Store) *collector.Manger {
 	m := collector.NewManger(store)
-	collector.LoadConfig(configPath, func(config collector.CollectorConfig) {
+	collector.LoadConfig(configPath, func(config collector.Config) {
 		log.Info("config change, reload collector!!!")
 		m.Load(config)
 	})

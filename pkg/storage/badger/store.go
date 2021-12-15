@@ -4,9 +4,8 @@ import (
 	"strconv"
 	"time"
 
-	log "github.com/sirupsen/logrus"
-
 	"github.com/dgraph-io/badger/v3"
+	log "github.com/sirupsen/logrus"
 	"github.com/xyctruth/profiler/pkg/storage"
 )
 
@@ -34,7 +33,11 @@ func NewStore(path string) storage.Store {
 }
 
 func (s *store) Release() {
-	s.seq.Release()
+	err := s.seq.Release()
+	if err != nil {
+		log.WithError(err).Error("store release ")
+		return
+	}
 	log.Info("store release ")
 }
 
@@ -45,10 +48,13 @@ func (s *store) GetProfile(id string) ([]byte, error) {
 		if err != nil {
 			return err
 		}
-		item.Value(func(val []byte) error {
+		err = item.Value(func(val []byte) error {
 			date = val
 			return nil
 		})
+		if err != nil {
+			return err
+		}
 		return nil
 	})
 	return date, err
@@ -100,9 +106,9 @@ func (s *store) SaveProfileMeta(metas []*storage.ProfileMeta) error {
 
 func (s *store) ListProfileMeta(sampleType string, targetFilter []string, startTime, endTime time.Time) ([]*storage.ProfileMetaByTarget, error) {
 	//todo targetFilter 去重复
-	targets := make([]*storage.ProfileMetaByTarget, 0, 0)
+	targets := make([]*storage.ProfileMetaByTarget, 0)
 	var err error
-	if targetFilter == nil || len(targetFilter) == 0 {
+	if len(targetFilter) == 0 {
 		targetFilter, err = s.ListTarget()
 		if err != nil {
 			return nil, err
@@ -111,7 +117,7 @@ func (s *store) ListProfileMeta(sampleType string, targetFilter []string, startT
 
 	err = s.db.View(func(txn *badger.Txn) error {
 		for _, targetName := range targetFilter {
-			target := &storage.ProfileMetaByTarget{TargetName: targetName, ProfileMetas: make([]*storage.ProfileMeta, 0, 0)}
+			target := &storage.ProfileMetaByTarget{TargetName: targetName, ProfileMetas: make([]*storage.ProfileMeta, 0)}
 			min := buildProfileMetaKey(sampleType, targetName, startTime)
 			max := buildProfileMetaKey(sampleType, targetName, endTime)
 
@@ -128,8 +134,9 @@ func (s *store) ListProfileMeta(sampleType string, targetFilter []string, startT
 				}
 				err := item.Value(func(v []byte) error {
 					sample := &storage.ProfileMeta{}
-					err := sample.Decode(v)
+					err = sample.Decode(v)
 					if err != nil {
+						return err
 					}
 					target.ProfileMetas = append(target.ProfileMetas, sample)
 					return nil
@@ -150,7 +157,7 @@ func (s *store) ListProfileMeta(sampleType string, targetFilter []string, startT
 }
 
 func (s *store) ListSampleType() ([]string, error) {
-	sampleTypes := make([]string, 0, 0)
+	sampleTypes := make([]string, 0)
 	err := s.db.View(func(txn *badger.Txn) error {
 		opts := badger.DefaultIteratorOptions
 		opts.PrefetchSize = 100
@@ -172,7 +179,7 @@ func (s *store) ListSampleType() ([]string, error) {
 }
 
 func (s *store) ListGroupSampleType() (map[string][]string, error) {
-	sampleTypes := make(map[string][]string, 0)
+	sampleTypes := make(map[string][]string)
 
 	err := s.db.View(func(txn *badger.Txn) error {
 		opts := badger.DefaultIteratorOptions
@@ -183,13 +190,16 @@ func (s *store) ListGroupSampleType() (map[string][]string, error) {
 		for it.Seek(PrefixSampleType); it.Valid(); it.Next() {
 			item := it.Item()
 			k := item.Key()
-			item.Value(func(v []byte) error {
+			err := item.Value(func(v []byte) error {
 				if _, ok := sampleTypes[string(v)]; !ok {
 					sampleTypes[string(v)] = make([]string, 0, 5)
 				}
 				sampleTypes[string(v)] = append(sampleTypes[string(v)], deleteSampleTypeKey(k))
 				return nil
 			})
+			if err != nil {
+				return err
+			}
 		}
 		return nil
 	})
@@ -201,7 +211,7 @@ func (s *store) ListGroupSampleType() (map[string][]string, error) {
 }
 
 func (s *store) ListTarget() ([]string, error) {
-	targets := make([]string, 0, 0)
+	targets := make([]string, 0)
 
 	err := s.db.View(func(txn *badger.Txn) error {
 		opts := badger.DefaultIteratorOptions

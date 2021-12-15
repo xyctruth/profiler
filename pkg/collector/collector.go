@@ -144,7 +144,7 @@ func (collector *Collector) analysis(profileType string, profileBytes []byte) er
 	}
 
 	metas := make([]*storage.ProfileMeta, 0, len(p.SampleType))
-	for i, _ := range p.SampleType {
+	for i := range p.SampleType {
 		meta := &storage.ProfileMeta{}
 		meta.Timestamp = time.Now().UnixNano() / time.Millisecond.Nanoseconds()
 		meta.ProfileID = profileID
@@ -159,7 +159,7 @@ func (collector *Collector) analysis(profileType string, profileBytes []byte) er
 		if len(p.SampleType) > 1 {
 			meta.SampleType = fmt.Sprintf("%s_%s", profileType, p.SampleType[i].Type)
 		} else {
-			meta.SampleType = fmt.Sprintf("%s", profileType)
+			meta.SampleType = profileType
 		}
 		metas = append(metas, meta)
 	}
