@@ -1,0 +1,41 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: profiler-ui
+  namespace: profiler-system
+spec:
+  hosts:
+    - profiling.jia-huang.com
+  gateways:
+    - istio-system/gateway
+  http:
+    - match:
+        - uri:
+            prefix: /
+      route:
+        - destination:
+            host: profiler
+            port:
+              number: 80
+      timeout: 10000ms
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: profiler-api
+  namespace: profiler-system
+spec:
+  hosts:
+    - api.profiling.jia-huang.com
+  gateways:
+    - istio-system/gateway
+  http:
+    - match:
+        - uri:
+            prefix: /
+      route:
+        - destination:
+            host: profiler
+            port:
+              number: 8080
+      timeout: 10000ms

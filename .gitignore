@@ -22,12 +22,10 @@ profiler
 
 _test
 
-../profiler/data
-
+data
 node_modules
 .DS_Store
 dist
 dist-ssr
 *.local
 
-test

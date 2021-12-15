@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1alpha2
+kind: Certificate
+metadata:
+  name: istio-ingress-cert
+  namespace: profiler-system
+spec:
+  dnsNames:
+    - profiler.jia-huang.com
+  secretName: istio-ingress-cert
+  issuerRef:
+    name: letsencrypt
+    kind: ClusterIssuer

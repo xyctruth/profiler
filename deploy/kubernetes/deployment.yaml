@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/name: profiler
+  name: profiler
+  namespace: profiler-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: profiler
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: profiler
+    spec:
+      containers:
+        - name: profiler
+          image: registry.cn-shenzhen.aliyuncs.com/complus-prod/profiler:latest
+          imagePullPolicy: Always
+          env:
+          - name: config_path
+            value: /profiler/config/collector.yaml
+          - name: storage_path
+            value: /profiler/data/
+          resources:
+            limits:
+              cpu: "400m"
+              memory: "2000Mi"
+            requests:
+              cpu: "100m"
+              memory: "400Mi"
+          terminationMessagePolicy: FallbackToLogsOnError
+          volumeMounts:
+            - name: profiler-data
+              mountPath: /profiler/data
+              readOnly: false
+            - name: profiler-config
+              mountPath: /profiler/config
+            - name: tz-config
+              mountPath: /etc/localtime
+      terminationGracePeriodSeconds: 120
+      volumes:
+        - name: profiler-config
+          configMap:
+            name: profiler-config
+        - name: profiler-data
+          persistentVolumeClaim:
+            claimName: profiler-data
+        - name: tz-config
+          hostPath:
+            path: /usr/share/zoneinfo/Asia/Shanghai
