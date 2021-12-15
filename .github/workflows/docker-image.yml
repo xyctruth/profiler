@@ -1,0 +1,21 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build&Push the Docker image
+      run: |
+       docker login --username=xyctruth --password=${{ secrets.DOCKER_TOKEN }}
+       make docker-build docker-push IMG=xyctruth/profiler:latest BASE_API_URL=https://api.profiling.jia-huang.com
+
