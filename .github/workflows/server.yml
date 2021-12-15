@@ -1,4 +1,4 @@
-name: profiler
+name: server
 
 on:
   push:
