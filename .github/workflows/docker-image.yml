@@ -14,8 +14,13 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Build&Push the Docker image
+    - name: Login Docker Hub
       run: |
-       docker login --username=xyctruth --password=${{ secrets.DOCKER_TOKEN }}
-       make docker-build docker-push IMG=xyctruth/profiler:latest BASE_API_URL=https://api.profiling.jia-huang.com
+        docker login --username=xyctruth --password=${{ secrets.DOCKER_TOKEN }}
+    - name: Build the Docker image
+      run: |
+       make docker-build IMG=xyctruth/profiler:latest BASE_API_URL=https://api.profiling.jia-huang.com
+    - name: Push the Docker image
+      run: |
+        make docker-push IMG=xyctruth/profiler:latest BASE_API_URL=https://api.profiling.jia-huang.com
 

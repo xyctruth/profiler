@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: profiler
-          image: registry.cn-shenzhen.aliyuncs.com/complus-prod/profiler:latest
+          image: xyctruth/profiler:latest
           imagePullPolicy: Always
           env:
           - name: config_path
