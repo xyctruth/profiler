@@ -20,9 +20,9 @@ spec:
           image: xyctruth/profiler:latest
           imagePullPolicy: Always
           env:
-          - name: config_path
+          - name: CONFIG_PATH
             value: /profiler/config/collector.yaml
-          - name: storage_path
+          - name: DATA_PATH
             value: /profiler/data/
           resources:
             limits:

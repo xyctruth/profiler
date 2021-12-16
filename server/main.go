@@ -21,11 +21,11 @@ var (
 )
 
 func main() {
-	if configPath = os.Getenv("config_path"); configPath == "" {
+	if configPath = os.Getenv("CONFIG_PATH"); configPath == "" {
 		configPath = "./collector.yaml"
 	}
 
-	if storagePath = os.Getenv("storage_path"); storagePath == "" {
+	if storagePath = os.Getenv("DATA_PATH"); storagePath == "" {
 		storagePath = "./data"
 	}
 
