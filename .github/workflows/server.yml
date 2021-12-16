@@ -24,10 +24,18 @@ jobs:
           args: --verbose
 
   test:
-    needs: lint
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.platform }}
     steps:
-      - name: Test
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Run tests
         run: make test
   
   
