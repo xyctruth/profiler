@@ -4,7 +4,8 @@
     :multiple="true"
     :value="value"
     @input="emit('input',$event)"
-    placeholder="选择类型">
+    placeholder="选择类型"
+    filterable>
     <el-option-group
       v-for="group in options"
       :key="group.label"
