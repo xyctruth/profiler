@@ -14,10 +14,11 @@
 
 程序会 watch `collector.yaml` 配置文件变化, 实时加载变化的配置
 
+### 本地启动
 ```bash
-     #run server :8080
+     # run server :8080
     go run server/main.go 
-     #run ui :80
+     # run ui :80
     cd ui &&  npm run dev --base_api_url=http://localhost:8080 
 ```
 
@@ -33,4 +34,5 @@
 ```
 
 ### In Kubernetes
+
 `./deploy/kubernetes/`
