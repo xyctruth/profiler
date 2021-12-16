@@ -9,7 +9,6 @@ import (
 	"github.com/google/pprof/profile"
 	log "github.com/sirupsen/logrus"
 	"github.com/xyctruth/profiler/pkg/storage"
-	"github.com/xyctruth/profiler/pkg/utils"
 )
 
 type APIServer struct {
@@ -20,11 +19,11 @@ type APIServer struct {
 }
 
 func NewAPIServer(addr string, store storage.Store) *APIServer {
-	registerPprofPath, webPprofPath := "/api/pprof/register", "/api/pprof/ui"
+	pprofPath := "/api/pprof/ui"
 
 	apiServer := &APIServer{
 		store: store,
-		pprof: newPprofServer(registerPprofPath, webPprofPath),
+		pprof: newPprofServer(pprofPath, store),
 	}
 
 	router := gin.Default()
@@ -34,9 +33,8 @@ func NewAPIServer(addr string, store storage.Store) *APIServer {
 	router.Use(HandleCors).GET("/api/profile/:id", apiServer.getProfile)
 	router.Use(HandleCors).GET("/api/profile_meta/:sample_type", apiServer.listProfileMeta)
 
-	// show pprof page
-	router.Use(HandleCors).GET(registerPprofPath+"/:id", apiServer.registerPprof)
-	router.Use(HandleCors).GET(webPprofPath+"/*any", apiServer.webPprof)
+	// register pprof page
+	router.Use(HandleCors).GET(pprofPath+"/*any", apiServer.webPprof)
 
 	srv := &http.Server{
 		Addr:    addr,
@@ -135,16 +133,6 @@ func (s *APIServer) getProfile(c *gin.Context) {
 	if err != nil {
 		c.JSON(500, err)
 	}
-}
-func (s *APIServer) registerPprof(c *gin.Context) {
-	sampleType := utils.RemoveSampleTypePrefix(c.Query("si"))
-	id := c.Param("id")
-	data, err := s.store.GetProfile(id)
-	if err != nil {
-		c.JSON(500, err)
-		return
-	}
-	s.pprof.register(c.Writer, c.Request, data, id, sampleType)
 }
 
 func (s *APIServer) webPprof(c *gin.Context) {

@@ -149,7 +149,7 @@
           height
         });
         chart.on('click', function (params) {
-          window.open(`${baseConfig.reqUrl}/api/pprof/register/${params.data.sourceData.ProfileID}?si=${title}`)
+          window.open(`${baseConfig.reqUrl}/api/pprof/ui?si=${title}&id=${params.data.sourceData.ProfileID}`)
         });
       }
       chart.setOption(Object.assign(chartOptions, {
