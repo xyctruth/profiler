@@ -15,7 +15,7 @@ const modules = Object.keys(modulesFiles).reduce((modules, modulePath) => {
 }, {})
 
 const vuexLocal = new VuexPersistence({
-  key: URL_SETTING_DATA.namespace + 'vuex',
+  key:  'vuex',
   storage: window.localStorage,
   modules: ['user'],
 })

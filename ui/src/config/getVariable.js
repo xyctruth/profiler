@@ -7,8 +7,7 @@ catch (e) {}
 const URL_SETTING_DATA = function (){
   console.log(process.env.npm_config_base_api_url)
   return  {
-    namespace: 'profiler-ui',
-    reqUrl: process.env.npm_config_base_api_url || "http://localhost:8080",
+    reqUrl: process.env.npm_config_base_api_url || "",
     publicPath: '/',
   }
 }()

@@ -19,8 +19,8 @@ jobs:
         docker login --username=xyctruth --password=${{ secrets.DOCKER_TOKEN }}
     - name: Build the Docker image
       run: |
-       make docker-build IMG=xyctruth/profiler:latest BASE_API_URL=https://api.profiling.jia-huang.com
+       make docker-build IMG=xyctruth/profiler:latest
     - name: Push the Docker image
       run: |
-        make docker-push IMG=xyctruth/profiler:latest BASE_API_URL=https://api.profiling.jia-huang.com
+        make docker-push IMG=xyctruth/profiler:latest
 

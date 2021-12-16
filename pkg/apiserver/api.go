@@ -20,7 +20,7 @@ type APIServer struct {
 }
 
 func NewAPIServer(addr string, store storage.Store) *APIServer {
-	registerPprofPath, webPprofPath := "/pprof/register", "/pprof/web"
+	registerPprofPath, webPprofPath := "/api/pprof/register", "/api/pprof/ui"
 
 	apiServer := &APIServer{
 		store: store,
