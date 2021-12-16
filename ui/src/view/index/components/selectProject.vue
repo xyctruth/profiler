@@ -4,7 +4,8 @@
     :value="value"
     :collapse-tags="true"
     @input="emit('input',$event)"
-    placeholder="选择项目">
+    placeholder="选择服务"
+    filterable>
     <el-option
       v-for="(item,index) in options"
       :key="index"
