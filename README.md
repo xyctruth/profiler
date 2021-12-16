@@ -25,6 +25,8 @@
     docker run -d -p 80:80 --name profiler xyctruth/profiler:latest
 
     # 挂载目录启动
+    mkdir -vp ~/profiler/config/
+    cp ./collector.yaml ~/profiler/config/
     docker run -d -p 80:80 -v ~/profiler/data/:/profiler/data/ -v  ~/profiler/config/:/profiler/config/ --name profiler xyctruth/profiler:latest
 ```
 
