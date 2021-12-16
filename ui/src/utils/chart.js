@@ -1,5 +1,4 @@
 export const formatTooltip = (params,unit)=>{
-    console.log(params)
     const val = formatUnit(params.data.value[1],unit)
     const date =params.data.value[0]
     return `<div style="margin: 0px 0 0;line-height:1;">

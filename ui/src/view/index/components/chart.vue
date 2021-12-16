@@ -1,5 +1,5 @@
 <template>
-  <div ref="canvasBox" style="width:100%;height:600px;">
+  <div ref="canvasBox" style="width:100%;height:400px;">
     <div
       class="canvas"
       :id="index+'canvas'"
@@ -21,7 +21,10 @@
 
   const getCanvasWidthHeight = () => {
     if (canvasBox.value) {
+      console.log(canvasBox.value)
       let {offsetWidth, offsetHeight} = canvasBox.value || {}
+      console.log(offsetWidth)
+      console.log(offsetHeight)
       return {
         width: offsetWidth || 800,
         height: offsetHeight || 400
@@ -54,7 +57,6 @@
   })
 
   const setChart = ({data = [], title} = {}) => {
-    console.log("set chart")
     nextTick(() => {
       var unit = ""
       const baseSetting = {
