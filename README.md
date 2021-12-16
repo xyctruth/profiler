@@ -1,4 +1,4 @@
-# 基于 pprof 的 Golang 程序连续分析
+# 基于 pprof,fgprof 的 Golang 程序连续分析
 
 ## [Demo](https://profiling.jia-huang.com)
 
@@ -10,7 +10,9 @@
 
 ## Quick Start
 
-需要被收集分析的golang程序,需要提供`net/http/pprof`端点，并配置在`collector.yaml`配置文件中
+需要被收集分析的golang程序,需要提供 `net/http/pprof` 端点，并配置在 `./collector.yaml` 配置文件中
+
+程序会 watch `collector.yaml` 配置文件变化, 实时加载变化的配置
 
 ```bash
      #run server :8080

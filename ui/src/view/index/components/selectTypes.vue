@@ -40,7 +40,7 @@
       url: "/api/group_sample_types",
     })
       .then((res) => {
-        var types = ["profile","goroutine","heap","allocs","block","threadcreate","mutex"]
+        var types = ["heap","fgprof","profile","goroutine","allocs","block","threadcreate","mutex"]
         var data = []
         for (const key of types) {
           if (res[key]) {

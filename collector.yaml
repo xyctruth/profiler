@@ -1,5 +1,16 @@
 collector:
   targetConfigs:
-    profiler-server:
+
+    profiler-server: #server name
       interval: 15s
       host: localhost:9000
+      profileConfigs: #default scrape (profile,heap,allocs,black,mutex,fgprof)
+
+    server2:
+      interval: 15s
+      host: localhost:9000
+      profileConfigs:
+        fgprof:
+          enable: false
+        profile:
+          enable: false

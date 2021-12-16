@@ -27,7 +27,7 @@ type Collector struct {
 }
 
 func newCollector(targetName string, target *TargetConfig, store storage.Store) *Collector {
-	job := &Collector{
+	collector := &Collector{
 		TargetName:      targetName,
 		TargetConfig:    target,
 		exitChan:        make(chan struct{}),
@@ -37,7 +37,8 @@ func newCollector(targetName string, target *TargetConfig, store storage.Store) 
 		log:             logrus.WithField("collector", targetName),
 		store:           store,
 	}
-	return job
+	collector.ProfileConfigs = buildProfileConfigs(collector.ProfileConfigs)
+	return collector
 }
 
 func (collector *Collector) run(wg *sync.WaitGroup) {
@@ -74,6 +75,7 @@ func (collector *Collector) reload(target *TargetConfig) {
 		collector.resetTickerChan <- target.Interval
 	}
 	collector.TargetConfig = target
+	collector.ProfileConfigs = buildProfileConfigs(collector.ProfileConfigs)
 }
 
 func (collector *Collector) exit() {
@@ -85,9 +87,11 @@ func (collector *Collector) exit() {
 func (collector *Collector) scrape() {
 	collector.log.Info("collector scrape start")
 	collector.mu.RLock()
-	for profileType, profileConfig := range DefaultProfileConfigs() {
-		collector.wg.Add(1)
-		go collector.fetch(profileType, profileConfig)
+	for profileType, profileConfig := range collector.ProfileConfigs {
+		if profileConfig.Enable {
+			collector.wg.Add(1)
+			go collector.fetch(profileType, profileConfig)
+		}
 	}
 	collector.mu.RUnlock()
 	collector.wg.Wait()
@@ -96,6 +100,7 @@ func (collector *Collector) scrape() {
 func (collector *Collector) fetch(profileType string, profileConfig *ProfileConfig) {
 	defer collector.wg.Done()
 	logEntry := collector.log.WithFields(logrus.Fields{"profile_type": profileType, "profile_url": profileConfig.Path})
+	logEntry.Debug("collector start fetch")
 	req, err := http.NewRequest("GET", "http://"+collector.Host+profileConfig.Path, nil)
 	if err != nil {
 		logEntry.WithError(err).Error("invoke task error")
