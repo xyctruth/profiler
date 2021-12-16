@@ -1,8 +1,9 @@
 package storage
 
 import (
-	"github.com/vmihailenco/msgpack/v5"
 	"time"
+
+	"github.com/vmihailenco/msgpack/v5"
 )
 
 type Store interface {

@@ -7,11 +7,9 @@ import (
 	"path"
 	"sync"
 
-	"github.com/xyctruth/profiler/pkg/utils"
-
-	"github.com/xyctruth/profiler/pkg/storage"
-
 	"github.com/google/pprof/driver"
+	"github.com/xyctruth/profiler/pkg/storage"
+	"github.com/xyctruth/profiler/pkg/utils"
 )
 
 type pprofServer struct {
@@ -39,11 +37,7 @@ func (s *pprofServer) web(w http.ResponseWriter, r *http.Request) {
 
 func (s *pprofServer) register(w http.ResponseWriter, r *http.Request) {
 	sampleType := utils.RemoveSampleTypePrefix(r.URL.Query().Get("si"))
-
-	id := r.URL.Query().Get(("id"))
-	if id == "" {
-
-	}
+	id := extractProfileID(r.URL.Path)
 
 	data, err := s.store.GetProfile(id)
 	if err != nil {
