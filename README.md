@@ -2,7 +2,7 @@
 
 ## [Demo](https://profiling.jia-huang.com)
 
-![profiler](https://xtruth.oss-cn-shenzhen.aliyuncs.com/5.png)
+![profiler](https://xtruth.oss-cn-shenzhen.aliyuncs.com/7.png)
  
 ### 点击 point
 ![speedscope](https://xtruth.oss-cn-shenzhen.aliyuncs.com/6.png)
