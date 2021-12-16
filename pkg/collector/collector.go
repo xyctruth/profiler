@@ -1,6 +1,7 @@
 package collector
 
 import (
+	"bytes"
 	"encoding/gob"
 	"errors"
 	"fmt"
@@ -138,11 +139,20 @@ func (collector *Collector) analysis(profileType string, profileBytes []byte) er
 	if err != nil {
 		return err
 	}
-	if p.SampleType == nil || len(p.SampleType) == 0 {
+	if len(p.SampleType) == 0 {
 		return errors.New("sample type is nil")
 	}
 
-	profileID, err := collector.store.SaveProfile(profileBytes)
+	if len(p.Mapping) > 0 {
+		p.Mapping[0].File = collector.TargetName
+	}
+
+	b := &bytes.Buffer{}
+	if err = p.Write(b); err != nil {
+		return err
+	}
+
+	profileID, err := collector.store.SaveProfile(b.Bytes())
 	if err != nil {
 		collector.log.WithError(err).Error("save profile error")
 		return err
