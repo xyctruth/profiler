@@ -5,12 +5,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/xyctruth/profiler/pkg/uitls"
-
 	"github.com/gin-gonic/gin"
 	"github.com/google/pprof/profile"
 	log "github.com/sirupsen/logrus"
 	"github.com/xyctruth/profiler/pkg/storage"
+	"github.com/xyctruth/profiler/pkg/uitls"
 )
 
 type APIServer struct {
