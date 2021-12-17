@@ -5,8 +5,8 @@
         <el-card style="margin-bottom: 20px;">
           <div flex="cross:center main:justify">
             <div>
-              <selectTypes style="margin-right: 20px;" v-model="types"></selectTypes>
-              <selectProject style="margin-right: 20px;" v-model="projects"></selectProject>
+              <selectTypes style="margin-right: 20px;" v-model:selectTypes="types"></selectTypes>
+              <selectProject style="margin-right: 20px;" v-model:selectProjects="projects"></selectProject>
             </div>
             <div>
               <selectTimeRange v-model:timeRange="timeRange"></selectTimeRange>

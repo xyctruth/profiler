@@ -1,9 +1,8 @@
 <template>
   <el-select
+    v-model="value"
     :multiple="true"
-    :value="value"
     :collapse-tags="true"
-    @input="emit('input',$event)"
     placeholder="选择服务"
     filterable>
     <el-option
@@ -17,19 +16,23 @@
 </template>
 
 <script setup>
-  import {ref, onMounted, defineEmits, defineProps} from 'vue'
+import {ref, onMounted, defineEmits, watch} from 'vue'
   import axios from "@/utils/request";
+  import router from "@/router/index.js";
 
   const options = ref([])
-  const props = defineProps({
-    value: {
-      type: Array,
-      default: () => {
-        return []
-      }
+  const value = ref([])
+  const emit = defineEmits(['update:selectProjects'])
+
+  let query = router.currentRoute.value.query
+  if (query.targets){
+    if (Array.isArray(query.targets)){
+      value.value = query.targets
+    }else{
+      value.value = [query.targets]
     }
-  })
-  const emit = defineEmits(['input'])
+  }
+
   onMounted(() => {
     axios({
       url: "/api/targets",
@@ -41,5 +44,16 @@
         console.log(err);
       })
   })
+
+watch(value, (value) => {
+  let query = router.currentRoute.value.query
+  let path = router.currentRoute.value.path
+  let newQuery = JSON.parse(JSON.stringify(query));
+  newQuery.targets = value;
+  router.push({path, query: newQuery});
+  emit("update:selectProjects",  value)
+}, {
+  immediate: true
+})
 
 </script>

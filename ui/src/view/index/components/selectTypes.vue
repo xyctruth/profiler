@@ -1,9 +1,8 @@
 <template>
   <el-select
+    v-model="value"
     :collapse-tags="true"
     :multiple="true"
-    :value="value"
-    @input="emit('input',$event)"
     placeholder="选择类型"
     filterable>
     <el-option-group
@@ -23,19 +22,23 @@
 </template>
 
 <script setup>
-  import {ref, onMounted, defineEmits, defineProps} from 'vue'
+import {ref, onMounted, defineEmits, watch} from 'vue'
   import axios from "@/utils/request";
+  import router from "@/router/index.js";
 
   const options = ref([])
-  const props = defineProps({
-    value: {
-      type: Array,
-      default: () => {
-        return []
-      }
+  const value = ref([])
+  const emit = defineEmits(['update:selectTypes'])
+
+  let query = router.currentRoute.value.query
+  if (query.types){
+    if (Array.isArray(query.types)){
+      value.value = query.types
+    }else{
+      value.value = [query.types]
     }
-  })
-  const emit = defineEmits(['input'])
+  }
+
   onMounted(() => {
     axios({
       url: "/api/group_sample_types",
@@ -56,6 +59,17 @@
       .catch((err) => {
         console.log(err);
       })
+  })
+
+  watch(value, (value) => {
+    let query = router.currentRoute.value.query
+    let path = router.currentRoute.value.path
+    let newQuery = JSON.parse(JSON.stringify(query));
+    newQuery.types = value;
+    router.push({path, query: newQuery});
+    emit("update:selectTypes",  value)
+  }, {
+    immediate: true
   })
 
 </script>
