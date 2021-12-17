@@ -105,15 +105,8 @@ func (s *store) SaveProfileMeta(metas []*storage.ProfileMeta) error {
 }
 
 func (s *store) ListProfileMeta(sampleType string, targetFilter []string, startTime, endTime time.Time) ([]*storage.ProfileMetaByTarget, error) {
-	//todo targetFilter 去重复
 	targets := make([]*storage.ProfileMetaByTarget, 0)
 	var err error
-	if len(targetFilter) == 0 {
-		targetFilter, err = s.ListTarget()
-		if err != nil {
-			return nil, err
-		}
-	}
 
 	err = s.db.View(func(txn *badger.Txn) error {
 		for _, targetName := range targetFilter {

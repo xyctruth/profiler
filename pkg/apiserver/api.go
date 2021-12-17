@@ -9,6 +9,7 @@ import (
 	"github.com/google/pprof/profile"
 	log "github.com/sirupsen/logrus"
 	"github.com/xyctruth/profiler/pkg/storage"
+	"github.com/xyctruth/profiler/pkg/uitls"
 )
 
 type APIServer struct {
@@ -92,6 +93,7 @@ func (s *APIServer) listProfileMeta(c *gin.Context) {
 		return
 	}
 
+	req.Targets = uitls.RemoveDuplicateElement(req.Targets)
 	metas, err := s.store.ListProfileMeta(sampleType, req.Targets, startTime, endTime)
 	if err != nil {
 		c.JSON(500, err)
