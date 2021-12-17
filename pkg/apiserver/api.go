@@ -136,5 +136,6 @@ func (s *APIServer) getProfile(c *gin.Context) {
 }
 
 func (s *APIServer) webPprof(c *gin.Context) {
+	c.Request.URL.RawQuery = removePrefixSampleType(c.Request.URL.RawQuery)
 	s.pprof.web(c.Writer, c.Request)
 }

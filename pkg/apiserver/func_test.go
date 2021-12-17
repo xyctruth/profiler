@@ -8,3 +8,10 @@ func TestExtractProfileId(t *testing.T) {
 		t.Error("error id is", id)
 	}
 }
+
+func TestRemovePrefixSampleType(t *testing.T) {
+	rawQuery := removePrefixSampleType("si=heap_alloc_space")
+	if rawQuery != "si=alloc_space" {
+		t.Error("error rawQuery is", rawQuery)
+	}
+}

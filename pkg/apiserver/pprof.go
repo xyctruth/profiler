@@ -9,23 +9,22 @@ import (
 
 	"github.com/google/pprof/driver"
 	"github.com/xyctruth/profiler/pkg/storage"
-	"github.com/xyctruth/profiler/pkg/utils"
 )
 
 type pprofServer struct {
-	exits   map[string]struct{}
-	mux     *http.ServeMux
-	mu      sync.Mutex
-	webPath string
-	store   storage.Store
+	exits    map[string]struct{}
+	mux      *http.ServeMux
+	mu       sync.Mutex
+	basePath string
+	store    storage.Store
 }
 
-func newPprofServer(webPath string, store storage.Store) *pprofServer {
+func newPprofServer(basePath string, store storage.Store) *pprofServer {
 	s := &pprofServer{
-		mux:     http.NewServeMux(),
-		exits:   make(map[string]struct{}),
-		webPath: webPath,
-		store:   store,
+		mux:      http.NewServeMux(),
+		exits:    make(map[string]struct{}),
+		basePath: basePath,
+		store:    store,
 	}
 	s.mux.HandleFunc("/", s.register)
 	return s
@@ -36,8 +35,8 @@ func (s *pprofServer) web(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *pprofServer) register(w http.ResponseWriter, r *http.Request) {
-	sampleType := utils.RemoveSampleTypePrefix(r.URL.Query().Get("si"))
 	id := extractProfileID(r.URL.Path)
+	sampleType := r.URL.Query().Get("si")
 
 	data, err := s.store.GetProfile(id)
 	if err != nil {
@@ -48,7 +47,7 @@ func (s *pprofServer) register(w http.ResponseWriter, r *http.Request) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	curPath := path.Join(s.webPath, id) + "/"
+	curPath := path.Join(s.basePath, id) + "/"
 	if _, ok := s.exits[id]; ok {
 		http.Redirect(w, r, curPath+"?si="+sampleType, http.StatusSeeOther)
 		return
