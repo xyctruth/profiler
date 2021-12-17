@@ -12,7 +12,7 @@ import (
 )
 
 type pprofServer struct {
-	exits    map[string]struct{}
+	cache    map[string]struct{}
 	mux      *http.ServeMux
 	mu       sync.Mutex
 	basePath string
@@ -22,7 +22,7 @@ type pprofServer struct {
 func newPprofServer(basePath string, store storage.Store) *pprofServer {
 	s := &pprofServer{
 		mux:      http.NewServeMux(),
-		exits:    make(map[string]struct{}),
+		cache:    make(map[string]struct{}),
 		basePath: basePath,
 		store:    store,
 	}
@@ -48,12 +48,12 @@ func (s *pprofServer) register(w http.ResponseWriter, r *http.Request) {
 	defer s.mu.Unlock()
 
 	curPath := path.Join(s.basePath, id) + "/"
-	if _, ok := s.exits[id]; ok {
+	if _, ok := s.cache[id]; ok {
 		http.Redirect(w, r, curPath+"?si="+sampleType, http.StatusSeeOther)
 		return
 	}
 
-	s.exits[id] = struct{}{}
+	s.cache[id] = struct{}{}
 
 	filepath := path.Join(os.TempDir(), id)
 	err = ioutil.WriteFile(filepath, data, 0600)

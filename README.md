@@ -19,7 +19,7 @@
      # run server :8080
     go run server/main.go 
      # run ui :80
-    cd ui &&  npm run dev --base_api_url=http://localhost:8080 
+    cd ui && npm install --registry=https://registry.npm.taobao.org  &&  npm run dev --base_api_url=http://localhost:8080 
 ```
 
 ### In Docker
@@ -32,7 +32,3 @@
     cp ./collector.yaml ~/profiler/config/
     docker run -d -p 80:80 -v ~/profiler/data/:/profiler/data/ -v  ~/profiler/config/:/profiler/config/ --name profiler xyctruth/profiler:latest
 ```
-
-### In Kubernetes
-
-`./deploy/kubernetes/`
