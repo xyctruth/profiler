@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/xyctruth/profiler/pkg/uitls"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/pprof/profile"
 	log "github.com/sirupsen/logrus"
@@ -92,6 +94,7 @@ func (s *APIServer) listProfileMeta(c *gin.Context) {
 		return
 	}
 
+	req.Targets = uitls.RemoveDuplicateElement(req.Targets)
 	metas, err := s.store.ListProfileMeta(sampleType, req.Targets, startTime, endTime)
 	if err != nil {
 		c.JSON(500, err)
