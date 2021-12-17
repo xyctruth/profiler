@@ -21,6 +21,7 @@ jobs:
       run: |
        make docker-build IMG=xyctruth/profiler:latest
     - name: Push the Docker image
+      if: ${{ github.event_name != 'pull_request' }}
       run: |
         make docker-push IMG=xyctruth/profiler:latest
 
