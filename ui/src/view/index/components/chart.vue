@@ -77,7 +77,8 @@
           top: 80,
         },
         dataZoom: {
-          start: 0,
+          //start: 0,
+          startValue: moment().subtract(2,"hour").format('YYYY-MM-DD HH:mm:ss'),
           type: "slider",
           show: true,
         },
