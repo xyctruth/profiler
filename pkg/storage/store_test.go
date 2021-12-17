@@ -7,6 +7,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/dgraph-io/badger/v3"
+	"github.com/vmihailenco/msgpack/v5"
+
 	log "github.com/sirupsen/logrus"
 )
 

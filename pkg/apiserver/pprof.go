@@ -1,62 +1,62 @@
 package apiserver
 
 import (
-	"flag"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"path"
-	"regexp"
-	"strings"
 	"sync"
 
 	"github.com/google/pprof/driver"
+	"github.com/xyctruth/profiler/pkg/storage"
 )
 
 type pprofServer struct {
-	exits        map[string]struct{}
-	mux          *http.ServeMux
-	mu           sync.Mutex
-	registerPath string
-	webPath      string
+	cache    map[string]struct{}
+	mux      *http.ServeMux
+	mu       sync.Mutex
+	basePath string
+	store    storage.Store
 }
 
-func newPprofServer(registerPath, webPath string) *pprofServer {
+func newPprofServer(basePath string, store storage.Store) *pprofServer {
 	s := &pprofServer{
-		mux:          http.NewServeMux(),
-		exits:        make(map[string]struct{}),
-		registerPath: registerPath,
-		webPath:      webPath,
+		mux:      http.NewServeMux(),
+		cache:    make(map[string]struct{}),
+		basePath: basePath,
+		store:    store,
 	}
-
-	s.mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		reg, _ := regexp.Compile(`(` + webPath + `|/[a-zA-Z]+)`)
-		path := registerPath + reg.ReplaceAllString(r.URL.Path, "")
-		sampleType := r.URL.Query().Get("si")
-		s.redirect(w, r, path, sampleType)
-	})
-
+	s.mux.HandleFunc("/", s.register)
 	return s
 }
 
-func (s *pprofServer) redirect(w http.ResponseWriter, r *http.Request, path, sampleType string) {
-	http.Redirect(w, r, path+"?si="+sampleType, http.StatusSeeOther)
+func (s *pprofServer) web(w http.ResponseWriter, r *http.Request) {
+	s.mux.ServeHTTP(w, r)
 }
 
-func (s *pprofServer) register(w http.ResponseWriter, r *http.Request, data []byte, id, sampleType string) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
+func (s *pprofServer) register(w http.ResponseWriter, r *http.Request) {
+	id := extractProfileID(r.URL.Path)
+	sampleType := r.URL.Query().Get("si")
 
-	curPath := path.Join(s.webPath, id) + "/"
-	if _, ok := s.exits[id]; ok {
-		s.redirect(w, r, curPath, sampleType)
+	data, err := s.store.GetProfile(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	s.exits[id] = struct{}{}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	curPath := path.Join(s.basePath, id) + "/"
+	if _, ok := s.cache[id]; ok {
+		http.Redirect(w, r, curPath+"?si="+sampleType, http.StatusSeeOther)
+		return
+	}
+
+	s.cache[id] = struct{}{}
 
 	filepath := path.Join(os.TempDir(), id)
-	err := ioutil.WriteFile(filepath, data, 0600)
+	err = ioutil.WriteFile(filepath, data, 0600)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -84,84 +84,5 @@ func (s *pprofServer) register(w http.ResponseWriter, r *http.Request, data []by
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	s.redirect(w, r, curPath, sampleType)
-}
-
-func (s *pprofServer) web(w http.ResponseWriter, r *http.Request) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	s.mux.ServeHTTP(w, r)
-}
-
-type pprofFlags struct {
-	args  []string
-	s     flag.FlagSet
-	usage []string
-}
-
-// Bool implements the plugin.FlagSet interface.
-func (p *pprofFlags) Bool(o string, d bool, c string) *bool {
-	return p.s.Bool(o, d, c)
-}
-
-// Int implements the plugin.FlagSet interface.
-func (p *pprofFlags) Int(o string, d int, c string) *int {
-	return p.s.Int(o, d, c)
-}
-
-// Float64 implements the plugin.FlagSet interface.
-func (p *pprofFlags) Float64(o string, d float64, c string) *float64 {
-	return p.s.Float64(o, d, c)
-}
-
-// String implements the plugin.FlagSet interface.
-func (p *pprofFlags) String(o, d, c string) *string {
-	return p.s.String(o, d, c)
-}
-
-// BoolVar implements the plugin.FlagSet interface.
-func (p *pprofFlags) BoolVar(b *bool, o string, d bool, c string) {
-	p.s.BoolVar(b, o, d, c)
-}
-
-// IntVar implements the plugin.FlagSet interface.
-func (p *pprofFlags) IntVar(i *int, o string, d int, c string) {
-	p.s.IntVar(i, o, d, c)
-}
-
-// Float64Var implements the plugin.FlagSet interface.
-// the value of the flag.
-func (p *pprofFlags) Float64Var(f *float64, o string, d float64, c string) {
-	p.s.Float64Var(f, o, d, c)
-}
-
-// StringVar implements the plugin.FlagSet interface.
-func (p *pprofFlags) StringVar(s *string, o, d, c string) {
-	p.s.StringVar(s, o, d, c)
-}
-
-// StringList implements the plugin.FlagSet interface.
-func (p *pprofFlags) StringList(o, d, c string) *[]*string {
-	return &[]*string{p.s.String(o, d, c)}
-}
-
-// AddExtraUsage implements the plugin.FlagSet interface.
-func (p *pprofFlags) AddExtraUsage(eu string) {
-	p.usage = append(p.usage, eu)
-}
-
-// ExtraUsage implements the plugin.FlagSet interface.
-func (p *pprofFlags) ExtraUsage() string {
-	return strings.Join(p.usage, "\n")
-}
-
-// Parse implements the plugin.FlagSet interface.
-func (p *pprofFlags) Parse(usage func()) []string {
-	p.s.Usage = usage
-	_ = p.s.Parse(p.args)
-	args := p.s.Args()
-	if len(args) == 0 {
-		usage()
-	}
-	return args
+	http.Redirect(w, r, curPath+"?si="+sampleType, http.StatusSeeOther)
 }
