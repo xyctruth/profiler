@@ -21,10 +21,7 @@
 
   const getCanvasWidthHeight = () => {
     if (canvasBox.value) {
-      console.log(canvasBox.value)
       let {offsetWidth, offsetHeight} = canvasBox.value || {}
-      console.log(offsetWidth)
-      console.log(offsetHeight)
       return {
         width: offsetWidth || 800,
         height: offsetHeight || 400
@@ -61,11 +58,10 @@
       var unit = ""
       const baseSetting = {
         type: "line",
-        showSymbol: true,
         lineStyle: {
           width: 3,
         },
-        symbolSize: 10
+        showSymbol: true,
       }
       const chartOptions = {
         legend: {
@@ -128,7 +124,9 @@
             data: [],
           }
           for (const p of meta.ProfileMetas) {
-            unit = p.SampleTypeUnit
+            if (unit){
+              unit = p.SampleTypeUnit
+            }
             let label = moment(p.Timestamp).format('YYYY-MM-DD HH:mm:ss')
             if (label) {
               item.data.push({

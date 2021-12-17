@@ -1,64 +1,36 @@
 <template>
-  <el-select v-model="value" placeholder="Select">
-    <el-option
-      v-for="item in options"
-      :key="item.label"
-      :label="item.label"
-      :value="item.label"
-    >
-    </el-option>
-  </el-select>
+  <div>
+    <el-date-picker v-model="value" type="date" :disabled-date="disabledDate">
+    </el-date-picker>
+  </div>
 </template>
 
 <script setup>
-  import {ref, onMounted, defineEmits, defineProps, watch} from 'vue'
+  import { reactive, toRefs, defineEmits, watch} from 'vue'
   import moment from 'moment'
 
-  const value = ref("1小时内")
-  const options = ref([
-    {
-      label: "1小时内",
-      value: () => {
-        return [moment().subtract(1, 'hours').toISOString(), moment().toISOString()]
-      },
+  const state = reactive({
+    disabledDate(time) {
+      return time.getTime() > Date.now()
     },
-    {
-      label: "12小时内",
-      value: () => {
-        return [moment().subtract(12, 'hours').toISOString(), moment().toISOString()]
-      },
-    },
-    {
-      label: "一天内",
-      value: () => {
-        return [moment().subtract(1, 'days').toISOString(), moment().toISOString()]
-      },
-    },
-    {
-      label: "一周内",
-      value: () => {
-        return [moment().subtract(7, 'days').toISOString(), moment().toISOString()]
-      },
-    },
-  ])
-  const emit = defineEmits(['update:time'])
+    value: new Date(),
+  })
+  const {disabledDate, value} = toRefs(state)
+
+  const emit = defineEmits(['update:timeRange'])
   const getCurrentValue = () => {
-    let item = options.value.find((item) => {
-      return item.label === value.value
-    })
-    return item ? item.value() : options[0].value()
+
+    var startDate = moment(value.value).startOf('day');
+    var endDate = moment(value.value).add(1,'days').startOf('day')
+
+    return [startDate.toISOString(),endDate.toISOString()]
   }
+
   watch(value, (value) => {
-    emit("update:time", getCurrentValue())
+    emit("update:timeRange", getCurrentValue())
   }, {
     immediate: true
   })
 
-
 </script>
 
-<style scope lang="scss">
-  .selectTimeRange {
-
-  }
-</style>

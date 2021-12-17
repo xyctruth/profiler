@@ -9,7 +9,7 @@
               <selectProject style="margin-right: 20px;" v-model="projects"></selectProject>
             </div>
             <div>
-              <selectTimeRange v-model:time="timeRange"></selectTimeRange>
+              <selectTimeRange v-model:timeRange="timeRange"></selectTimeRange>
             </div>
           </div>
         </el-card>

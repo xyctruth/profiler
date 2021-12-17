@@ -107,7 +107,12 @@ func (s *store) SaveProfileMeta(metas []*storage.ProfileMeta) error {
 func (s *store) ListProfileMeta(sampleType string, targetFilter []string, startTime, endTime time.Time) ([]*storage.ProfileMetaByTarget, error) {
 	targets := make([]*storage.ProfileMetaByTarget, 0)
 	var err error
-
+	if len(targetFilter) == 0 {
+		targetFilter, err = s.ListTarget()
+		if err != nil {
+			return nil, err
+		}
+	}
 	err = s.db.View(func(txn *badger.Txn) error {
 		for _, targetName := range targetFilter {
 			target := &storage.ProfileMetaByTarget{TargetName: targetName, ProfileMetas: make([]*storage.ProfileMeta, 0)}
@@ -138,7 +143,10 @@ func (s *store) ListProfileMeta(sampleType string, targetFilter []string, startT
 					return err
 				}
 			}
-			targets = append(targets, target)
+
+			if len(target.ProfileMetas) > 0 {
+				targets = append(targets, target)
+			}
 		}
 		return nil
 	})
