@@ -77,7 +77,7 @@
           top: 80,
         },
         dataZoom: {
-          start: 90,
+          start: 0,
           end: 100,
           type: "slider",
           show: true,
