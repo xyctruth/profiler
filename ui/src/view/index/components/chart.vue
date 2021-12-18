@@ -61,7 +61,7 @@
         lineStyle: {
           width: 3,
         },
-        showSymbol: true,
+        showSymbol: false,
       }
       const chartOptions = {
         legend: {
@@ -104,13 +104,7 @@
         },
         tooltip: {
           show: true,
-          trigger: 'item',
-          axisPointer: {
-            animation: false
-          },
-          formatter: (params) => {
-            return formatTooltip(params, unit)
-          },
+          trigger: 'axis',
         },
         series: []
       }

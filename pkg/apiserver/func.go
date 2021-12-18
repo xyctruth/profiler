@@ -1,10 +1,14 @@
 package apiserver
 
-import "regexp"
+import (
+	"regexp"
+	"strings"
+)
 
 func extractProfileID(path string) string {
-	reg, _ := regexp.Compile(`([\d]+)`)
-	return reg.FindString(path)
+	reg, _ := regexp.Compile(`/([\d]+)(/|$)`)
+	s := reg.FindString(path)
+	return strings.ReplaceAll(s, "/", "")
 }
 
 func removePrefixSampleType(rawQuery string) string {

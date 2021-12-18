@@ -29,7 +29,24 @@ func NewStore(path string) storage.Store {
 	if err != nil {
 		panic(err)
 	}
+
+	go s.GC()
 	return s
+}
+
+func (s *store) GC() {
+	ticker := time.NewTicker(5 * time.Minute)
+	defer ticker.Stop()
+	for range ticker.C {
+	again:
+		log.Info("store gc start")
+		err := s.db.RunValueLogGC(0.7)
+		if err == nil {
+			goto again
+		} else {
+			log.WithError(err).Info("store gc error")
+		}
+	}
 }
 
 func (s *store) Release() {
