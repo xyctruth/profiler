@@ -7,6 +7,26 @@ func TestExtractProfileId(t *testing.T) {
 	if id != "10009" {
 		t.Error("error id is", id)
 	}
+
+	id = extractProfileID("/api/pprof/ui/10009/top")
+	if id != "10009" {
+		t.Error("error id is", id)
+	}
+
+	id = extractProfileID("/api/pprof/ui/10009")
+	if id != "10009" {
+		t.Error("error id is", id)
+	}
+
+	id = extractProfileID("/api/pprof/ui/10009asd")
+	if id != "" {
+		t.Error("error id is", id)
+	}
+
+	id = extractProfileID("/api/pprof/ui/10009asd/")
+	if id != "" {
+		t.Error("error id is", id)
+	}
 }
 
 func TestRemovePrefixSampleType(t *testing.T) {

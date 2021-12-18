@@ -36,8 +36,6 @@ func (s *pprofServer) web(w http.ResponseWriter, r *http.Request) {
 
 func (s *pprofServer) register(w http.ResponseWriter, r *http.Request) {
 	id := extractProfileID(r.URL.Path)
-	sampleType := r.URL.Query().Get("si")
-
 	data, err := s.store.GetProfile(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -47,9 +45,8 @@ func (s *pprofServer) register(w http.ResponseWriter, r *http.Request) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	curPath := path.Join(s.basePath, id) + "/"
 	if _, ok := s.cache[id]; ok {
-		http.Redirect(w, r, curPath+"?si="+sampleType, http.StatusSeeOther)
+		http.Redirect(w, r, r.URL.Path+"?"+r.URL.RawQuery, http.StatusSeeOther)
 		return
 	}
 
@@ -65,6 +62,7 @@ func (s *pprofServer) register(w http.ResponseWriter, r *http.Request) {
 		args: []string{"-http=localhost:0", "-no_browser", filepath},
 	}
 
+	curPath := path.Join(s.basePath, id) + "/"
 	options := &driver.Options{
 		Flagset: flags,
 		HTTPServer: func(args *driver.HTTPServerArgs) error {
@@ -84,5 +82,5 @@ func (s *pprofServer) register(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	http.Redirect(w, r, curPath+"?si="+sampleType, http.StatusSeeOther)
+	http.Redirect(w, r, r.URL.Path+"?"+r.URL.RawQuery, http.StatusSeeOther)
 }
