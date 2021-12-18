@@ -264,7 +264,7 @@ func (s *store) Clear(targetName string, days int64) error {
 			for it.Rewind(); it.Valid(); it.Next() {
 				item := it.Item()
 				k := item.Key()
-				var profileID uint64 = 0
+				var profileID uint64
 				if !storage.CompareKey(k, max) {
 					break
 				}
