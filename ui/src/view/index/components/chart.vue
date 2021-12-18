@@ -81,6 +81,7 @@
           end: 100,
           type: "slider",
           show: true,
+          realtime: false, // 是否实时刷新
         },
         title: {
           text: title,
@@ -145,7 +146,8 @@
         chart = echarts.init(canvas.value, null, {
           devicePixelRatio: window.devicePixelRatio || 2,
           width,
-          height
+          height,
+          useDirtyRect: true,
         });
         chart.on('click', function (params) {
           window.open(`${baseConfig.reqUrl}/api/pprof/ui/${params.data.sourceData.ProfileID}?si=${title}`)
