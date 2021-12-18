@@ -81,6 +81,7 @@ type Config struct {
 type TargetConfig struct {
 	ProfileConfigs map[string]*ProfileConfig
 	Interval       time.Duration
+	Expiration     int64 // unit day
 	Host           string
 }
 

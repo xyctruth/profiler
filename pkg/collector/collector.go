@@ -2,7 +2,6 @@ package collector
 
 import (
 	"bytes"
-	"encoding/gob"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -49,8 +48,7 @@ func (collector *Collector) run(wg *sync.WaitGroup) {
 
 	wg.Add(1)
 	collector.log.Info("collector run")
-
-	gob.Register(storage.ProfileMeta{})
+	go collector.cronClear()
 
 	ticker := time.NewTicker(collector.Interval)
 	defer ticker.Stop()
@@ -66,6 +64,30 @@ func (collector *Collector) run(wg *sync.WaitGroup) {
 		case <-ticker.C:
 			collector.scrape()
 		}
+	}
+}
+
+func (collector *Collector) cronClear() {
+	if collector.Expiration <= 0 {
+		return
+	}
+	// 每天24点执行
+	for {
+		now := time.Now()
+		next := now.Add(time.Hour * 24)
+		next = time.Date(next.Year(), next.Month(), next.Day(), 0, 0, 0, 0, next.Location())
+		t := time.NewTimer(next.Sub(now))
+		<-t.C
+
+		collector.log.Info("collector clear start")
+		collector.mu.RLock()
+
+		err := collector.store.Clear(collector.TargetName, collector.Expiration)
+		if err != nil {
+			collector.log.WithError(err).Error("collector clear error")
+		}
+
+		collector.mu.RUnlock()
 	}
 }
 

@@ -1,6 +1,8 @@
 package apiserver
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestExtractProfileId(t *testing.T) {
 	id := extractProfileID("/api/pprof/ui/10009/")

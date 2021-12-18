@@ -18,6 +18,8 @@ type Store interface {
 
 	ListTarget() ([]string, error)
 
+	Clear(targetName string, days int64) error
+
 	Release()
 }
 
