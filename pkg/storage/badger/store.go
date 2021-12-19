@@ -243,7 +243,7 @@ func (s *store) ListTarget() ([]string, error) {
 	return targets, nil
 }
 
-func (s *store) Clear(targetName string, days int64) error {
+func (s *store) Clear(targetName string, agoDays int64) error {
 	sampleTypes, err := s.ListSampleType()
 	if err != nil {
 		return err
@@ -251,7 +251,7 @@ func (s *store) Clear(targetName string, days int64) error {
 
 	now := time.Now()
 	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
-	ago := today.Add(-time.Hour * 24 * time.Duration(days))
+	ago := today.Add(-time.Hour * 24 * time.Duration(agoDays))
 
 	err = s.db.Update(func(txn *badger.Txn) error {
 		for _, sampleType := range sampleTypes {

@@ -1,4 +1,4 @@
-package uitls
+package utils
 
 func RemoveDuplicateElement(s []string) []string {
 	result := make([]string, 0, len(s))

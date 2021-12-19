@@ -48,7 +48,7 @@ func (collector *Collector) run(wg *sync.WaitGroup) {
 
 	wg.Add(1)
 	collector.log.Info("collector run")
-	go collector.cronClear()
+	go collector.autoClear()
 
 	ticker := time.NewTicker(collector.Interval)
 	defer ticker.Stop()
@@ -67,7 +67,7 @@ func (collector *Collector) run(wg *sync.WaitGroup) {
 	}
 }
 
-func (collector *Collector) cronClear() {
+func (collector *Collector) autoClear() {
 	if collector.Expiration <= 0 {
 		return
 	}
@@ -111,7 +111,7 @@ func (collector *Collector) scrape() {
 	collector.log.Info("collector scrape start")
 	collector.mu.RLock()
 	for profileType, profileConfig := range collector.ProfileConfigs {
-		if profileConfig.Enable {
+		if *profileConfig.Enable {
 			collector.wg.Add(1)
 			go collector.fetch(profileType, profileConfig)
 		}
