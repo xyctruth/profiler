@@ -1,16 +1,22 @@
 collector:
   targetConfigs:
 
-    profiler-server: #server name
+    profiler-server: # server name
       interval: 15s
+      expiration: 0  # no expiration time. unit day
       host: localhost:9000
-      profileConfigs: #default scrape (profile,heap,allocs,black,mutex,fgprof)
+      profileConfigs: # default scrape (profile, heap, allocs, black, mutex, fgprof)
 
     server2:
-      interval: 15s
+      interval: 20s
+      expiration: 1
       host: localhost:9000
-      profileConfigs:
+      profileConfigs: # rewrite default profile config
         fgprof:
           enable: false
         profile:
+          path: /debug/pprof/profile?seconds=10
           enable: false
+        heap:
+          path: /debug/pprof/heap
+

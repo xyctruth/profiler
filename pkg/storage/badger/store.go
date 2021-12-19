@@ -31,6 +31,7 @@ func NewStore(path string) storage.Store {
 	}
 
 	go s.GC()
+
 	return s
 }
 
@@ -47,15 +48,6 @@ func (s *store) GC() {
 			log.WithError(err).Info("store gc error")
 		}
 	}
-}
-
-func (s *store) Release() {
-	err := s.seq.Release()
-	if err != nil {
-		log.WithError(err).Error("store release ")
-		return
-	}
-	log.Info("store release ")
 }
 
 func (s *store) GetProfile(id string) ([]byte, error) {
@@ -137,8 +129,8 @@ func (s *store) ListProfileMeta(sampleType string, targetFilter []string, startT
 			max := buildProfileMetaKey(sampleType, targetName, endTime)
 
 			opts := badger.DefaultIteratorOptions
-			opts.PrefetchSize = 10
-			opts.Prefix = PrefixProfileMeta
+			opts.PrefetchSize = 100
+			opts.Prefix = buildBaseProfileMetaKey(sampleType, targetName)
 			it := txn.NewIterator(opts)
 			defer it.Close()
 			for it.Seek(min); it.Valid(); it.Next() {
@@ -249,4 +241,79 @@ func (s *store) ListTarget() ([]string, error) {
 		return nil, err
 	}
 	return targets, nil
+}
+
+func (s *store) Clear(targetName string, agoDays int64) error {
+	sampleTypes, err := s.ListSampleType()
+	if err != nil {
+		return err
+	}
+
+	now := time.Now()
+	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	ago := today.Add(-time.Hour * 24 * time.Duration(agoDays))
+
+	err = s.db.Update(func(txn *badger.Txn) error {
+		for _, sampleType := range sampleTypes {
+			max := buildProfileMetaKey(sampleType, targetName, ago)
+			opts := badger.DefaultIteratorOptions
+			opts.PrefetchSize = 100
+			opts.Prefix = buildBaseProfileMetaKey(sampleType, targetName)
+			it := txn.NewIterator(opts)
+			defer it.Close()
+			for it.Rewind(); it.Valid(); it.Next() {
+				item := it.Item()
+				k := item.Key()
+				var profileID uint64
+				if !storage.CompareKey(k, max) {
+					break
+				}
+				err = item.Value(func(v []byte) error {
+					sample := &storage.ProfileMeta{}
+					err = sample.Decode(v)
+					if err != nil {
+						return err
+					}
+					profileID = sample.ProfileID
+					return nil
+				})
+				if err != nil {
+					return err
+				}
+
+				err = s.delete(k, buildProfileKey(strconv.FormatUint(profileID, 10)))
+				if err != nil {
+					return err
+				}
+			}
+		}
+		return nil
+	})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *store) delete(keys ...[]byte) error {
+	return s.db.Update(func(txn *badger.Txn) error {
+		for _, key := range keys {
+			err := txn.Delete(key)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+}
+
+func (s *store) Release() {
+	err := s.seq.Release()
+	if err != nil {
+		log.WithError(err).Error("store release ")
+		return
+	}
+	log.Info("store release ")
 }

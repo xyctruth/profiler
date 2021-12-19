@@ -6,41 +6,42 @@ import (
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
+	"github.com/xyctruth/profiler/pkg/utils"
 )
 
 var (
 	defaultProfileConfigs = map[string]*ProfileConfig{
 		"profile": {
 			Path:   "/debug/pprof/profile?seconds=10",
-			Enable: true,
+			Enable: utils.BoolPtr(true),
 		},
 		"fgprof": {
 			Path:   "/debug/fgprof?seconds=10",
-			Enable: true,
+			Enable: utils.BoolPtr(true),
 		},
 		"mutex": {
 			Path:   "/debug/pprof/mutex",
-			Enable: true,
+			Enable: utils.BoolPtr(true),
 		},
 		"heap": {
 			Path:   "/debug/pprof/heap",
-			Enable: true,
+			Enable: utils.BoolPtr(true),
 		},
 		"goroutine": {
 			Path:   "/debug/pprof/goroutine",
-			Enable: true,
+			Enable: utils.BoolPtr(true),
 		},
 		"allocs": {
 			Path:   "/debug/pprof/allocs",
-			Enable: true,
+			Enable: utils.BoolPtr(true),
 		},
 		"block": {
 			Path:   "/debug/pprof/block",
-			Enable: true,
+			Enable: utils.BoolPtr(true),
 		},
 		"threadcreate": {
 			Path:   "/debug/pprof/threadcreate",
-			Enable: true,
+			Enable: utils.BoolPtr(true),
 		},
 	}
 )
@@ -81,12 +82,13 @@ type Config struct {
 type TargetConfig struct {
 	ProfileConfigs map[string]*ProfileConfig
 	Interval       time.Duration
+	Expiration     int64 // unit day
 	Host           string
 }
 
 type ProfileConfig struct {
 	Path   string
-	Enable bool
+	Enable *bool
 }
 
 func buildProfileConfigs(profileConfig map[string]*ProfileConfig) map[string]*ProfileConfig {
@@ -94,14 +96,19 @@ func buildProfileConfigs(profileConfig map[string]*ProfileConfig) map[string]*Pr
 		return defaultProfileConfigs
 	}
 
-	for profileName, defaultConfig := range defaultProfileConfigs {
-		if config, ok := profileConfig[profileName]; ok {
+	for key, defaultConfig := range defaultProfileConfigs {
+		if config, ok := profileConfig[key]; ok {
 			if config.Path == "" {
 				config.Path = defaultConfig.Path
 			}
-		} else {
-			profileConfig[profileName] = defaultConfig
+
+			if config.Enable == nil {
+				config.Enable = defaultConfig.Enable
+			}
+			continue
 		}
+
+		profileConfig[key] = defaultConfig
 	}
 	return profileConfig
 }

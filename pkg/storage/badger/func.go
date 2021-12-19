@@ -16,9 +16,16 @@ var (
 	Sequence          = []byte("Sequence")
 )
 
-func buildProfileKey(profile string) []byte {
+func buildProfileKey(id string) []byte {
 	buf := bytes.NewBuffer(PrefixProfiles)
-	buf.Write([]byte(profile))
+	buf.Write([]byte(id))
+	return buf.Bytes()
+}
+
+func buildBaseProfileMetaKey(sampleType string, target string) []byte {
+	buf := bytes.NewBuffer(PrefixProfileMeta)
+	buf.Write([]byte(sampleType))
+	buf.Write([]byte(target))
 	return buf.Bytes()
 }
 
