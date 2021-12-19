@@ -61,7 +61,7 @@
         lineStyle: {
           width: 3,
         },
-        showSymbol: true,
+        showSymbol: false,
       }
       const chartOptions = {
         legend: {
@@ -77,7 +77,7 @@
           top: 80,
         },
         dataZoom: {
-          start: 90,
+          start: 0,
           end: 100,
           type: "slider",
           show: true,
@@ -103,13 +103,7 @@
         },
         tooltip: {
           show: true,
-          trigger: 'item',
-          axisPointer: {
-            animation: false
-          },
-          formatter: (params) => {
-            return formatTooltip(params, unit)
-          },
+          trigger: 'axis',
         },
         series: []
       }
