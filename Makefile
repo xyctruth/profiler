@@ -23,7 +23,7 @@ docker-push:
 
 .PHONY: test
 test:
-	go test -v -coverprofile=cover.out  ./pkg/storage
+	go test -v -coverprofile=cover.out  ./...
 	go test -v  ./...
 
 .PHONY: test-cover
