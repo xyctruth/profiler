@@ -46,7 +46,7 @@ var (
 	}
 )
 
-func LoadConfig(configPath string, fn func(configmap Config)) {
+func LoadConfig(configPath string, fn func(configmap CollectorConfig)) {
 	conf := viper.New()
 	conf.SetConfigFile(configPath)
 	conf.SetConfigType("yaml")
@@ -56,17 +56,17 @@ func LoadConfig(configPath string, fn func(configmap Config)) {
 		panic(fmt.Errorf("Fatal error config file: %w", err))
 	}
 
-	var config Config
+	var config CollectorConfig
 	err = conf.UnmarshalKey("collector", &config)
 	if err != nil {
-		panic(fmt.Errorf("Fatal error config Config: %w", err))
+		panic(fmt.Errorf("Fatal error config CollectorConfig: %w", err))
 	}
 
 	conf.OnConfigChange(func(in fsnotify.Event) {
-		var newConfig Config
+		var newConfig CollectorConfig
 		err = conf.UnmarshalKey("collector", &newConfig)
 		if err != nil {
-			panic(fmt.Errorf("Fatal error config Config: %w", err))
+			panic(fmt.Errorf("Fatal error config CollectorConfig: %w", err))
 		}
 		fn(newConfig)
 	})
@@ -75,20 +75,23 @@ func LoadConfig(configPath string, fn func(configmap Config)) {
 }
 
 type Config struct {
-	Name          string
-	TargetConfigs map[string]*TargetConfig
+	Collector *CollectorConfig `yaml:"collector"`
+}
+
+type CollectorConfig struct {
+	TargetConfigs map[string]*TargetConfig `yaml:"targetConfigs"`
 }
 
 type TargetConfig struct {
-	ProfileConfigs map[string]*ProfileConfig
-	Interval       time.Duration
-	Expiration     int64 // unit day
-	Host           string
+	ProfileConfigs map[string]*ProfileConfig `yaml:"profileConfigs"`
+	Interval       time.Duration             `yaml:"interval"`
+	Expiration     int64                     `yaml:"expiration"` // unit day
+	Host           string                    `yaml:"host"`
 }
 
 type ProfileConfig struct {
-	Path   string
-	Enable *bool
+	Path   string `yaml:"path"`
+	Enable *bool  `yaml:"enable"`
 }
 
 func buildProfileConfigs(profileConfig map[string]*ProfileConfig) map[string]*ProfileConfig {

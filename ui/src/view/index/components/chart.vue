@@ -117,6 +117,9 @@
             ...baseSetting,
             name: meta.TargetName,
             data: [],
+            emphasis: {
+              focus: 'series'
+            },
           }
           for (const p of meta.ProfileMetas) {
             if (unit){

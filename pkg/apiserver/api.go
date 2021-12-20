@@ -28,6 +28,9 @@ func NewAPIServer(addr string, store storage.Store) *APIServer {
 	}
 
 	router := gin.Default()
+	router.GET("/api/healthz", func(c *gin.Context) {
+		c.JSON(200, "I'm fine")
+	})
 	router.Use(HandleCors).GET("/api/targets", apiServer.listTarget)
 	router.Use(HandleCors).GET("/api/sample_types", apiServer.listSampleTypes)
 	router.Use(HandleCors).GET("/api/group_sample_types", apiServer.listGroupSampleTypes)

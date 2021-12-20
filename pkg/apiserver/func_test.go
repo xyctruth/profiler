@@ -2,38 +2,58 @@ package apiserver
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestExtractProfileId(t *testing.T) {
-	id := extractProfileID("/api/pprof/ui/10009/")
-	if id != "10009" {
-		t.Error("error id is", id)
-	}
 
-	id = extractProfileID("/api/pprof/ui/10009/top")
-	if id != "10009" {
-		t.Error("error id is", id)
+	tests := []struct {
+		name    string
+		input   string
+		want    string
+		wantErr bool
+	}{
+		{
+			name:    "/10009/",
+			input:   "/api/pprof/ui/10009/",
+			want:    "10009",
+			wantErr: false,
+		},
+		{
+			name:    "/10009/top",
+			input:   "/api/pprof/ui/10009/top",
+			want:    "10009",
+			wantErr: false,
+		},
+		{
+			name:    "/10009",
+			input:   "/api/pprof/ui/10009",
+			want:    "10009",
+			wantErr: false,
+		},
+		{
+			name:    "/10009asd",
+			input:   "/api/pprof/ui/10009asd",
+			want:    "",
+			wantErr: false,
+		},
+		{
+			name:    "/10009asd/",
+			input:   "/api/pprof/ui/10009asd/",
+			want:    "",
+			wantErr: false,
+		},
 	}
-
-	id = extractProfileID("/api/pprof/ui/10009")
-	if id != "10009" {
-		t.Error("error id is", id)
-	}
-
-	id = extractProfileID("/api/pprof/ui/10009asd")
-	if id != "" {
-		t.Error("error id is", id)
-	}
-
-	id = extractProfileID("/api/pprof/ui/10009asd/")
-	if id != "" {
-		t.Error("error id is", id)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := extractProfileID(tt.input)
+			assert.Equal(t, tt.want, got)
+		})
 	}
 }
 
 func TestRemovePrefixSampleType(t *testing.T) {
 	rawQuery := removePrefixSampleType("si=heap_alloc_space")
-	if rawQuery != "si=alloc_space" {
-		t.Error("error rawQuery is", rawQuery)
-	}
+	assert.Equal(t, "si=alloc_space", rawQuery)
 }
