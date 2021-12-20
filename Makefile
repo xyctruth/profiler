@@ -1,8 +1,5 @@
 IMG ?= profiler:latest
 
-.PHONY: test
-test:
-	go test  ./...
 
 .PHONY: fmt
 fmt:
@@ -23,5 +20,11 @@ docker-stop:
 .PHONY: docker-push
 docker-push:
 	docker push ${IMG}
+
+.PHONY: test
+test:
+	go test -v -coverprofile=cover.out  ./pkg/collector
+	go tool cover -html=cover.out -o cover.html
+	open cover.html
 
 
