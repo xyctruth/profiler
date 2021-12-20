@@ -9,8 +9,8 @@ import (
 	"github.com/xyctruth/profiler/pkg/utils"
 )
 
-var (
-	defaultProfileConfigs = map[string]*ProfileConfig{
+func defaultProfileConfigs() map[string]*ProfileConfig {
+	return map[string]*ProfileConfig{
 		"profile": {
 			Path:   "/debug/pprof/profile?seconds=10",
 			Enable: utils.BoolPtr(true),
@@ -44,7 +44,8 @@ var (
 			Enable: utils.BoolPtr(true),
 		},
 	}
-)
+
+}
 
 func LoadConfig(configPath string, fn func(configmap CollectorConfig)) {
 	conf := viper.New()
@@ -96,10 +97,10 @@ type ProfileConfig struct {
 
 func buildProfileConfigs(profileConfig map[string]*ProfileConfig) map[string]*ProfileConfig {
 	if profileConfig == nil {
-		return defaultProfileConfigs
+		return defaultProfileConfigs()
 	}
 
-	for key, defaultConfig := range defaultProfileConfigs {
+	for key, defaultConfig := range defaultProfileConfigs() {
 		if config, ok := profileConfig[key]; ok {
 			if config.Path == "" {
 				config.Path = defaultConfig.Path

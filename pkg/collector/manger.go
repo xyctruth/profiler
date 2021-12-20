@@ -47,7 +47,7 @@ func (manger *Manger) Load(config CollectorConfig) {
 		if !ok {
 			// add collector
 			log.Info("add collector ", k)
-			collector := newCollector(k, target, manger.store)
+			collector := newCollector(k, *target, manger.store)
 			manger.collectors[k] = collector
 			go collector.run(manger.wg)
 			continue
@@ -56,7 +56,7 @@ func (manger *Manger) Load(config CollectorConfig) {
 		// update collector
 		if !reflect.DeepEqual(collector.TargetConfig, target) {
 			log.Info("reload collector ", k)
-			collector.reload(target)
+			collector.reload(*target)
 		}
 	}
 }

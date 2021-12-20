@@ -26,10 +26,10 @@ type Collector struct {
 	store           storage.Store
 }
 
-func newCollector(targetName string, target *TargetConfig, store storage.Store) *Collector {
+func newCollector(targetName string, target TargetConfig, store storage.Store) *Collector {
 	collector := &Collector{
 		TargetName:      targetName,
-		TargetConfig:    target,
+		TargetConfig:    &target,
 		exitChan:        make(chan struct{}),
 		resetTickerChan: make(chan time.Duration),
 		wg:              &sync.WaitGroup{},
@@ -91,13 +91,13 @@ func (collector *Collector) autoClear() {
 	}
 }
 
-func (collector *Collector) reload(target *TargetConfig) {
+func (collector *Collector) reload(target TargetConfig) {
 	collector.mu.Lock()
 	defer collector.mu.Unlock()
 	if collector.Interval != target.Interval {
 		collector.resetTickerChan <- target.Interval
 	}
-	collector.TargetConfig = target
+	collector.TargetConfig = &target
 	collector.ProfileConfigs = buildProfileConfigs(collector.ProfileConfigs)
 }
 
@@ -110,13 +110,14 @@ func (collector *Collector) exit() {
 func (collector *Collector) scrape() {
 	collector.log.Info("collector scrape start")
 	collector.mu.RLock()
+	defer collector.mu.RUnlock()
+
 	for profileType, profileConfig := range collector.ProfileConfigs {
 		if *profileConfig.Enable {
 			collector.wg.Add(1)
 			go collector.fetch(profileType, profileConfig)
 		}
 	}
-	collector.mu.RUnlock()
 	collector.wg.Wait()
 }
 
@@ -139,7 +140,7 @@ func (collector *Collector) fetch(profileType string, profileConfig *ProfileConf
 	defer resp.Body.Close()
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		logEntry.WithError(err).Error("http resp status code is", resp.StatusCode)
+		logEntry.WithError(err).Error("http resp status code is ", resp.StatusCode)
 		return
 	}
 

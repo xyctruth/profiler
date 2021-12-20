@@ -4,31 +4,14 @@ import (
 	"testing"
 	"time"
 
+	"github.com/xyctruth/profiler/pkg/utils"
+
 	"github.com/stretchr/testify/require"
 	yaml "gopkg.in/yaml.v2"
 )
 
-func TestLoadConfig(t *testing.T) {
-	LoadConfig("../../collector.yaml", func(config CollectorConfig) {
-		require.NotEqual(t, config, nil)
-		require.Equal(t, len(config.TargetConfigs), 2)
-
-		serverConfig, ok := config.TargetConfigs["profiler-server"]
-		require.Equal(t, ok, true)
-		require.Equal(t, serverConfig.Interval, 15*time.Second)
-		require.Equal(t, serverConfig.Expiration, int64(0))
-		require.Equal(t, serverConfig.Host, "localhost:9000")
-		require.Equal(t, len(serverConfig.ProfileConfigs), 0)
-
-		serverConfig, ok = config.TargetConfigs["server2"]
-		require.Equal(t, ok, true)
-		require.Equal(t, len(serverConfig.ProfileConfigs), 3)
-	})
-
-}
-
-func TestBuildProfileConfigs(t *testing.T) {
-	configStr := `
+var (
+	configStr = `
   targetConfigs:
 
     profiler-server:
@@ -50,25 +33,46 @@ func TestBuildProfileConfigs(t *testing.T) {
         heap:
           path: /debug/pprof/heap
 `
+)
 
+func TestLoadConfig(t *testing.T) {
+	LoadConfig("../../collector.yaml", func(config CollectorConfig) {
+		require.NotEqual(t, config, nil)
+		require.Equal(t, len(config.TargetConfigs), 2)
+
+		serverConfig, ok := config.TargetConfigs["profiler-server"]
+		require.Equal(t, ok, true)
+		require.Equal(t, 15*time.Second, serverConfig.Interval)
+		require.Equal(t, int64(0), serverConfig.Expiration)
+		require.Equal(t, "localhost:9000", serverConfig.Host)
+		require.Equal(t, 0, len(serverConfig.ProfileConfigs))
+
+		serverConfig, ok = config.TargetConfigs["server2"]
+		require.Equal(t, ok, true)
+		require.Equal(t, 3, len(serverConfig.ProfileConfigs))
+	})
+
+}
+
+func TestBuildProfileConfigs(t *testing.T) {
 	config := &CollectorConfig{}
 	err := yaml.Unmarshal([]byte(configStr), config)
 	require.NoError(t, err)
 
 	serverConfig, ok := config.TargetConfigs["server2"]
-	require.Equal(t, ok, true)
-	require.Equal(t, len(serverConfig.ProfileConfigs), 3)
+	require.Equal(t, true, ok)
+	require.Equal(t, 3, len(serverConfig.ProfileConfigs))
 
 	profileConfigs := buildProfileConfigs(serverConfig.ProfileConfigs)
 
 	require.Equal(t, len(profileConfigs), 8)
 
-	require.Equal(t, profileConfigs["fgprof"].Path, defaultProfileConfigs["fgprof"].Path)
-	require.NotEqual(t, profileConfigs["fgprof"].Enable, false)
+	require.Equal(t, defaultProfileConfigs()["fgprof"].Path, profileConfigs["fgprof"].Path)
+	require.Equal(t, utils.Bool(false), profileConfigs["fgprof"].Enable)
 
 	require.Equal(t, profileConfigs["profile"].Path, "/debug/pprof/profile?seconds=15")
-	require.NotEqual(t, profileConfigs["profile"].Enable, false)
+	require.Equal(t, utils.Bool(false), profileConfigs["profile"].Enable)
 
-	require.Equal(t, profileConfigs["heap"].Path, defaultProfileConfigs["heap"].Path)
-	require.NotEqual(t, profileConfigs["heap"].Enable, true)
+	require.Equal(t, defaultProfileConfigs()["heap"].Path, profileConfigs["heap"].Path)
+	require.Equal(t, utils.Bool(true), profileConfigs["heap"].Enable)
 }
