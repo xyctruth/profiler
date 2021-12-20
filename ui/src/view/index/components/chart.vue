@@ -59,11 +59,26 @@
       const baseSetting = {
         type: "line",
         lineStyle: {
-          width: 3,
+          width: 2,
         },
         showSymbol: true,
+        sampling: 'lttb',
+        showAllSymbol: false,
+//        symbolSize: 4,
+
+        symbolSize: function(data) {
+          // console.log(data)
+          return 4;
+        },
+        // symbol: "circle",
+        emphasis: {
+          width: 3,
+          focus: 'series',
+        },
       }
       const chartOptions = {
+        animation: false,
+
         legend: {
           type: 'scroll',
           orient: 'vertical',
@@ -77,7 +92,7 @@
           top: 80,
         },
         dataZoom: {
-          start: 90,
+          start: 0,
           end: 100,
           type: "slider",
           show: true,
@@ -104,7 +119,9 @@
         },
         tooltip: {
           show: true,
+          confine: true,
           trigger: 'item',
+          // showContent: false,
           axisPointer: {
             animation: false
           },
@@ -152,6 +169,9 @@
         chart.on('click', function (params) {
           window.open(`${baseConfig.reqUrl}/api/pprof/ui/${params.data.sourceData.ProfileID}?si=${title}`)
         });
+        // chart.on('mouseover', 'series.line', function (params) {
+        //     console.log(params);
+        // });
       }
       chart.setOption(Object.assign(chartOptions, {
         series: echartData,
