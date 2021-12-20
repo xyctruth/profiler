@@ -1,18 +1,16 @@
 package main
 
 import (
-	"net/http"
-	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"syscall"
 
-	"github.com/felixge/fgprof"
 	log "github.com/sirupsen/logrus"
 	"github.com/xyctruth/profiler/pkg/apiserver"
 	"github.com/xyctruth/profiler/pkg/collector"
 	"github.com/xyctruth/profiler/pkg/storage"
 	"github.com/xyctruth/profiler/pkg/storage/badger"
+	"github.com/xyctruth/profiler/pkg/utils"
 )
 
 var (
@@ -31,7 +29,7 @@ func main() {
 
 	log.Info("configPath:", configPath, " storagePath:", storagePath)
 
-	registerPProf()
+	utils.RegisterPProf()
 
 	store := badger.NewStore(storagePath)
 	collectorManger := runCollector(configPath, store)
@@ -58,17 +56,5 @@ func runCollector(configPath string, store storage.Store) *collector.Manger {
 		log.Info("config change, reload collector!!!")
 		m.Load(config)
 	})
-
 	return m
-}
-
-func registerPProf() {
-	go func() {
-		http.DefaultServeMux.Handle("/debug/fgprof", fgprof.Handler())
-		err := http.ListenAndServe(":9000", nil)
-		if err != nil {
-			panic(err)
-		}
-	}()
-
 }
