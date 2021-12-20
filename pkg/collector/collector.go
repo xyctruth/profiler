@@ -110,13 +110,14 @@ func (collector *Collector) exit() {
 func (collector *Collector) scrape() {
 	collector.log.Info("collector scrape start")
 	collector.mu.RLock()
+	defer collector.mu.RUnlock()
+
 	for profileType, profileConfig := range collector.ProfileConfigs {
 		if *profileConfig.Enable {
 			collector.wg.Add(1)
 			go collector.fetch(profileType, profileConfig)
 		}
 	}
-	collector.mu.RUnlock()
 	collector.wg.Wait()
 }
 
