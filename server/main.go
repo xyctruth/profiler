@@ -54,7 +54,7 @@ func runAPIServer(store storage.Store) *apiserver.APIServer {
 
 func runCollector(configPath string, store storage.Store) *collector.Manger {
 	m := collector.NewManger(store)
-	collector.LoadConfig(configPath, func(config collector.Config) {
+	collector.LoadConfig(configPath, func(config collector.CollectorConfig) {
 		log.Info("config change, reload collector!!!")
 		m.Load(config)
 	})

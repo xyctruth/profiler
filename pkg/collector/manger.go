@@ -31,7 +31,7 @@ func (manger *Manger) Stop() {
 	log.Info("collector manger exit ")
 }
 
-func (manger *Manger) Load(config Config) {
+func (manger *Manger) Load(config CollectorConfig) {
 	// delete old collector
 	for k, collector := range manger.collectors {
 		if _, ok := config.TargetConfigs[k]; !ok {
