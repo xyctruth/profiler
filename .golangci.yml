@@ -34,3 +34,6 @@ issues:
     - linters:
         - staticcheck
       text: "SA1017:"
+    - linters:
+        - revive
+      text: "exported: type name will be used as collector.CollectorConfig by other packages,"
