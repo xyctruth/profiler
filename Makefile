@@ -24,9 +24,10 @@ docker-push:
 .PHONY: test
 test:
 	go test -v -coverprofile=cover.out  ./pkg/collector
+	go test -v  ./...
 
-.PHONY: test-html
-test-html:
+.PHONY: test-cover
+test-cover:
 	go test -v -coverprofile=cover.out  ./pkg/collector
 	go tool cover -html=cover.out -o cover.html
 	open cover.html
