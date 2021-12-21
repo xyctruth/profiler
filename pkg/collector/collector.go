@@ -137,6 +137,8 @@ func (collector *Collector) scrape() {
 }
 
 func (collector *Collector) fetch(profileType string, profileConfig *ProfileConfig) {
+	collector.mu.RLock()
+	defer collector.mu.RUnlock()
 	defer collector.wg.Done()
 	logEntry := collector.log.WithFields(logrus.Fields{"profile_type": profileType, "profile_url": profileConfig.Path})
 	logEntry.Debug("collector start fetch")
