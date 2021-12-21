@@ -17,7 +17,7 @@ import (
 
 type Collector struct {
 	TargetName string
-	*TargetConfig
+	TargetConfig
 	exitChan        chan struct{}
 	resetTickerChan chan time.Duration
 	mangerWg        *sync.WaitGroup
@@ -31,7 +31,7 @@ type Collector struct {
 func newCollector(targetName string, target TargetConfig, store storage.Store, mangerWg *sync.WaitGroup) *Collector {
 	collector := &Collector{
 		TargetName:      targetName,
-		TargetConfig:    &target,
+		TargetConfig:    target,
 		exitChan:        make(chan struct{}),
 		resetTickerChan: make(chan time.Duration, 1000),
 		mangerWg:        mangerWg,
@@ -59,10 +59,10 @@ func (collector *Collector) run() {
 
 func (collector *Collector) scrapeLoop(interval time.Duration) {
 	defer collector.mangerWg.Done()
+	collector.scrape()
 
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
-	collector.scrape()
 	for {
 		select {
 		case <-collector.exitChan:
@@ -78,6 +78,7 @@ func (collector *Collector) scrapeLoop(interval time.Duration) {
 
 func (collector *Collector) clearLoop() {
 	defer collector.mangerWg.Done()
+	collector.clear()
 
 	for {
 		// 每天24点执行
@@ -100,6 +101,8 @@ func (collector *Collector) reload(target TargetConfig) {
 	collector.mu.Lock()
 	defer collector.mu.Unlock()
 
+	target.ProfileConfigs = buildProfileConfigs(target.ProfileConfigs)
+
 	if reflect.DeepEqual(collector.TargetConfig, target) {
 		return
 	}
@@ -108,8 +111,8 @@ func (collector *Collector) reload(target TargetConfig) {
 	if collector.Interval != target.Interval {
 		collector.resetTickerChan <- target.Interval
 	}
-	collector.TargetConfig = &target
-	collector.ProfileConfigs = buildProfileConfigs(collector.ProfileConfigs)
+
+	collector.TargetConfig = target
 }
 
 func (collector *Collector) exit() {
@@ -144,11 +147,11 @@ func (collector *Collector) scrape() {
 	collector.wg.Wait()
 }
 
-func (collector *Collector) fetch(profileType string, profileConfig *ProfileConfig) {
+func (collector *Collector) fetch(profileType string, profileConfig ProfileConfig) {
 	defer collector.wg.Done()
 
 	logEntry := collector.log.WithFields(logrus.Fields{"profile_type": profileType, "profile_url": profileConfig.Path})
-	logEntry.Debug("collector start fetch")
+	logEntry.Info("collector start fetch")
 
 	req, err := http.NewRequest("GET", "http://"+collector.Host+profileConfig.Path, nil)
 	if err != nil {

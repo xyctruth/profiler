@@ -60,9 +60,11 @@ func (s *APIServer) Stop() {
 }
 
 func (s *APIServer) Run() {
-	if err := s.srv.ListenAndServe(); err != nil {
-		log.Fatal("api server listen: ", err)
-	}
+	go func() {
+		if err := s.srv.ListenAndServe(); err != nil {
+			log.Fatal("api server listen: ", err)
+		}
+	}()
 }
 
 func (s *APIServer) listTarget(c *gin.Context) {

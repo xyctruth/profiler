@@ -56,4 +56,7 @@ func TestExtractProfileId(t *testing.T) {
 func TestRemovePrefixSampleType(t *testing.T) {
 	rawQuery := removePrefixSampleType("si=heap_alloc_space")
 	assert.Equal(t, "si=alloc_space", rawQuery)
+
+	rawQuery = removePrefixSampleType("")
+	assert.Equal(t, "", rawQuery)
 }
