@@ -1,4 +1,4 @@
-name: Build
+name: Server-Build
 
 on:
   push:
@@ -39,7 +39,7 @@ jobs:
 
       - name: Build
         run: |
-          go build -v -race -a -o profiler
+          go build -v -race -a -o profiler ./server/main.go
         working-directory: ./profiler
 
   
