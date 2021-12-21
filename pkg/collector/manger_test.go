@@ -18,6 +18,7 @@ func TestManger(t *testing.T) {
 	err := os.RemoveAll("./data/manger")
 	require.Equal(t, nil, err)
 	store := badger.NewStore("./data/manger")
+	defer store.Release()
 
 	manger := NewManger(store)
 	config := &CollectorConfig{}

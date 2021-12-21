@@ -27,6 +27,7 @@ func TestCollectorReload(t *testing.T) {
 	err := os.RemoveAll("./data")
 	require.Equal(t, nil, err)
 	store := badger.NewStore("./data")
+	defer store.Release()
 
 	config := &CollectorConfig{}
 	yaml.Unmarshal([]byte(configStr), config)
@@ -69,6 +70,7 @@ func TestCollectorRun(t *testing.T) {
 	err := os.RemoveAll("./data")
 	require.Equal(t, nil, err)
 	store := badger.NewStore("./data")
+	defer store.Release()
 
 	config := &CollectorConfig{}
 	yaml.Unmarshal([]byte(configStr), config)
