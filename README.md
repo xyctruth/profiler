@@ -2,8 +2,7 @@
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/xyctruth/profiler)](https://goreportcard.com/report/github.com/xyctruth/profiler)
 [![codecov](https://codecov.io/gh/xyctruth/profiler/branch/master/graph/badge.svg?token=YWNYJK9KQW)](https://codecov.io/gh/xyctruth/profiler)
-[![Build status](https://img.shields.io/github/workflow/status/xyctruth/profiler/server)](https://github.com/xyctruth/profiler/actions/workflows/server.yml)
-[![LICENSE](https://img.shields.io/github/license/xyctruth/profiler)](/LICENSE)
+[![Build status](https://img.shields.io/github/workflow/status/xyctruth/profiler/server/master)](https://github.com/xyctruth/profiler/actions/workflows/server.yml)
 
 ## [Demo](https://profiling.jia-huang.com)
 

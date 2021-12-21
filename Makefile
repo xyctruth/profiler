@@ -1,10 +1,5 @@
 IMG ?= profiler:latest
 
-
-.PHONY: fmt
-fmt:
-	gofmt -w $(shell find . -name "*.go")
-
 .PHONY: docker-build
 docker-build:
 	docker build -t ${IMG} .
@@ -23,13 +18,15 @@ docker-push:
 
 .PHONY: test
 test:
-	go test -v -coverprofile=cover.out  ./...
+	go test -v -coverprofile=cover.out  ./pkg/...
 	go test -v  ./...
 
-.PHONY: test-cover
-test-cover:
-	go test -v -coverprofile=cover.out  ./pkg/collector
+.PHONY:
+cover-ui:
+	go test -v -coverprofile=cover.out  ./pkg/...
 	go tool cover -html=cover.out -o cover.html
 	open cover.html
 
-
+.PHONY: fmt
+fmt:
+	gofmt -w $(shell find . -name "*.go")

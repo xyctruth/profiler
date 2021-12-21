@@ -1,4 +1,4 @@
-name: Server
+name: Build
 
 on:
   push:
@@ -47,5 +47,5 @@ jobs:
           file: ./cover.out
           flags: unittests
           name: codecov-umbrella
-  
-  
+
+
