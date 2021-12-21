@@ -32,7 +32,7 @@ func newCollector(targetName string, target TargetConfig, store storage.Store) *
 		TargetName:      targetName,
 		TargetConfig:    &target,
 		exitChan:        make(chan struct{}),
-		resetTickerChan: make(chan time.Duration),
+		resetTickerChan: make(chan time.Duration, 1000),
 		wg:              &sync.WaitGroup{},
 		httpClient:      &http.Client{},
 		log:             logrus.WithField("collector", targetName),
@@ -67,8 +67,8 @@ func (collector *Collector) scrapeLoop(interval time.Duration) {
 		case <-collector.exitChan:
 			collector.log.Info("collector exit")
 			return
-		case interval := <-collector.resetTickerChan:
-			ticker.Reset(interval)
+		case i := <-collector.resetTickerChan:
+			ticker.Reset(i)
 		case <-ticker.C:
 			collector.scrape()
 		}
