@@ -15,7 +15,7 @@ import (
 func TestNewCollector(t *testing.T) {
 	config := &CollectorConfig{}
 	yaml.Unmarshal([]byte(configStr), config)
-	collector := newCollector("profiler-server", *config.TargetConfigs["profiler-server"], nil)
+	collector := newCollector("profiler-server", *config.TargetConfigs["profiler-server"], nil, &sync.WaitGroup{})
 	require.NotEqual(t, nil, collector)
 	require.Equal(t, collector.Interval, 15*time.Second)
 	require.Equal(t, collector.Expiration, int64(0))
@@ -28,11 +28,12 @@ func TestCollectorReload(t *testing.T) {
 	require.Equal(t, nil, err)
 	store := badger.NewStore("./data")
 	defer store.Release()
+	wg := &sync.WaitGroup{}
 
 	config := &CollectorConfig{}
 	yaml.Unmarshal([]byte(configStr), config)
 	targetConfig := config.TargetConfigs["profiler-server"]
-	collector := newCollector("profiler-server", *targetConfig, store)
+	collector := newCollector("profiler-server", *targetConfig, store, wg)
 	require.NotEqual(t, nil, collector)
 	require.Equal(t, 15*time.Second, collector.Interval)
 	require.Equal(t, int64(0), collector.Expiration)
@@ -41,8 +42,8 @@ func TestCollectorReload(t *testing.T) {
 
 	targetConfig.Interval = 20 * time.Second
 
-	wg := &sync.WaitGroup{}
-	collector.run(wg)
+	collector.run()
+	defer collector.exit()
 
 	collector.reload(*targetConfig)
 	require.Equal(t, collector.Interval, 20*time.Second)
@@ -61,9 +62,6 @@ func TestCollectorReload(t *testing.T) {
 	require.Equal(t, "localhost:9001", collector.Host)
 	require.Equal(t, false, *targetConfig.ProfileConfigs["fgprof"].Enable)
 	require.Equal(t, "/test/path?s=123", targetConfig.ProfileConfigs["fgprof"].Path)
-
-	collector.exit()
-	wg.Wait()
 }
 
 func TestCollectorRun(t *testing.T) {
@@ -71,15 +69,15 @@ func TestCollectorRun(t *testing.T) {
 	require.Equal(t, nil, err)
 	store := badger.NewStore("./data")
 	defer store.Release()
+	wg := &sync.WaitGroup{}
 
 	config := &CollectorConfig{}
 	yaml.Unmarshal([]byte(configStr), config)
 	targetConfig := config.TargetConfigs["profiler-server"]
 
-	collector := newCollector("profiler-server1", *targetConfig, store)
+	collector := newCollector("profiler-server1", *targetConfig, store, wg)
 
-	wg := &sync.WaitGroup{}
-	collector.run(wg)
+	collector.run()
 
 	time.Sleep(1 * time.Second)
 

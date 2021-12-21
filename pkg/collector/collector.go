@@ -20,6 +20,7 @@ type Collector struct {
 	*TargetConfig
 	exitChan        chan struct{}
 	resetTickerChan chan time.Duration
+	mangerWg        *sync.WaitGroup
 	wg              *sync.WaitGroup
 	httpClient      *http.Client
 	mu              sync.RWMutex
@@ -27,12 +28,13 @@ type Collector struct {
 	store           storage.Store
 }
 
-func newCollector(targetName string, target TargetConfig, store storage.Store) *Collector {
+func newCollector(targetName string, target TargetConfig, store storage.Store, mangerWg *sync.WaitGroup) *Collector {
 	collector := &Collector{
 		TargetName:      targetName,
 		TargetConfig:    &target,
 		exitChan:        make(chan struct{}),
 		resetTickerChan: make(chan time.Duration, 1000),
+		mangerWg:        mangerWg,
 		wg:              &sync.WaitGroup{},
 		httpClient:      &http.Client{},
 		log:             logrus.WithField("collector", targetName),
@@ -42,16 +44,13 @@ func newCollector(targetName string, target TargetConfig, store storage.Store) *
 	return collector
 }
 
-func (collector *Collector) run(wg *sync.WaitGroup) {
+func (collector *Collector) run() {
 	collector.mu.Lock()
 	defer collector.mu.Unlock()
 
-	defer func() {
-		wg.Done()
-	}()
-
-	wg.Add(1)
 	collector.log.Info("collector run")
+
+	collector.mangerWg.Add(2)
 
 	go collector.scrapeLoop(collector.Interval)
 	go collector.clearLoop()
@@ -59,13 +58,15 @@ func (collector *Collector) run(wg *sync.WaitGroup) {
 }
 
 func (collector *Collector) scrapeLoop(interval time.Duration) {
+	defer collector.mangerWg.Done()
+
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 	collector.scrape()
 	for {
 		select {
 		case <-collector.exitChan:
-			collector.log.Info("collector exit")
+			collector.log.Info("scrape loop exit")
 			return
 		case i := <-collector.resetTickerChan:
 			ticker.Reset(i)
@@ -76,14 +77,22 @@ func (collector *Collector) scrapeLoop(interval time.Duration) {
 }
 
 func (collector *Collector) clearLoop() {
+	defer collector.mangerWg.Done()
+
 	for {
 		// 每天24点执行
 		now := time.Now()
 		next := now.Add(time.Hour * 24)
 		next = time.Date(next.Year(), next.Month(), next.Day(), 0, 0, 0, 0, next.Location())
 		t := time.NewTimer(next.Sub(now))
-		<-t.C
-		collector.clear()
+
+		select {
+		case <-collector.exitChan:
+			collector.log.Info("clear loop exit")
+			return
+		case <-t.C:
+			collector.clear()
+		}
 	}
 }
 
@@ -104,14 +113,13 @@ func (collector *Collector) reload(target TargetConfig) {
 }
 
 func (collector *Collector) exit() {
-	collector.mu.Lock()
-	defer collector.mu.Unlock()
 	close(collector.exitChan)
 }
 
 func (collector *Collector) clear() {
 	collector.mu.RLock()
 	defer collector.mu.RUnlock()
+
 	if collector.Expiration <= 0 {
 		return
 	}
@@ -137,11 +145,11 @@ func (collector *Collector) scrape() {
 }
 
 func (collector *Collector) fetch(profileType string, profileConfig *ProfileConfig) {
-	collector.mu.RLock()
-	defer collector.mu.RUnlock()
 	defer collector.wg.Done()
+
 	logEntry := collector.log.WithFields(logrus.Fields{"profile_type": profileType, "profile_url": profileConfig.Path})
 	logEntry.Debug("collector start fetch")
+
 	req, err := http.NewRequest("GET", "http://"+collector.Host+profileConfig.Path, nil)
 	if err != nil {
 		logEntry.WithError(err).Error("invoke task error")

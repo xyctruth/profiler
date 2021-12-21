@@ -51,9 +51,9 @@ func (manger *Manger) Load(config CollectorConfig) {
 		if !ok {
 			// add collector
 			log.Info("add collector ", k)
-			collector := newCollector(k, *target, manger.store)
+			collector := newCollector(k, *target, manger.store, manger.wg)
 			manger.collectors[k] = collector
-			collector.run(manger.wg)
+			collector.run()
 			continue
 		}
 
