@@ -3,6 +3,7 @@ package collector
 import (
 	"os"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 	"github.com/xyctruth/profiler/pkg/storage/badger"
@@ -15,30 +16,41 @@ func init() {
 }
 
 func TestManger(t *testing.T) {
-	err := os.RemoveAll("./data/manger")
-	require.Equal(t, nil, err)
-	store := badger.NewStore("./data/manger")
+	store := badger.NewStore("./data")
+	defer os.RemoveAll("./data")
+	defer store.Release()
 
 	manger := NewManger(store)
-	config := &CollectorConfig{}
-	yaml.Unmarshal([]byte(configStr), config)
-	manger.Load(*config)
+	c := &Config{}
+	yaml.Unmarshal([]byte(generalConfigYAML), c)
+	config := c.Collector
+	manger.Load(config)
 	require.Equal(t, 2, len(manger.collectors))
 
-	config.TargetConfigs["profiler-server"].Host = "localhost:1111"
-	manger.Load(*config)
-
-	config.TargetConfigs["server2"].Host = "localhost:9000"
-	config.TargetConfigs["server2"].ProfileConfigs["heap"] = &ProfileConfig{
+	s2 := config.TargetConfigs["server2"]
+	s2.Interval = time.Second * 1
+	s2.Host = "localhost:9000"
+	s2.ProfileConfigs["heap"] = ProfileConfig{
 		Enable: utils.Bool(true),
 		Path:   "/test/path?s=123",
 	}
-	manger.Load(*config)
+	config.TargetConfigs["server2"] = s2
+	manger.Load(config)
 
 	delete(config.TargetConfigs, "profiler-server")
-	manger.Load(*config)
+	manger.Load(config)
 	require.Equal(t, 1, len(manger.collectors))
-
 	manger.Stop()
 
+}
+
+func TestErrorHostManger(t *testing.T) {
+	store := badger.NewStore("./data")
+	defer os.RemoveAll("./data")
+	defer store.Release()
+	manger := NewManger(store)
+	config := &CollectorConfig{}
+	yaml.Unmarshal([]byte(errHostConfigYAML), config)
+	manger.Load(*config)
+	manger.Stop()
 }

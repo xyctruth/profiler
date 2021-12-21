@@ -1,5 +1,9 @@
 # 基于 pprof,fgprof 的 Golang 程序连续分析
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/xyctruth/profiler)](https://goreportcard.com/report/github.com/xyctruth/profiler)
+[![codecov](https://codecov.io/gh/xyctruth/profiler/branch/master/graph/badge.svg?token=YWNYJK9KQW)](https://codecov.io/gh/xyctruth/profiler)
+[![Build status](https://img.shields.io/github/workflow/status/xyctruth/profiler/server/master)](https://github.com/xyctruth/profiler/actions/workflows/server.yml)
+
 ## [Demo](https://profiling.jia-huang.com)
 
 ![profiler](https://xtruth.oss-cn-shenzhen.aliyuncs.com/profiler_1.png)

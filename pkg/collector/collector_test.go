@@ -13,65 +13,73 @@ import (
 )
 
 func TestNewCollector(t *testing.T) {
-	config := &CollectorConfig{}
-	yaml.Unmarshal([]byte(configStr), config)
-	collector := newCollector("profiler-server", *config.TargetConfigs["profiler-server"], nil)
+	c := &Config{}
+	yaml.Unmarshal([]byte(generalConfigYAML), c)
+	config := c.Collector
+	collector := newCollector("profiler-server", config.TargetConfigs["profiler-server"], nil, &sync.WaitGroup{})
 	require.NotEqual(t, nil, collector)
-	require.Equal(t, collector.Interval, 15*time.Second)
+	require.Equal(t, collector.Interval, 2*time.Second)
 	require.Equal(t, collector.Expiration, int64(0))
 	require.Equal(t, collector.Host, "localhost:9000")
 	require.Equal(t, len(collector.ProfileConfigs), 8)
 }
 
 func TestCollectorReload(t *testing.T) {
-	config := &CollectorConfig{}
-	yaml.Unmarshal([]byte(configStr), config)
-	targetConfig := config.TargetConfigs["profiler-server"]
-	collector := newCollector("profiler-server", *targetConfig, nil)
-	require.NotEqual(t, nil, collector)
-	require.Equal(t, 15*time.Second, collector.Interval)
-	require.Equal(t, int64(0), collector.Expiration)
-	require.Equal(t, "localhost:9000", collector.Host)
-	require.Equal(t, 8, len(collector.ProfileConfigs))
+	store := badger.NewStore("./data")
+	defer os.RemoveAll("./data")
+	defer store.Release()
+	wg := &sync.WaitGroup{}
 
-	targetConfig.Interval = 20 * time.Second
-	go func() {
-		<-collector.resetTickerChan
-	}()
-	collector.reload(*targetConfig)
-	require.Equal(t, collector.Interval, 20*time.Second)
+	c := &Config{}
+	yaml.Unmarshal([]byte(generalConfigYAML), c)
+	config := c.Collector
+
+	targetConfig := config.TargetConfigs["server2"]
+	collector := newCollector("server2", targetConfig, store, wg)
+
+	collector.run()
+	defer collector.exit()
+
+	targetConfig.Interval = 1 * time.Second
+	collector.reload(targetConfig)
+	require.Equal(t, collector.Interval, 1*time.Second)
+
+	collector.reload(targetConfig)
+	require.Equal(t, collector.Interval, 1*time.Second)
 
 	targetConfig.Expiration = 200
-	collector.reload(*targetConfig)
+	collector.reload(targetConfig)
 	require.Equal(t, int64(200), collector.Expiration)
 
-	targetConfig.Host = "localhost:9001"
-	targetConfig.ProfileConfigs = make(map[string]*ProfileConfig)
-	targetConfig.ProfileConfigs["fgprof"] = &ProfileConfig{
-		Enable: utils.Bool(false),
+	targetConfig.ProfileConfigs["fgprof"] = ProfileConfig{
+		Enable: utils.Bool(true),
 		Path:   "/test/path?s=123",
 	}
-	collector.reload(*targetConfig)
-	require.Equal(t, "localhost:9001", collector.Host)
-	require.Equal(t, false, *targetConfig.ProfileConfigs["fgprof"].Enable)
-	require.Equal(t, "/test/path?s=123", targetConfig.ProfileConfigs["fgprof"].Path)
+
+	collector.reload(targetConfig)
+	require.Equal(t, utils.Bool(true), collector.ProfileConfigs["fgprof"].Enable)
+	require.Equal(t, "/test/path?s=123", collector.ProfileConfigs["fgprof"].Path)
+	time.Sleep(1 * time.Second)
 }
 
 func TestCollectorRun(t *testing.T) {
-	err := os.RemoveAll("./data")
-	require.Equal(t, nil, err)
 	store := badger.NewStore("./data")
-
-	config := &CollectorConfig{}
-	yaml.Unmarshal([]byte(configStr), config)
-	targetConfig := config.TargetConfigs["profiler-server"]
-
-	collector := newCollector("profiler-server1", *targetConfig, store)
+	defer os.RemoveAll("./data")
+	defer store.Release()
 
 	wg := &sync.WaitGroup{}
-	go collector.run(wg)
+
+	c := &Config{}
+	yaml.Unmarshal([]byte(generalConfigYAML), c)
+	config := c.Collector
+
+	targetConfig := config.TargetConfigs["profiler-server"]
+	collector := newCollector("profiler-server", targetConfig, store, wg)
+
+	collector.run()
 
 	time.Sleep(1 * time.Second)
+
 	collector.exit()
 	wg.Wait()
 

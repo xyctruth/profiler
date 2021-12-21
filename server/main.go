@@ -30,11 +30,11 @@ func main() {
 	log.Info("configPath:", configPath, " storagePath:", storagePath)
 
 	utils.RegisterPProf()
-
 	store := badger.NewStore(storagePath)
 	collectorManger := runCollector(configPath, store)
 	apiServer := runAPIServer(store)
 
+	// receive signal exit
 	quit := make(chan os.Signal)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	s := <-quit
@@ -46,15 +46,18 @@ func main() {
 
 func runAPIServer(store storage.Store) *apiserver.APIServer {
 	apiServer := apiserver.NewAPIServer(":8080", store)
-	go apiServer.Run()
+	apiServer.Run()
 	return apiServer
 }
 
 func runCollector(configPath string, store storage.Store) *collector.Manger {
 	m := collector.NewManger(store)
-	collector.LoadConfig(configPath, func(config collector.CollectorConfig) {
+	err := collector.LoadConfig(configPath, func(config collector.CollectorConfig) {
 		log.Info("config change, reload collector!!!")
 		m.Load(config)
 	})
+	if err != nil {
+		panic(err)
+	}
 	return m
 }
