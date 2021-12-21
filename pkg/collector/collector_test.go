@@ -60,6 +60,9 @@ func TestCollectorReload(t *testing.T) {
 	require.Equal(t, "localhost:9001", collector.Host)
 	require.Equal(t, false, *targetConfig.ProfileConfigs["fgprof"].Enable)
 	require.Equal(t, "/test/path?s=123", targetConfig.ProfileConfigs["fgprof"].Path)
+
+	collector.exit()
+	wg.Wait()
 }
 
 func TestCollectorRun(t *testing.T) {
@@ -77,6 +80,7 @@ func TestCollectorRun(t *testing.T) {
 	collector.run(wg)
 
 	time.Sleep(1 * time.Second)
+
 	collector.exit()
 	wg.Wait()
 
