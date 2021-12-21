@@ -7,22 +7,6 @@ on:
     branches: [ master ]
 
 jobs:
-
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Setup go
-        uses: actions/setup-go@v2
-        with:
-          go-version: '^1.16'
-      - name: Checkout repository
-        uses: actions/checkout@v2
-      - name: Setup golangci-lint
-        uses: golangci/golangci-lint-action@v2
-        with:
-          version: v1.43.0
-          args: --verbose
-
   test:
     strategy:
       matrix:
@@ -37,7 +21,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Run tests
+      - name: Test
         run: make test
 
       - name: Codecov
