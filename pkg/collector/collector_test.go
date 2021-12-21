@@ -24,10 +24,14 @@ func TestNewCollector(t *testing.T) {
 }
 
 func TestCollectorReload(t *testing.T) {
+	err := os.RemoveAll("./data")
+	require.Equal(t, nil, err)
+	store := badger.NewStore("./data")
+
 	config := &CollectorConfig{}
 	yaml.Unmarshal([]byte(configStr), config)
 	targetConfig := config.TargetConfigs["profiler-server"]
-	collector := newCollector("profiler-server", *targetConfig, nil)
+	collector := newCollector("profiler-server", *targetConfig, store)
 	require.NotEqual(t, nil, collector)
 	require.Equal(t, 15*time.Second, collector.Interval)
 	require.Equal(t, int64(0), collector.Expiration)
@@ -35,9 +39,10 @@ func TestCollectorReload(t *testing.T) {
 	require.Equal(t, 8, len(collector.ProfileConfigs))
 
 	targetConfig.Interval = 20 * time.Second
-	go func() {
-		<-collector.resetTickerChan
-	}()
+
+	wg := &sync.WaitGroup{}
+	collector.run(wg)
+
 	collector.reload(*targetConfig)
 	require.Equal(t, collector.Interval, 20*time.Second)
 
@@ -69,7 +74,7 @@ func TestCollectorRun(t *testing.T) {
 	collector := newCollector("profiler-server1", *targetConfig, store)
 
 	wg := &sync.WaitGroup{}
-	go collector.run(wg)
+	collector.run(wg)
 
 	time.Sleep(1 * time.Second)
 	collector.exit()

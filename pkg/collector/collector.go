@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"reflect"
 	"sync"
 	"time"
 
@@ -42,18 +43,25 @@ func newCollector(targetName string, target TargetConfig, store storage.Store) *
 }
 
 func (collector *Collector) run(wg *sync.WaitGroup) {
+	collector.mu.Lock()
+	defer collector.mu.Unlock()
+
 	defer func() {
 		wg.Done()
 	}()
 
 	wg.Add(1)
 	collector.log.Info("collector run")
-	go collector.autoClear()
 
-	ticker := time.NewTicker(collector.Interval)
+	go collector.scrapeLoop(collector.Interval)
+	go collector.clearLoop()
+
+}
+
+func (collector *Collector) scrapeLoop(interval time.Duration) {
+	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 	collector.scrape()
-
 	for {
 		select {
 		case <-collector.exitChan:
@@ -67,33 +75,27 @@ func (collector *Collector) run(wg *sync.WaitGroup) {
 	}
 }
 
-func (collector *Collector) autoClear() {
-	if collector.Expiration <= 0 {
-		return
-	}
-	// 每天24点执行
+func (collector *Collector) clearLoop() {
 	for {
+		// 每天24点执行
 		now := time.Now()
 		next := now.Add(time.Hour * 24)
 		next = time.Date(next.Year(), next.Month(), next.Day(), 0, 0, 0, 0, next.Location())
 		t := time.NewTimer(next.Sub(now))
 		<-t.C
-
-		collector.log.Info("collector clear start")
-		collector.mu.RLock()
-
-		err := collector.store.Clear(collector.TargetName, collector.Expiration)
-		if err != nil {
-			collector.log.WithError(err).Error("collector clear error")
-		}
-
-		collector.mu.RUnlock()
+		collector.clear()
 	}
 }
 
 func (collector *Collector) reload(target TargetConfig) {
 	collector.mu.Lock()
 	defer collector.mu.Unlock()
+
+	if reflect.DeepEqual(collector.TargetConfig, target) {
+		return
+	}
+	collector.log.Info("reload collector ")
+
 	if collector.Interval != target.Interval {
 		collector.resetTickerChan <- target.Interval
 	}
@@ -107,11 +109,24 @@ func (collector *Collector) exit() {
 	close(collector.exitChan)
 }
 
+func (collector *Collector) clear() {
+	collector.mu.RLock()
+	defer collector.mu.RUnlock()
+	if collector.Expiration <= 0 {
+		return
+	}
+	collector.log.Info("collector clear start")
+	err := collector.store.Clear(collector.TargetName, collector.Expiration)
+	if err != nil {
+		collector.log.WithError(err).Error("collector clear error")
+	}
+}
+
 func (collector *Collector) scrape() {
-	collector.log.Info("collector scrape start")
 	collector.mu.RLock()
 	defer collector.mu.RUnlock()
 
+	collector.log.Info("collector scrape start")
 	for profileType, profileConfig := range collector.ProfileConfigs {
 		if *profileConfig.Enable {
 			collector.wg.Add(1)

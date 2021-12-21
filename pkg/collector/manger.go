@@ -1,7 +1,6 @@
 package collector
 
 import (
-	"reflect"
 	"sync"
 
 	log "github.com/sirupsen/logrus"
@@ -12,6 +11,7 @@ type Manger struct {
 	collectors map[string]*Collector
 	store      storage.Store
 	wg         *sync.WaitGroup
+	mu         sync.Mutex
 }
 
 func NewManger(store storage.Store) *Manger {
@@ -24,6 +24,8 @@ func NewManger(store storage.Store) *Manger {
 }
 
 func (manger *Manger) Stop() {
+	manger.mu.Lock()
+	defer manger.mu.Unlock()
 	for _, c := range manger.collectors {
 		c.exit()
 	}
@@ -32,6 +34,8 @@ func (manger *Manger) Stop() {
 }
 
 func (manger *Manger) Load(config CollectorConfig) {
+	manger.mu.Lock()
+	defer manger.mu.Unlock()
 	// delete old collector
 	for k, collector := range manger.collectors {
 		if _, ok := config.TargetConfigs[k]; !ok {
@@ -49,14 +53,11 @@ func (manger *Manger) Load(config CollectorConfig) {
 			log.Info("add collector ", k)
 			collector := newCollector(k, *target, manger.store)
 			manger.collectors[k] = collector
-			go collector.run(manger.wg)
+			collector.run(manger.wg)
 			continue
 		}
 
 		// update collector
-		if !reflect.DeepEqual(collector.TargetConfig, target) {
-			log.Info("reload collector ", k)
-			collector.reload(*target)
-		}
+		collector.reload(*target)
 	}
 }

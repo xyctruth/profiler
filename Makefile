@@ -18,12 +18,10 @@ docker-push:
 
 .PHONY: test
 test:
-	go test -v -coverprofile=cover.out  ./pkg/...
-	go test -v  ./...
+	go test -race -v -coverprofile=cover.out  ./pkg/...
 
-.PHONY:
-cover-ui:
-	go test -v -coverprofile=cover.out  ./pkg/...
+.PHONY: cover-ui
+cover-ui: test
 	go tool cover -html=cover.out -o cover.html
 	open cover.html
 
