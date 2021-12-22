@@ -11,7 +11,6 @@
 ### 点击 point 跳转 pprof web
 ![pprof](https://xtruth.oss-cn-shenzhen.aliyuncs.com/6.png)
 
-
 ## Quick Start
 
 需要被收集分析的golang程序,需要提供 `net/http/pprof` 端点，并配置在 `./collector.yaml` 配置文件中
