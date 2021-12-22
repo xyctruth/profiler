@@ -7,10 +7,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dgraph-io/badger/v3"
-	"github.com/vmihailenco/msgpack/v5"
+	"github.com/stretchr/testify/require"
 
+	"github.com/dgraph-io/badger/v3"
 	log "github.com/sirupsen/logrus"
+	"github.com/vmihailenco/msgpack/v5"
 )
 
 var (
@@ -63,7 +64,7 @@ func BenchmarkReadGob(b *testing.B) {
 	}
 }
 
-func BenchmarkReadString(b *testing.B) {
+func BenchmarkReadMsgPack(b *testing.B) {
 	reset()
 	data := encodeMsgPack()
 	for i := 0; i < 100000; i++ {
@@ -114,7 +115,7 @@ func insert(prefix string, data []byte) {
 		if err != nil {
 			return err
 		}
-		idb := Itob(int(num))
+		idb := itob(int(num))
 		key := append([]byte(prefix), BuildKey(time.Now())...)
 		key = append(key, idb...)
 		return txn.Set(key, data)
@@ -124,7 +125,7 @@ func insert(prefix string, data []byte) {
 	}
 }
 
-func Itob(v int) []byte {
+func itob(v int) []byte {
 	b := make([]byte, 8)
 	binary.BigEndian.PutUint64(b, uint64(v))
 	return b
@@ -135,8 +136,8 @@ func encodeGob() []byte {
 	sample.ProfileID = 1
 	sample.Timestamp = time.Now().UnixNano() / time.Millisecond.Nanoseconds()
 	sample.Duration = time.Now().UnixNano()
-	sample.SampleTypeUnit = "123"
-	sample.SampleType = "23432"
+	sample.SampleTypeUnit = "count"
+	sample.SampleType = "alloc_objects"
 	var sampleBuf bytes.Buffer
 	err := gob.NewEncoder(&sampleBuf).Encode(sample)
 	if err != nil {
@@ -150,10 +151,9 @@ func encodeMsgPack() []byte {
 	sample.ProfileID = 1
 	sample.Timestamp = time.Now().UnixNano() / time.Millisecond.Nanoseconds()
 	sample.Duration = time.Now().UnixNano()
-	sample.SampleTypeUnit = "123"
-	sample.SampleType = "23432"
-	var sampleBuf bytes.Buffer
-	b, err := msgpack.Marshal(&sampleBuf)
+	sample.SampleTypeUnit = "count"
+	sample.SampleType = "alloc_objects"
+	b, err := msgpack.Marshal(&sample)
 	if err != nil {
 		panic(err)
 	}
@@ -176,4 +176,24 @@ func decodeMsgPack(v []byte) *ProfileMeta {
 		panic(err)
 	}
 	return &sample
+}
+
+func TestEncode(t *testing.T) {
+	sample := &ProfileMeta{}
+	sample.ProfileID = 1
+	sample.Timestamp = time.Now().UnixNano() / time.Millisecond.Nanoseconds()
+	sample.Duration = time.Now().UnixNano()
+	sample.SampleTypeUnit = "count"
+	sample.SampleType = "alloc_objects"
+	b, err := sample.Encode()
+	require.Equal(t, err, nil)
+
+	var sample1 ProfileMeta
+	err = sample1.Decode(b)
+	require.Equal(t, err, nil)
+	require.Equal(t, sample.ProfileID, sample1.ProfileID)
+	require.Equal(t, sample.Timestamp, sample1.Timestamp)
+	require.Equal(t, sample.Duration, sample1.Duration)
+	require.Equal(t, sample.SampleTypeUnit, sample1.SampleTypeUnit)
+	require.Equal(t, sample.SampleType, sample1.SampleType)
 }

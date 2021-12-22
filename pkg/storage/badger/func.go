@@ -2,8 +2,13 @@ package badger
 
 import (
 	"bytes"
+	"strconv"
 	"strings"
 	"time"
+
+	"github.com/sirupsen/logrus"
+
+	"github.com/dgraph-io/badger/v3"
 
 	"github.com/xyctruth/profiler/pkg/storage"
 )
@@ -43,14 +48,52 @@ func buildSampleTypeKey(sampleType string) []byte {
 	return buf.Bytes()
 }
 
-func deleteSampleTypeKey(sampleType []byte) string {
-	return strings.Replace(string(sampleType), string(PrefixSampleType), "", 1)
-}
-
 func buildTargetKey(target string) []byte {
 	buf := bytes.NewBuffer(PrefixTarget)
 	buf.Write([]byte(target))
 	return buf.Bytes()
+}
+
+func newProfileEntry(id uint64, val []byte, ttl time.Duration) *badger.Entry {
+	entry := badger.NewEntry(buildProfileKey(strconv.FormatUint(id, 10)), val)
+
+	if ttl > 0 {
+		entry = entry.WithTTL(ttl)
+	}
+	return entry
+}
+
+func newProfileMetaEntry(meta *storage.ProfileMeta, ttl time.Duration) *badger.Entry {
+	metaBytes, err := meta.Encode()
+	if err != nil {
+		logrus.WithError(err).Error("ProfileMeta encode error")
+		return nil
+	}
+	entry := badger.NewEntry(buildProfileMetaKey(meta.SampleType, meta.TargetName, time.Now()), metaBytes)
+	if ttl > 0 {
+		entry = entry.WithTTL(ttl)
+	}
+	return entry
+}
+
+func newSampleTypeEntry(sampleType string, profileType string, ttl time.Duration) *badger.Entry {
+	entry := badger.NewEntry(buildSampleTypeKey(sampleType), []byte(profileType))
+	if ttl > 0 {
+		entry = entry.WithTTL(ttl)
+	}
+	return entry
+}
+
+func newTargetKeyEntry(target string, ttl time.Duration) *badger.Entry {
+	entry := badger.NewEntry(buildTargetKey(target), []byte{})
+	if ttl > 0 {
+		entry = entry.WithTTL(ttl)
+	}
+	return entry
+}
+
+func deleteSampleTypeKey(sampleType []byte) string {
+	return strings.Replace(string(sampleType), string(PrefixSampleType), "", 1)
 }
 
 func deleteTargetKey(target []byte) string {

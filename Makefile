@@ -1,4 +1,5 @@
 IMG ?= profiler:latest
+TEST_PATH ?=./pkg/...
 
 .PHONY: docker-build
 docker-build:
@@ -18,7 +19,7 @@ docker-push:
 
 .PHONY: test
 test:
-	go test -race -v -coverprofile=cover.out  ./pkg/...
+	go test -race -v -coverprofile=cover.out  ${TEST_PATH}
 
 .PHONY: cover-ui
 cover-ui: test
