@@ -22,7 +22,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Install Graphviz
-        run: apt-get install graphviz
+        run: apt-get -f install graphviz
 
       - name: Test
         run: make test
