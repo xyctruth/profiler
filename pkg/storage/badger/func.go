@@ -3,7 +3,6 @@ package badger
 import (
 	"bytes"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/dgraph-io/badger/v3"
@@ -12,11 +11,11 @@ import (
 )
 
 var (
-	PrefixProfiles    = []byte("Profile")
-	PrefixProfileMeta = []byte("ProfileMeta")
-	PrefixSampleType  = []byte("SampleType")
-	PrefixTarget      = []byte("Target")
-	Sequence          = []byte("Sequence")
+	Sequence          = []byte{0x80}
+	PrefixProfiles    = []byte{0x81}
+	PrefixProfileMeta = []byte{0x82}
+	PrefixSampleType  = []byte{0x83}
+	PrefixTarget      = []byte{0x84}
 )
 
 func buildProfileKey(id string) []byte {
@@ -91,9 +90,9 @@ func newTargetKeyEntry(target string, ttl time.Duration) *badger.Entry {
 }
 
 func deleteSampleTypeKey(sampleType []byte) string {
-	return strings.Replace(string(sampleType), string(PrefixSampleType), "", 1)
+	return string(sampleType[1:])
 }
 
 func deleteTargetKey(target []byte) string {
-	return strings.Replace(string(target), string(PrefixTarget), "", 1)
+	return string(target[1:])
 }
