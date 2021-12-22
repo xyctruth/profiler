@@ -236,18 +236,6 @@ func (s *store) ListTarget() ([]string, error) {
 	return targets, nil
 }
 
-func (s *store) delete(keys ...[]byte) error {
-	return s.db.Update(func(txn *badger.Txn) error {
-		for _, key := range keys {
-			err := txn.Delete(key)
-			if err != nil {
-				return err
-			}
-		}
-		return nil
-	})
-}
-
 func (s *store) Release() {
 	err := s.seq.Release()
 	if err != nil {
