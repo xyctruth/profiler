@@ -21,6 +21,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Install Graphviz
+        run: apt-get install graphviz
+
       - name: Test
         run: make test
 
