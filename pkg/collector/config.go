@@ -5,103 +5,121 @@ import (
 	"time"
 
 	"github.com/fsnotify/fsnotify"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"github.com/xyctruth/profiler/pkg/utils"
 )
 
-var (
-	defaultProfileConfigs = map[string]*ProfileConfig{
+func defaultProfileConfigs() map[string]ProfileConfig {
+	return map[string]ProfileConfig{
 		"profile": {
 			Path:   "/debug/pprof/profile?seconds=10",
-			Enable: true,
+			Enable: utils.BoolPtr(true),
 		},
 		"fgprof": {
 			Path:   "/debug/fgprof?seconds=10",
-			Enable: true,
+			Enable: utils.BoolPtr(true),
 		},
 		"mutex": {
 			Path:   "/debug/pprof/mutex",
-			Enable: true,
+			Enable: utils.BoolPtr(true),
 		},
 		"heap": {
 			Path:   "/debug/pprof/heap",
-			Enable: true,
+			Enable: utils.BoolPtr(true),
 		},
 		"goroutine": {
 			Path:   "/debug/pprof/goroutine",
-			Enable: true,
+			Enable: utils.BoolPtr(true),
 		},
 		"allocs": {
 			Path:   "/debug/pprof/allocs",
-			Enable: true,
+			Enable: utils.BoolPtr(true),
 		},
 		"block": {
 			Path:   "/debug/pprof/block",
-			Enable: true,
+			Enable: utils.BoolPtr(true),
 		},
 		"threadcreate": {
 			Path:   "/debug/pprof/threadcreate",
-			Enable: true,
+			Enable: utils.BoolPtr(true),
 		},
 	}
-)
 
-func LoadConfig(configPath string, fn func(configmap Config)) {
+}
+
+func LoadConfig(configPath string, fn func(configmap CollectorConfig)) error {
 	conf := viper.New()
 	conf.SetConfigFile(configPath)
 	conf.SetConfigType("yaml")
 
 	err := conf.ReadInConfig()
 	if err != nil {
-		panic(fmt.Errorf("Fatal error config file: %w", err))
+		return fmt.Errorf("Fatal error config file: %w", err)
 	}
 
-	var config Config
+	var config CollectorConfig
 	err = conf.UnmarshalKey("collector", &config)
 	if err != nil {
-		panic(fmt.Errorf("Fatal error config Config: %w", err))
+		return fmt.Errorf("Fatal error config CollectorConfig: %w", err)
 	}
 
 	conf.OnConfigChange(func(in fsnotify.Event) {
-		var newConfig Config
+		var newConfig CollectorConfig
 		err = conf.UnmarshalKey("collector", &newConfig)
 		if err != nil {
-			panic(fmt.Errorf("Fatal error config Config: %w", err))
+			log.Info("Fatal error config CollectorConfig: %w")
 		}
 		fn(newConfig)
 	})
 	conf.WatchConfig()
 	fn(config)
+
+	return nil
 }
 
 type Config struct {
-	Name          string
-	TargetConfigs map[string]*TargetConfig
+	Collector CollectorConfig `yaml:"collector"`
+}
+
+type CollectorConfig struct {
+	TargetConfigs map[string]TargetConfig `yaml:"targetConfigs"`
 }
 
 type TargetConfig struct {
-	ProfileConfigs map[string]*ProfileConfig
-	Interval       time.Duration
-	Host           string
+	ProfileConfigs map[string]ProfileConfig `yaml:"profileConfigs"`
+	Interval       time.Duration            `yaml:"interval"`
+	Expiration     int64                    `yaml:"expiration"` // unit day
+	Host           string                   `yaml:"host"`
 }
 
 type ProfileConfig struct {
-	Path   string
-	Enable bool
+	Path   string `yaml:"path"`
+	Enable *bool  `yaml:"enable"`
 }
 
-func buildProfileConfigs(profileConfig map[string]*ProfileConfig) map[string]*ProfileConfig {
+func buildProfileConfigs(profileConfig map[string]ProfileConfig) map[string]ProfileConfig {
+	defaultConfigs := defaultProfileConfigs()
 	if profileConfig == nil {
-		return defaultProfileConfigs
+		return defaultConfigs
 	}
 
-	for profileName, defaultConfig := range defaultProfileConfigs {
-		if config, ok := profileConfig[profileName]; ok {
+	profiles := make(map[string]ProfileConfig, len(defaultConfigs))
+
+	for key, defaultConfig := range defaultConfigs {
+		if config, ok := profileConfig[key]; ok {
 			if config.Path == "" {
 				config.Path = defaultConfig.Path
 			}
-		} else {
-			profileConfig[profileName] = defaultConfig
+			if config.Enable == nil {
+				config.Enable = defaultConfig.Enable
+			}
+
+			profiles[key] = config
+			continue
 		}
+
+		profiles[key] = defaultConfig
 	}
-	return profileConfig
+	return profiles
 }

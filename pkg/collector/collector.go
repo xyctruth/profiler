@@ -2,11 +2,11 @@ package collector
 
 import (
 	"bytes"
-	"encoding/gob"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"reflect"
 	"sync"
 	"time"
 
@@ -17,9 +17,10 @@ import (
 
 type Collector struct {
 	TargetName string
-	*TargetConfig
+	TargetConfig
 	exitChan        chan struct{}
 	resetTickerChan chan time.Duration
+	mangerWg        *sync.WaitGroup
 	wg              *sync.WaitGroup
 	httpClient      *http.Client
 	mu              sync.RWMutex
@@ -27,12 +28,13 @@ type Collector struct {
 	store           storage.Store
 }
 
-func newCollector(targetName string, target *TargetConfig, store storage.Store) *Collector {
+func newCollector(targetName string, target TargetConfig, store storage.Store, mangerWg *sync.WaitGroup) *Collector {
 	collector := &Collector{
 		TargetName:      targetName,
 		TargetConfig:    target,
 		exitChan:        make(chan struct{}),
-		resetTickerChan: make(chan time.Duration),
+		resetTickerChan: make(chan time.Duration, 1000),
+		mangerWg:        mangerWg,
 		wg:              &sync.WaitGroup{},
 		httpClient:      &http.Client{},
 		log:             logrus.WithField("collector", targetName),
@@ -42,66 +44,78 @@ func newCollector(targetName string, target *TargetConfig, store storage.Store) 
 	return collector
 }
 
-func (collector *Collector) run(wg *sync.WaitGroup) {
-	defer func() {
-		wg.Done()
-	}()
+func (collector *Collector) run() {
+	collector.mu.Lock()
+	defer collector.mu.Unlock()
 
-	wg.Add(1)
 	collector.log.Info("collector run")
 
-	gob.Register(storage.ProfileMeta{})
+	collector.mangerWg.Add(1)
 
-	ticker := time.NewTicker(collector.Interval)
-	defer ticker.Stop()
+	go collector.scrapeLoop(collector.Interval)
+}
+
+func (collector *Collector) scrapeLoop(interval time.Duration) {
+	defer collector.mangerWg.Done()
 	collector.scrape()
 
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
 	for {
 		select {
 		case <-collector.exitChan:
-			collector.log.Info("collector exit")
+			collector.log.Info("scrape loop exit")
 			return
-		case interval := <-collector.resetTickerChan:
-			ticker.Reset(interval)
+		case i := <-collector.resetTickerChan:
+			ticker.Reset(i)
 		case <-ticker.C:
 			collector.scrape()
 		}
 	}
 }
 
-func (collector *Collector) reload(target *TargetConfig) {
+func (collector *Collector) reload(target TargetConfig) {
 	collector.mu.Lock()
 	defer collector.mu.Unlock()
+
+	target.ProfileConfigs = buildProfileConfigs(target.ProfileConfigs)
+
+	if reflect.DeepEqual(collector.TargetConfig, target) {
+		return
+	}
+	collector.log.Info("reload collector ")
+
 	if collector.Interval != target.Interval {
 		collector.resetTickerChan <- target.Interval
 	}
+
 	collector.TargetConfig = target
-	collector.ProfileConfigs = buildProfileConfigs(collector.ProfileConfigs)
 }
 
 func (collector *Collector) exit() {
-	collector.mu.Lock()
-	defer collector.mu.Unlock()
 	close(collector.exitChan)
 }
 
 func (collector *Collector) scrape() {
-	collector.log.Info("collector scrape start")
 	collector.mu.RLock()
+	defer collector.mu.RUnlock()
+
+	collector.log.Info("collector scrape start")
 	for profileType, profileConfig := range collector.ProfileConfigs {
-		if profileConfig.Enable {
+		if *profileConfig.Enable {
 			collector.wg.Add(1)
 			go collector.fetch(profileType, profileConfig)
 		}
 	}
-	collector.mu.RUnlock()
 	collector.wg.Wait()
 }
 
-func (collector *Collector) fetch(profileType string, profileConfig *ProfileConfig) {
+func (collector *Collector) fetch(profileType string, profileConfig ProfileConfig) {
 	defer collector.wg.Done()
+
 	logEntry := collector.log.WithFields(logrus.Fields{"profile_type": profileType, "profile_url": profileConfig.Path})
-	logEntry.Debug("collector start fetch")
+	logEntry.Info("collector start fetch")
+
 	req, err := http.NewRequest("GET", "http://"+collector.Host+profileConfig.Path, nil)
 	if err != nil {
 		logEntry.WithError(err).Error("invoke task error")
@@ -117,7 +131,7 @@ func (collector *Collector) fetch(profileType string, profileConfig *ProfileConf
 	defer resp.Body.Close()
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		logEntry.WithError(err).Error("http resp status code is", resp.StatusCode)
+		logEntry.WithError(err).Error("http resp status code is ", resp.StatusCode)
 		return
 	}
 
@@ -152,7 +166,7 @@ func (collector *Collector) analysis(profileType string, profileBytes []byte) er
 		return err
 	}
 
-	profileID, err := collector.store.SaveProfile(b.Bytes())
+	profileID, err := collector.store.SaveProfile(b.Bytes(), time.Duration(collector.Expiration)*time.Hour*24)
 	if err != nil {
 		collector.log.WithError(err).Error("save profile error")
 		return err
@@ -179,7 +193,7 @@ func (collector *Collector) analysis(profileType string, profileBytes []byte) er
 		metas = append(metas, meta)
 	}
 
-	err = collector.store.SaveProfileMeta(metas)
+	err = collector.store.SaveProfileMeta(metas, time.Duration(collector.Expiration)*time.Hour*24)
 	if err != nil {
 		collector.log.WithError(err).Error("save profile meta error")
 		return err

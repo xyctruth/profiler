@@ -31,6 +31,18 @@ spec:
             requests:
               cpu: "100m"
               memory: "400Mi"
+          livenessProbe:
+            httpGet:
+              path: /api/healthz
+              port: 80
+            initialDelaySeconds: 180
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /api/healthz
+              port: 80
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
           terminationMessagePolicy: FallbackToLogsOnError
           volumeMounts:
             - name: profiler-data

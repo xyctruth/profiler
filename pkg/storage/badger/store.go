@@ -1,7 +1,6 @@
 package badger
 
 import (
-	"strconv"
 	"time"
 
 	"github.com/dgraph-io/badger/v3"
@@ -31,6 +30,7 @@ func NewStore(path string) storage.Store {
 	}
 
 	go s.GC()
+
 	return s
 }
 
@@ -47,15 +47,6 @@ func (s *store) GC() {
 			log.WithError(err).Info("store gc error")
 		}
 	}
-}
-
-func (s *store) Release() {
-	err := s.seq.Release()
-	if err != nil {
-		log.WithError(err).Error("store release ")
-		return
-	}
-	log.Info("store release ")
 }
 
 func (s *store) GetProfile(id string) ([]byte, error) {
@@ -77,15 +68,14 @@ func (s *store) GetProfile(id string) ([]byte, error) {
 	return date, err
 }
 
-func (s *store) SaveProfile(profileData []byte) (uint64, error) {
+func (s *store) SaveProfile(profileData []byte, ttl time.Duration) (uint64, error) {
 	id, err := s.seq.Next()
 	if err != nil {
 		return 0, err
 	}
 
 	err = s.db.Update(func(txn *badger.Txn) error {
-		return txn.Set(buildProfileKey(strconv.FormatUint(id, 10)), profileData)
-
+		return txn.SetEntry(newProfileEntry(id, profileData, ttl))
 	})
 
 	if err != nil {
@@ -94,25 +84,20 @@ func (s *store) SaveProfile(profileData []byte) (uint64, error) {
 	return id, nil
 }
 
-func (s *store) SaveProfileMeta(metas []*storage.ProfileMeta) error {
+func (s *store) SaveProfileMeta(metas []*storage.ProfileMeta, ttl time.Duration) error {
 	return s.db.Update(func(txn *badger.Txn) error {
 		for _, meta := range metas {
-			err := txn.Set(buildSampleTypeKey(meta.SampleType), []byte(meta.ProfileType))
+			err := txn.SetEntry(newSampleTypeEntry(meta.SampleType, meta.ProfileType, ttl))
 			if err != nil {
 				return err
 			}
 
-			err = txn.Set(buildTargetKey(meta.TargetName), []byte(meta.TargetName))
+			err = txn.SetEntry(newTargetKeyEntry(meta.TargetName, ttl))
 			if err != nil {
 				return err
 			}
 
-			metaBytes, err := meta.Encode()
-			if err != nil {
-				return err
-			}
-
-			err = txn.Set(buildProfileMetaKey(meta.SampleType, meta.TargetName, time.Now()), metaBytes)
+			err = txn.SetEntry(newProfileMetaEntry(meta, ttl))
 			if err != nil {
 				return err
 			}
@@ -137,8 +122,8 @@ func (s *store) ListProfileMeta(sampleType string, targetFilter []string, startT
 			max := buildProfileMetaKey(sampleType, targetName, endTime)
 
 			opts := badger.DefaultIteratorOptions
-			opts.PrefetchSize = 10
-			opts.Prefix = PrefixProfileMeta
+			opts.PrefetchSize = 100
+			opts.Prefix = buildBaseProfileMetaKey(sampleType, targetName)
 			it := txn.NewIterator(opts)
 			defer it.Close()
 			for it.Seek(min); it.Valid(); it.Next() {
@@ -249,4 +234,13 @@ func (s *store) ListTarget() ([]string, error) {
 		return nil, err
 	}
 	return targets, nil
+}
+
+func (s *store) Release() {
+	err := s.seq.Release()
+	if err != nil {
+		log.WithError(err).Error("store release ")
+		return
+	}
+	log.Info("store release ")
 }

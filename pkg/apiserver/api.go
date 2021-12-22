@@ -9,7 +9,7 @@ import (
 	"github.com/google/pprof/profile"
 	log "github.com/sirupsen/logrus"
 	"github.com/xyctruth/profiler/pkg/storage"
-	"github.com/xyctruth/profiler/pkg/uitls"
+	"github.com/xyctruth/profiler/pkg/utils"
 )
 
 type APIServer struct {
@@ -28,6 +28,9 @@ func NewAPIServer(addr string, store storage.Store) *APIServer {
 	}
 
 	router := gin.Default()
+	router.GET("/api/healthz", func(c *gin.Context) {
+		c.JSON(200, "I'm fine")
+	})
 	router.Use(HandleCors).GET("/api/targets", apiServer.listTarget)
 	router.Use(HandleCors).GET("/api/sample_types", apiServer.listSampleTypes)
 	router.Use(HandleCors).GET("/api/group_sample_types", apiServer.listGroupSampleTypes)
@@ -57,9 +60,11 @@ func (s *APIServer) Stop() {
 }
 
 func (s *APIServer) Run() {
-	if err := s.srv.ListenAndServe(); err != nil {
-		log.Fatal("api server listen: ", err)
-	}
+	go func() {
+		if err := s.srv.ListenAndServe(); err != nil {
+			log.Fatal("api server listen: ", err)
+		}
+	}()
 }
 
 func (s *APIServer) listTarget(c *gin.Context) {
@@ -93,7 +98,7 @@ func (s *APIServer) listProfileMeta(c *gin.Context) {
 		return
 	}
 
-	req.Targets = uitls.RemoveDuplicateElement(req.Targets)
+	req.Targets = utils.RemoveDuplicateElement(req.Targets)
 	metas, err := s.store.ListProfileMeta(sampleType, req.Targets, startTime, endTime)
 	if err != nil {
 		c.JSON(500, err)
