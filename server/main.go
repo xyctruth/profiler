@@ -36,7 +36,7 @@ func main() {
 
 	// receive signal exit
 	quit := make(chan os.Signal)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	s := <-quit
 	log.Info("signal receive exit ", s)
 	collectorManger.Stop()
