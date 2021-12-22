@@ -1,6 +1,7 @@
 package apiserver
 
 import (
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -40,7 +41,7 @@ func (s *pprofServer) register(w http.ResponseWriter, r *http.Request) {
 	}
 	data, err := s.store.GetProfile(id)
 	if err != nil {
-		if err == storage.ErrProfileNotFound {
+		if errors.Is(err, storage.ErrProfileNotFound) {
 			http.Error(w, "Profile not found", http.StatusNotFound)
 			return
 		}

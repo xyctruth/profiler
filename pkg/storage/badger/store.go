@@ -1,6 +1,7 @@
 package badger
 
 import (
+	"errors"
 	"time"
 
 	"github.com/dgraph-io/badger/v3"
@@ -66,7 +67,7 @@ func (s *store) GetProfile(id string) ([]byte, error) {
 		return nil
 	})
 
-	if err == badger.ErrKeyNotFound {
+	if errors.Is(err, badger.ErrKeyNotFound) {
 		return nil, storage.ErrProfileNotFound
 	}
 	return date, err
