@@ -50,11 +50,9 @@ func (collector *Collector) run() {
 
 	collector.log.Info("collector run")
 
-	collector.mangerWg.Add(2)
+	collector.mangerWg.Add(1)
 
 	go collector.scrapeLoop(collector.Interval)
-	go collector.clearLoop()
-
 }
 
 func (collector *Collector) scrapeLoop(interval time.Duration) {
@@ -72,27 +70,6 @@ func (collector *Collector) scrapeLoop(interval time.Duration) {
 			ticker.Reset(i)
 		case <-ticker.C:
 			collector.scrape()
-		}
-	}
-}
-
-func (collector *Collector) clearLoop() {
-	defer collector.mangerWg.Done()
-	collector.clear()
-
-	for {
-		// 每天24点执行
-		now := time.Now()
-		next := now.Add(time.Hour * 24)
-		next = time.Date(next.Year(), next.Month(), next.Day(), 0, 0, 0, 0, next.Location())
-		t := time.NewTimer(next.Sub(now))
-
-		select {
-		case <-collector.exitChan:
-			collector.log.Info("clear loop exit")
-			return
-		case <-t.C:
-			collector.clear()
 		}
 	}
 }
@@ -117,20 +94,6 @@ func (collector *Collector) reload(target TargetConfig) {
 
 func (collector *Collector) exit() {
 	close(collector.exitChan)
-}
-
-func (collector *Collector) clear() {
-	collector.mu.RLock()
-	defer collector.mu.RUnlock()
-
-	if collector.Expiration <= 0 {
-		return
-	}
-	collector.log.Info("collector clear start")
-	err := collector.store.Clear(collector.TargetName, collector.Expiration)
-	if err != nil {
-		collector.log.WithError(err).Error("collector clear error")
-	}
 }
 
 func (collector *Collector) scrape() {
@@ -203,7 +166,7 @@ func (collector *Collector) analysis(profileType string, profileBytes []byte) er
 		return err
 	}
 
-	profileID, err := collector.store.SaveProfile(b.Bytes())
+	profileID, err := collector.store.SaveProfile(b.Bytes(), time.Duration(collector.Expiration)*time.Hour*24)
 	if err != nil {
 		collector.log.WithError(err).Error("save profile error")
 		return err
@@ -230,7 +193,7 @@ func (collector *Collector) analysis(profileType string, profileBytes []byte) er
 		metas = append(metas, meta)
 	}
 
-	err = collector.store.SaveProfileMeta(metas)
+	err = collector.store.SaveProfileMeta(metas, time.Duration(collector.Expiration)*time.Hour*24)
 	if err != nil {
 		collector.log.WithError(err).Error("save profile meta error")
 		return err

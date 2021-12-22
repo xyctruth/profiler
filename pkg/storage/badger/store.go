@@ -1,7 +1,6 @@
 package badger
 
 import (
-	"strconv"
 	"time"
 
 	"github.com/dgraph-io/badger/v3"
@@ -69,15 +68,14 @@ func (s *store) GetProfile(id string) ([]byte, error) {
 	return date, err
 }
 
-func (s *store) SaveProfile(profileData []byte) (uint64, error) {
+func (s *store) SaveProfile(profileData []byte, ttl time.Duration) (uint64, error) {
 	id, err := s.seq.Next()
 	if err != nil {
 		return 0, err
 	}
 
 	err = s.db.Update(func(txn *badger.Txn) error {
-		return txn.Set(buildProfileKey(strconv.FormatUint(id, 10)), profileData)
-
+		return txn.SetEntry(newProfileEntry(id, profileData, ttl))
 	})
 
 	if err != nil {
@@ -86,25 +84,20 @@ func (s *store) SaveProfile(profileData []byte) (uint64, error) {
 	return id, nil
 }
 
-func (s *store) SaveProfileMeta(metas []*storage.ProfileMeta) error {
+func (s *store) SaveProfileMeta(metas []*storage.ProfileMeta, ttl time.Duration) error {
 	return s.db.Update(func(txn *badger.Txn) error {
 		for _, meta := range metas {
-			err := txn.Set(buildSampleTypeKey(meta.SampleType), []byte(meta.ProfileType))
+			err := txn.SetEntry(newSampleTypeEntry(meta.SampleType, meta.ProfileType, ttl))
 			if err != nil {
 				return err
 			}
 
-			err = txn.Set(buildTargetKey(meta.TargetName), []byte(meta.TargetName))
+			err = txn.SetEntry(newTargetKeyEntry(meta.TargetName, ttl))
 			if err != nil {
 				return err
 			}
 
-			metaBytes, err := meta.Encode()
-			if err != nil {
-				return err
-			}
-
-			err = txn.Set(buildProfileMetaKey(meta.SampleType, meta.TargetName, time.Now()), metaBytes)
+			err = txn.SetEntry(newProfileMetaEntry(meta, ttl))
 			if err != nil {
 				return err
 			}
@@ -241,72 +234,6 @@ func (s *store) ListTarget() ([]string, error) {
 		return nil, err
 	}
 	return targets, nil
-}
-
-func (s *store) Clear(targetName string, agoDays int64) error {
-	sampleTypes, err := s.ListSampleType()
-	if err != nil {
-		return err
-	}
-
-	now := time.Now()
-	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
-	ago := today.Add(-time.Hour * 24 * time.Duration(agoDays))
-
-	err = s.db.Update(func(txn *badger.Txn) error {
-		for _, sampleType := range sampleTypes {
-			max := buildProfileMetaKey(sampleType, targetName, ago)
-			opts := badger.DefaultIteratorOptions
-			opts.PrefetchSize = 100
-			opts.Prefix = buildBaseProfileMetaKey(sampleType, targetName)
-			it := txn.NewIterator(opts)
-			defer it.Close()
-			for it.Rewind(); it.Valid(); it.Next() {
-				item := it.Item()
-				k := item.Key()
-				var profileID uint64
-				if !storage.CompareKey(k, max) {
-					break
-				}
-				err = item.Value(func(v []byte) error {
-					sample := &storage.ProfileMeta{}
-					err = sample.Decode(v)
-					if err != nil {
-						return err
-					}
-					profileID = sample.ProfileID
-					return nil
-				})
-				if err != nil {
-					return err
-				}
-
-				err = s.delete(k, buildProfileKey(strconv.FormatUint(profileID, 10)))
-				if err != nil {
-					return err
-				}
-			}
-		}
-		return nil
-	})
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (s *store) delete(keys ...[]byte) error {
-	return s.db.Update(func(txn *badger.Txn) error {
-		for _, key := range keys {
-			err := txn.Delete(key)
-			if err != nil {
-				return err
-			}
-		}
-		return nil
-	})
 }
 
 func (s *store) Release() {

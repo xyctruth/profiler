@@ -8,17 +8,15 @@ import (
 
 type Store interface {
 	GetProfile(id string) ([]byte, error)
-	SaveProfile(data []byte) (uint64, error)
+	SaveProfile(data []byte, ttl time.Duration) (uint64, error)
 
-	SaveProfileMeta(metas []*ProfileMeta) error
+	SaveProfileMeta(metas []*ProfileMeta, ttl time.Duration) error
 	ListProfileMeta(sampleType string, targetFilter []string, startTime, endTime time.Time) ([]*ProfileMetaByTarget, error)
 
 	ListSampleType() ([]string, error)
 	ListGroupSampleType() (map[string][]string, error)
 
 	ListTarget() ([]string, error)
-
-	Clear(targetName string, agoDays int64) error
 
 	Release()
 }
