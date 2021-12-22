@@ -7,7 +7,7 @@ on:
     branches: [ master ]
 
 jobs:
-  test:
+  server-test:
     strategy:
       matrix:
         platform: [ubuntu-latest, macos-latest]
