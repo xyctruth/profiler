@@ -6,10 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/sirupsen/logrus"
-
 	"github.com/dgraph-io/badger/v3"
-
+	"github.com/sirupsen/logrus"
 	"github.com/xyctruth/profiler/pkg/storage"
 )
 
