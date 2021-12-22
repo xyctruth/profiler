@@ -57,27 +57,18 @@
     nextTick(() => {
       var unit = ""
       const baseSetting = {
-        type: "line",
-        lineStyle: {
-          width: 2,
-        },
-        showSymbol: true,
+        type: "scatter",
+        showSymbol: false,
         sampling: 'lttb',
         showAllSymbol: false,
-//        symbolSize: 4,
-
-        symbolSize: function(data) {
-          // console.log(data)
-          return 4;
-        },
-        // symbol: "circle",
+        symbolSize: 10,
         emphasis: {
           width: 3,
           focus: 'series',
         },
       }
       const chartOptions = {
-        animation: false,
+        animation: false, // 关闭加载动画
 
         legend: {
           type: 'scroll',
@@ -121,7 +112,6 @@
           show: true,
           confine: true,
           trigger: 'item',
-          // showContent: false,
           axisPointer: {
             animation: false
           },
@@ -141,12 +131,9 @@
             ...baseSetting,
             name: meta.TargetName,
             data: [],
-            emphasis: {
-              focus: 'series'
-            },
           }
           for (const p of meta.ProfileMetas) {
-            if (unit){
+            if (!unit){
               unit = p.SampleTypeUnit
             }
             let label = moment(p.Timestamp).format('YYYY-MM-DD HH:mm:ss')
@@ -172,9 +159,6 @@
         chart.on('click', function (params) {
           window.open(`${baseConfig.reqUrl}/api/pprof/ui/${params.data.sourceData.ProfileID}?si=${title}`)
         });
-        // chart.on('mouseover', 'series.line', function (params) {
-        //     console.log(params);
-        // });
       }
       chart.setOption(Object.assign(chartOptions, {
         series: echartData,
