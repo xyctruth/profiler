@@ -1,6 +1,7 @@
 package collector
 
 import (
+	"io/ioutil"
 	"os"
 	"sync"
 	"testing"
@@ -25,11 +26,14 @@ func TestNewCollector(t *testing.T) {
 }
 
 func TestCollectorReload(t *testing.T) {
-	store := badger.NewStore("./data")
-	defer os.RemoveAll("./data")
-	defer store.Release()
-	wg := &sync.WaitGroup{}
+	dir, err := ioutil.TempDir("./", "temp-*")
+	require.Equal(t, nil, err)
+	defer os.RemoveAll(dir)
 
+	store := badger.NewStore(dir)
+	defer store.Release()
+
+	wg := &sync.WaitGroup{}
 	c := &Config{}
 	yaml.Unmarshal([]byte(generalConfigYAML), c)
 	config := c.Collector
@@ -38,7 +42,10 @@ func TestCollectorReload(t *testing.T) {
 	collector := newCollector("server2", targetConfig, store, wg)
 
 	collector.run()
-	defer collector.exit()
+	defer func() {
+		collector.exit()
+		wg.Wait()
+	}()
 
 	targetConfig.Interval = 1 * time.Second
 	collector.reload(targetConfig)
@@ -63,8 +70,10 @@ func TestCollectorReload(t *testing.T) {
 }
 
 func TestCollectorRun(t *testing.T) {
-	store := badger.NewStore("./data")
-	defer os.RemoveAll("./data")
+	dir, err := ioutil.TempDir("./", "temp-*")
+	require.Equal(t, nil, err)
+	defer os.RemoveAll(dir)
+	store := badger.NewStore(dir)
 	defer store.Release()
 
 	wg := &sync.WaitGroup{}

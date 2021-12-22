@@ -23,6 +23,7 @@ profiler
 _test
 
 data
+temp-*/
 node_modules
 .DS_Store
 dist

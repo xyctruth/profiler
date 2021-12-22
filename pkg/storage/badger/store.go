@@ -65,6 +65,10 @@ func (s *store) GetProfile(id string) ([]byte, error) {
 		}
 		return nil
 	})
+
+	if err == badger.ErrKeyNotFound {
+		return nil, storage.ErrProfileNotFound
+	}
 	return date, err
 }
 
@@ -239,8 +243,15 @@ func (s *store) ListTarget() ([]string, error) {
 func (s *store) Release() {
 	err := s.seq.Release()
 	if err != nil {
-		log.WithError(err).Error("store release ")
+		log.WithError(err).Error("store release")
 		return
 	}
+
+	err = s.db.Close()
+	if err != nil {
+		log.WithError(err).Error("store close")
+		return
+	}
+
 	log.Info("store release ")
 }
