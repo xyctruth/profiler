@@ -16,7 +16,9 @@ RUN npm run build
 FROM nginx:alpine
 WORKDIR /profiler
 
+RUN apk update
 RUN apk add graphviz
+RUN apk add dumb-init
 
 # server
 COPY --from=builder /workspace/profiler .
@@ -35,4 +37,5 @@ COPY entrypoint.sh ./entrypoint.sh
 RUN chmod +x entrypoint.sh
 EXPOSE 80 8080
 
-ENTRYPOINT ["./entrypoint.sh"]
+ENTRYPOINT ["dumb-init", "--"]
+CMD ["./entrypoint.sh"]
