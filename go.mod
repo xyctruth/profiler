@@ -13,7 +13,9 @@ require (
 require (
 	github.com/dgraph-io/badger/v3 v3.2103.2
 	github.com/felixge/fgprof v0.9.1
+	github.com/gavv/httpexpect/v2 v2.3.1 // indirect
 	github.com/go-playground/validator/v10 v10.6.1 // indirect
+	github.com/klauspost/cpuid v1.2.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/stretchr/testify v1.7.0

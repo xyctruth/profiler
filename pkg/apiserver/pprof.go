@@ -1,6 +1,7 @@
 package apiserver
 
 import (
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -12,7 +13,6 @@ import (
 )
 
 type pprofServer struct {
-	cache    map[string]struct{}
 	mux      *http.ServeMux
 	mu       sync.Mutex
 	basePath string
@@ -22,7 +22,6 @@ type pprofServer struct {
 func newPprofServer(basePath string, store storage.Store) *pprofServer {
 	s := &pprofServer{
 		mux:      http.NewServeMux(),
-		cache:    make(map[string]struct{}),
 		basePath: basePath,
 		store:    store,
 	}
@@ -36,21 +35,22 @@ func (s *pprofServer) web(w http.ResponseWriter, r *http.Request) {
 
 func (s *pprofServer) register(w http.ResponseWriter, r *http.Request) {
 	id := extractProfileID(r.URL.Path)
+	if id == "" {
+		http.Error(w, "Invalid parameter", http.StatusBadRequest)
+		return
+	}
 	data, err := s.store.GetProfile(id)
 	if err != nil {
+		if errors.Is(err, storage.ErrProfileNotFound) {
+			http.Error(w, "Profile not found", http.StatusNotFound)
+			return
+		}
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	s.mu.Lock()
 	defer s.mu.Unlock()
-
-	if _, ok := s.cache[id]; ok {
-		http.Redirect(w, r, r.URL.Path+"?"+r.URL.RawQuery, http.StatusSeeOther)
-		return
-	}
-
-	s.cache[id] = struct{}{}
 
 	filepath := path.Join(os.TempDir(), id)
 	err = ioutil.WriteFile(filepath, data, 0600)

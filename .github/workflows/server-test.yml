@@ -21,6 +21,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Install Linux Graphviz
+        if: runner.os == "Linux"
+        run: sudo apt-get install -f graphviz
+
+      - name: Install MacOS Graphviz
+        if: runner.os == "macOS"
+        run: sudo brew install -f graphviz
+
       - name: Test
         run: make test
 

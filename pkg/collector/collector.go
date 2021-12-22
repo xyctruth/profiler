@@ -166,7 +166,7 @@ func (collector *Collector) analysis(profileType string, profileBytes []byte) er
 		return err
 	}
 
-	profileID, err := collector.store.SaveProfile(b.Bytes(), time.Duration(collector.Expiration)*time.Hour*24)
+	profileID, err := collector.store.SaveProfile(b.Bytes(), collector.Expiration)
 	if err != nil {
 		collector.log.WithError(err).Error("save profile error")
 		return err
@@ -193,7 +193,7 @@ func (collector *Collector) analysis(profileType string, profileBytes []byte) er
 		metas = append(metas, meta)
 	}
 
-	err = collector.store.SaveProfileMeta(metas, time.Duration(collector.Expiration)*time.Hour*24)
+	err = collector.store.SaveProfileMeta(metas, collector.Expiration)
 	if err != nil {
 		collector.log.WithError(err).Error("save profile meta error")
 		return err

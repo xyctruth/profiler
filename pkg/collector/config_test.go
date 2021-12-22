@@ -31,7 +31,7 @@ collector:
 
     server2:
       interval: 2s
-      expiration: 1
+      expiration: 30000h
       host: localhost:9000
       profileConfigs: # rewrite default profile config
         fgprof:
@@ -133,12 +133,13 @@ func TestLoadConfig(t *testing.T) {
 		serverConfig, ok := config.TargetConfigs["profiler-server"]
 		require.Equal(t, ok, true)
 		require.Equal(t, 2*time.Second, serverConfig.Interval)
-		require.Equal(t, int64(0), serverConfig.Expiration)
+		require.Equal(t, time.Duration(0), serverConfig.Expiration)
 		require.Equal(t, "localhost:9000", serverConfig.Host)
 		require.Equal(t, 2, len(serverConfig.ProfileConfigs))
 
 		serverConfig, ok = config.TargetConfigs["server2"]
 		require.Equal(t, ok, true)
+		require.Equal(t, 30000*time.Hour, serverConfig.Expiration)
 		require.Equal(t, 3, len(serverConfig.ProfileConfigs))
 	})
 	require.Equal(t, err, nil)

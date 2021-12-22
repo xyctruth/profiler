@@ -9,82 +9,109 @@ data:
       targetConfigs:
         profiler-server:
           interval: 5m
+          expiration: 168h
           host: localhost:9000
         admin-gateway-f006dev:
           interval: 5m
+          expiration: 168h
           host: admin-gateway.f006dev:9000
         app-awards-svc-f006dev:
           interval: 5m
+          expiration: 168h
           host: app-awards-svc.f006dev:9000
         app-businesses-b-svc-f006dev:
           interval: 5m
+          expiration: 168h
           host: app-businesses-b-svc.f006dev:9000
         app-businesses-gateway-f006dev:
           interval: 5m
+          expiration: 168h
           host: app-businesses-gateway.f006dev:9000
         app-channel-b-svc-f006dev:
           interval: 5m
+          expiration: 168h
           host: app-channel-b-svc.f006dev:9000
         app-coupon-b-svc-f006dev:
           interval: 5m
+          expiration: 168h
           host: app-coupon-b-svc.f006dev:9000
         app-coupon-c-svc-f006dev:
           interval: 5m
+          expiration: 168h
           host: app-coupon-c-svc.f006dev:9000
         app-fitness-b-svc-f006dev:
           interval: 5m
+          expiration: 168h
           host: app-fitness-b-svc.f006dev:9000
         app-fitness-c-svc-f006dev:
           interval: 5m
+          expiration: 168h
           host: app-fitness-c-svc.f006dev:9000
         app-gateway-f006dev:
           interval: 5m
+          expiration: 168h
           host: app-gateway.f006dev:9000
         app-gymnasiums-b-svc-f006dev:
           interval: 5m
+          expiration: 168h
           host: app-gymnasiums-b-svc.f006dev:9000
         app-gymnasiums-gateway-f006dev:
           interval: 5m
+          expiration: 168h
           host: app-gymnasiums-gateway.f006dev:9000
         app-knowledge-svc:
           interval: 5m
+          expiration: 168h
           host: app-knowledge-svc.f006dev:9000
         app-lotteries-svc-f006dev:
           interval: 5m
+          expiration: 168h
           host: app-lotteries-svc.f006dev:9000
         app-media-c-svc-f006dev:
           interval: 5m
+          expiration: 168h
           host: app-media-c-svc.f006dev:9000
         app-media-m-svc-f006dev:
           interval: 5m
+          expiration: 168h
           host: app-media-m-svc.f006dev:9000
         app-split-svc-f006dev:
           interval: 5m
+          expiration: 168h
           host: app-split-svc.f006dev:9000
         app-supplychain-b-svc-f006dev:
           interval: 5m
+          expiration: 168h
           host: app-supplychain-b-svc.f006dev:9000
         app-supplychain-c-svc-f006dev:
           interval: 5m
+          expiration: 168h
           host: app-supplychain-c-svc.f006dev:9000
         app-supplychain-gateway-f006dev:
           interval: 5m
+          expiration: 168h
           host: app-supplychain-gateway.f006dev:9000
         app-vip-svc-f006dev:
           interval: 5m
+          expiration: 168h
           host: app-vip-svc.f006dev:9000
         basic-common-svc-f006dev:
           interval: 5m
+          expiration: 168h
           host: basic-common-svc.f006dev:9000
         basic-notification-svc-f006dev:
           interval: 5m
+          expiration: 168h
           host: basic-notification-svc.f006dev:9000
         basic-pay-svc-f006dev:
           interval: 5m
+          expiration: 168h
           host: basic-pay-svc.f006dev:9000
         basic-tag-svc-f006dev:
           interval: 5m
+          expiration: 168h
           host: basic-tag-svc.f006dev:9000
         basic-user-svc-f006dev:
           interval: 5m
+          expiration: 168h
           host: basic-user-svc.f006dev:9000

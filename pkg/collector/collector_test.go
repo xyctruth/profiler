@@ -1,6 +1,7 @@
 package collector
 
 import (
+	"io/ioutil"
 	"os"
 	"sync"
 	"testing"
@@ -19,17 +20,20 @@ func TestNewCollector(t *testing.T) {
 	collector := newCollector("profiler-server", config.TargetConfigs["profiler-server"], nil, &sync.WaitGroup{})
 	require.NotEqual(t, nil, collector)
 	require.Equal(t, collector.Interval, 2*time.Second)
-	require.Equal(t, collector.Expiration, int64(0))
+	require.Equal(t, collector.Expiration, time.Duration(0))
 	require.Equal(t, collector.Host, "localhost:9000")
 	require.Equal(t, len(collector.ProfileConfigs), 8)
 }
 
 func TestCollectorReload(t *testing.T) {
-	store := badger.NewStore("./data")
-	defer os.RemoveAll("./data")
-	defer store.Release()
-	wg := &sync.WaitGroup{}
+	dir, err := ioutil.TempDir("./", "temp-*")
+	require.Equal(t, nil, err)
+	defer os.RemoveAll(dir)
 
+	store := badger.NewStore(dir)
+	defer store.Release()
+
+	wg := &sync.WaitGroup{}
 	c := &Config{}
 	yaml.Unmarshal([]byte(generalConfigYAML), c)
 	config := c.Collector
@@ -38,7 +42,10 @@ func TestCollectorReload(t *testing.T) {
 	collector := newCollector("server2", targetConfig, store, wg)
 
 	collector.run()
-	defer collector.exit()
+	defer func() {
+		collector.exit()
+		wg.Wait()
+	}()
 
 	targetConfig.Interval = 1 * time.Second
 	collector.reload(targetConfig)
@@ -47,9 +54,9 @@ func TestCollectorReload(t *testing.T) {
 	collector.reload(targetConfig)
 	require.Equal(t, collector.Interval, 1*time.Second)
 
-	targetConfig.Expiration = 200
+	targetConfig.Expiration = 200 * time.Second
 	collector.reload(targetConfig)
-	require.Equal(t, int64(200), collector.Expiration)
+	require.Equal(t, 200*time.Second, collector.Expiration)
 
 	targetConfig.ProfileConfigs["fgprof"] = ProfileConfig{
 		Enable: utils.Bool(true),
@@ -63,8 +70,10 @@ func TestCollectorReload(t *testing.T) {
 }
 
 func TestCollectorRun(t *testing.T) {
-	store := badger.NewStore("./data")
-	defer os.RemoveAll("./data")
+	dir, err := ioutil.TempDir("./", "temp-*")
+	require.Equal(t, nil, err)
+	defer os.RemoveAll(dir)
+	store := badger.NewStore(dir)
 	defer store.Release()
 
 	wg := &sync.WaitGroup{}

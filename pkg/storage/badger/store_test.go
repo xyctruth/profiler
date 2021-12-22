@@ -18,7 +18,7 @@ var (
 		Timestamp:      time.Now().UnixNano() / time.Millisecond.Nanoseconds(),
 		Duration:       time.Now().UnixNano(),
 		SampleTypeUnit: "count",
-		SampleType:     "alloc_objects",
+		SampleType:     "heap_alloc_objects",
 		ProfileType:    "heap",
 		TargetName:     "profiler-server",
 		Value:          1,
@@ -29,7 +29,7 @@ var (
 			Timestamp:      time.Now().UnixNano() / time.Millisecond.Nanoseconds(),
 			Duration:       time.Now().UnixNano(),
 			SampleTypeUnit: "count",
-			SampleType:     "alloc_objects",
+			SampleType:     "heap_alloc_objects",
 			ProfileType:    "heap",
 			TargetName:     "profiler-server",
 			Value:          100,
@@ -39,7 +39,7 @@ var (
 			Timestamp:      time.Now().UnixNano() / time.Millisecond.Nanoseconds(),
 			Duration:       time.Now().UnixNano(),
 			SampleTypeUnit: "bytes",
-			SampleType:     "alloc_space",
+			SampleType:     "heap_alloc_space",
 			ProfileType:    "heap",
 			TargetName:     "profiler-server",
 			Value:          200,
@@ -49,7 +49,7 @@ var (
 			Timestamp:      time.Now().UnixNano() / time.Millisecond.Nanoseconds(),
 			Duration:       time.Now().UnixNano(),
 			SampleTypeUnit: "count",
-			SampleType:     "inuse_objects",
+			SampleType:     "heap_inuse_objects",
 			ProfileType:    "heap",
 			TargetName:     "server2",
 			Value:          300,
@@ -59,16 +59,26 @@ var (
 			Timestamp:      time.Now().UnixNano() / time.Millisecond.Nanoseconds(),
 			Duration:       time.Now().UnixNano(),
 			SampleTypeUnit: "bytes",
-			SampleType:     "inuse_space",
+			SampleType:     "heap_inuse_space",
 			ProfileType:    "heap",
 			TargetName:     "server2",
+			Value:          400,
+		},
+		{
+			ProfileID:      5,
+			Timestamp:      time.Now().UnixNano() / time.Millisecond.Nanoseconds(),
+			Duration:       time.Now().UnixNano(),
+			SampleTypeUnit: "bytes",
+			SampleType:     "heap_inuse_space",
+			ProfileType:    "heap",
+			TargetName:     "server3",
 			Value:          400,
 		},
 	}
 )
 
 func TestNewStore(t *testing.T) {
-	dir, err := ioutil.TempDir("./", "data-*")
+	dir, err := ioutil.TempDir("./", "temp-*")
 	defer os.RemoveAll(dir)
 	require.Equal(t, nil, err)
 	s := NewStore(dir)
@@ -77,7 +87,7 @@ func TestNewStore(t *testing.T) {
 }
 
 func TestProfile(t *testing.T) {
-	dir, err := ioutil.TempDir("./", "data-*")
+	dir, err := ioutil.TempDir("./", "temp-*")
 	defer os.RemoveAll(dir)
 	require.Equal(t, nil, err)
 	s := NewStore(dir)
@@ -99,7 +109,7 @@ func TestProfile(t *testing.T) {
 }
 
 func TestProfileMeta(t *testing.T) {
-	dir, err := ioutil.TempDir("./", "data-*")
+	dir, err := ioutil.TempDir("./", "temp-*")
 	defer os.RemoveAll(dir)
 	require.Equal(t, nil, err)
 	s := NewStore(dir)
@@ -135,7 +145,6 @@ func TestProfileMeta(t *testing.T) {
 	time.Sleep(1 * time.Second)
 
 	{
-
 		ttlTargets, err := s.ListTarget()
 		require.Equal(t, nil, err)
 		require.Equal(t, 0, len(ttlTargets))
@@ -155,7 +164,7 @@ func TestProfileMeta(t *testing.T) {
 }
 
 func TestProfileMetaArray(t *testing.T) {
-	dir, err := ioutil.TempDir("./", "data-*")
+	dir, err := ioutil.TempDir("./", "temp-*")
 	defer os.RemoveAll(dir)
 	require.Equal(t, nil, err)
 	s := NewStore(dir)
@@ -170,7 +179,7 @@ func TestProfileMetaArray(t *testing.T) {
 
 	targets, err := s.ListTarget()
 	require.Equal(t, nil, err)
-	require.Equal(t, 2, len(targets))
+	require.Equal(t, 3, len(targets))
 
 	groupTargets, err := s.ListGroupSampleType()
 	require.Equal(t, nil, err)
@@ -183,10 +192,26 @@ func TestProfileMetaArray(t *testing.T) {
 	require.Equal(t, nil, err)
 	require.Equal(t, 4, len(sampleTypes))
 
-	for _, sampleType := range sampleTypes {
-		profileMetas, err := s.ListProfileMeta(sampleType, targets, min, max)
+	{
+		profileMetas, err := s.ListProfileMeta("heap_inuse_space", targets, min, max)
+		require.Equal(t, nil, err)
+		require.Equal(t, 2, len(profileMetas))
+
+		profileMetas, err = s.ListProfileMeta("heap_inuse_space", nil, min, max)
+		require.Equal(t, nil, err)
+		require.Equal(t, 2, len(profileMetas))
+
+		profileMetas, err = s.ListProfileMeta("heap_inuse_space", []string{"server2"}, min, max)
 		require.Equal(t, nil, err)
 		require.Equal(t, 1, len(profileMetas))
+
+		profileMetas, err = s.ListProfileMeta("heap_inuse_objects", nil, min, max)
+		require.Equal(t, nil, err)
+		require.Equal(t, 1, len(profileMetas))
+
+		profileMetas, err = s.ListProfileMeta("heap_inuse_objects1", nil, min, max)
+		require.Equal(t, nil, err)
+		require.Equal(t, 0, len(profileMetas))
 	}
 
 	// Waiting for the overdue
@@ -210,4 +235,5 @@ func TestProfileMetaArray(t *testing.T) {
 		require.Equal(t, nil, err)
 		require.Equal(t, 0, len(ttlProfileMetas))
 	}
+	s.Release()
 }

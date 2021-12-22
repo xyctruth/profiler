@@ -1,6 +1,7 @@
 package collector
 
 import (
+	"io/ioutil"
 	"os"
 	"testing"
 	"time"
@@ -16,8 +17,10 @@ func init() {
 }
 
 func TestManger(t *testing.T) {
-	store := badger.NewStore("./data")
-	defer os.RemoveAll("./data")
+	dir, err := ioutil.TempDir("./", "temp-*")
+	require.Equal(t, nil, err)
+	defer os.RemoveAll(dir)
+	store := badger.NewStore(dir)
 	defer store.Release()
 
 	manger := NewManger(store)
@@ -45,8 +48,10 @@ func TestManger(t *testing.T) {
 }
 
 func TestErrorHostManger(t *testing.T) {
-	store := badger.NewStore("./data")
-	defer os.RemoveAll("./data")
+	dir, err := ioutil.TempDir("./", "temp-*")
+	require.Equal(t, nil, err)
+	defer os.RemoveAll(dir)
+	store := badger.NewStore(dir)
 	defer store.Release()
 	manger := NewManger(store)
 	config := &CollectorConfig{}
