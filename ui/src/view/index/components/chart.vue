@@ -57,13 +57,19 @@
     nextTick(() => {
       var unit = ""
       const baseSetting = {
-        type: "line",
-        lineStyle: {
-          width: 3,
-        },
+        type: "scatter",
         showSymbol: false,
+        sampling: 'lttb',
+        showAllSymbol: false,
+        symbolSize: 10,
+        emphasis: {
+          width: 3,
+          focus: 'series',
+        },
       }
       const chartOptions = {
+        animation: false, // 关闭加载动画
+
         legend: {
           type: 'scroll',
           orient: 'vertical',
@@ -81,6 +87,7 @@
           end: 100,
           type: "slider",
           show: true,
+          realtime: false, // 是否实时刷新
         },
         title: {
           text: title,
@@ -103,7 +110,14 @@
         },
         tooltip: {
           show: true,
-          trigger: 'axis',
+          confine: true,
+          trigger: 'item',
+          axisPointer: {
+            animation: false
+          },
+          formatter: (params) => {
+            return formatTooltip(params, unit)
+          },
         },
         series: []
       }
@@ -117,12 +131,9 @@
             ...baseSetting,
             name: meta.TargetName,
             data: [],
-            emphasis: {
-              focus: 'series'
-            },
           }
           for (const p of meta.ProfileMetas) {
-            if (unit){
+            if (!unit){
               unit = p.SampleTypeUnit
             }
             let label = moment(p.Timestamp).format('YYYY-MM-DD HH:mm:ss')
@@ -142,7 +153,8 @@
         chart = echarts.init(canvas.value, null, {
           devicePixelRatio: window.devicePixelRatio || 2,
           width,
-          height
+          height,
+          useDirtyRect: true,
         });
         chart.on('click', function (params) {
           window.open(`${baseConfig.reqUrl}/api/pprof/ui/${params.data.sourceData.ProfileID}?si=${title}`)
