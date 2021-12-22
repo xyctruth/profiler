@@ -20,7 +20,7 @@ func TestNewCollector(t *testing.T) {
 	collector := newCollector("profiler-server", config.TargetConfigs["profiler-server"], nil, &sync.WaitGroup{})
 	require.NotEqual(t, nil, collector)
 	require.Equal(t, collector.Interval, 2*time.Second)
-	require.Equal(t, collector.Expiration, int64(0))
+	require.Equal(t, collector.Expiration, time.Duration(0))
 	require.Equal(t, collector.Host, "localhost:9000")
 	require.Equal(t, len(collector.ProfileConfigs), 8)
 }
@@ -54,9 +54,9 @@ func TestCollectorReload(t *testing.T) {
 	collector.reload(targetConfig)
 	require.Equal(t, collector.Interval, 1*time.Second)
 
-	targetConfig.Expiration = 200
+	targetConfig.Expiration = 200 * time.Second
 	collector.reload(targetConfig)
-	require.Equal(t, int64(200), collector.Expiration)
+	require.Equal(t, 200*time.Second, collector.Expiration)
 
 	targetConfig.ProfileConfigs["fgprof"] = ProfileConfig{
 		Enable: utils.Bool(true),

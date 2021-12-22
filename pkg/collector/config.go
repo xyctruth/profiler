@@ -89,7 +89,7 @@ type CollectorConfig struct {
 type TargetConfig struct {
 	ProfileConfigs map[string]ProfileConfig `yaml:"profileConfigs"`
 	Interval       time.Duration            `yaml:"interval"`
-	Expiration     int64                    `yaml:"expiration"` // unit day
+	Expiration     time.Duration            `yaml:"expiration"`
 	Host           string                   `yaml:"host"`
 }
 
