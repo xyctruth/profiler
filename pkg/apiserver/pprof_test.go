@@ -7,10 +7,10 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
-	"time"
+
+	"github.com/xyctruth/profiler/pkg/storage"
 
 	"github.com/gavv/httpexpect/v2"
-
 	"github.com/stretchr/testify/require"
 	"github.com/xyctruth/profiler/pkg/storage/badger"
 )
@@ -21,20 +21,6 @@ func TestPprofServer(t *testing.T) {
 	defer os.RemoveAll(dir)
 
 	store := badger.NewStore(dir)
-
-	invalidId, err := store.SaveProfile([]byte{}, time.Second*10)
-	require.Equal(t, nil, err)
-	require.Equal(t, uint64(0), invalidId)
-
-	invalidId2, err := store.SaveProfile([]byte("haha"), time.Second*10)
-	require.Equal(t, nil, err)
-	require.Equal(t, uint64(1), invalidId2)
-
-	profileBytes, err := ioutil.ReadFile("./profile.pb.gz")
-	require.Equal(t, nil, err)
-	id, err := store.SaveProfile(profileBytes, time.Second*10)
-	require.Equal(t, nil, err)
-	require.Equal(t, uint64(2), id)
 
 	pprofServer := newPprofServer("/api/pprof/ui", store)
 
@@ -47,6 +33,12 @@ func TestPprofServer(t *testing.T) {
 	e.GET("/badUrl").
 		Expect().
 		Status(http.StatusBadRequest).Text().Equal("Invalid parameter\n")
+
+	testPprofUI(e, store, t)
+}
+
+func testPprofUI(e *httpexpect.Expect, store storage.Store, t *testing.T) {
+	invalidId, invalidId2, id := initProfileData(store, t)
 
 	e.GET("/api/pprof/ui/1999").
 		Expect().
@@ -87,4 +79,5 @@ func TestPprofServer(t *testing.T) {
 	e.GET(fmt.Sprintf("/api/pprof/ui/%d/toperror", id)).WithQuery("si", "alloc_space").
 		Expect().
 		Status(http.StatusOK).Header("Content-Type").Equal("text/html")
+
 }
