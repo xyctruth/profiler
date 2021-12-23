@@ -20,10 +20,26 @@
                   <selectTimeRange class="time-range-container" v-model:timeRange="timeRange"
                                    style="width: 90%"></selectTimeRange>
                 </el-col>
+
               </el-row>
               <!--          </div>-->
 
             </el-card>
+            <div>
+              <el-col :xs="24" :sm="24" :md="0" :lg="0" :xl="0" style="padding-right: 0px;padding-left: 0px;">
+                <el-affix :offset="10" class="guid">
+                  <el-card>
+                    <el-button
+                        @click="jump(item)"
+                        v-for="(item,index) in types" :key="index" type="text"
+                        style="display: inline-block;padding-right: 20px;"
+                    >
+                      {{ item }}
+                    </el-button>
+                  </el-card>
+                </el-affix>
+              </el-col>
+            </div>
             <div>
               <el-card
                   class="char-card"
@@ -43,7 +59,7 @@
         </el-row>
 
       </el-col>
-      <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="4">
+      <el-col :xs="0" :sm="0" :md="0" :lg="4" :xl="4">
         <el-row>
           <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
             <el-affix :offset="10" class="guid">
