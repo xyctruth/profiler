@@ -6,10 +6,11 @@
 
 ## [Demo](https://profiling.jia-huang.com)
 
-![profiler](https://xtruth.oss-cn-shenzhen.aliyuncs.com/profiler_1.png)
- 
+<img src="assets/profiler-1.png" alt="profiler">
+
 ### 点击 point 跳转 pprof web
-![pprof](https://xtruth.oss-cn-shenzhen.aliyuncs.com/6.png)
+
+<img src="assets/profiler-pprof.png" alt="profiler-pprof">
 
 ## Quick Start
 
