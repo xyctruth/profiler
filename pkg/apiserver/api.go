@@ -2,6 +2,7 @@ package apiserver
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"time"
 
@@ -29,13 +30,13 @@ func NewAPIServer(addr string, store storage.Store) *APIServer {
 
 	router := gin.Default()
 	router.GET("/api/healthz", func(c *gin.Context) {
-		c.JSON(200, "I'm fine")
+		c.String(200, "I'm fine")
 	})
 	router.Use(HandleCors).GET("/api/targets", apiServer.listTarget)
 	router.Use(HandleCors).GET("/api/sample_types", apiServer.listSampleTypes)
 	router.Use(HandleCors).GET("/api/group_sample_types", apiServer.listGroupSampleTypes)
-	router.Use(HandleCors).GET("/api/profile/:id", apiServer.getProfile)
 	router.Use(HandleCors).GET("/api/profile_meta/:sample_type", apiServer.listProfileMeta)
+	router.Use(HandleCors).GET("/api/profile/:id", apiServer.getProfile)
 
 	// register pprof page
 	router.Use(HandleCors).GET(pprofPath+"/*any", apiServer.webPprof)
@@ -62,6 +63,10 @@ func (s *APIServer) Stop() {
 func (s *APIServer) Run() {
 	go func() {
 		if err := s.srv.ListenAndServe(); err != nil {
+			if errors.Is(err, http.ErrServerClosed) {
+				log.Info("api server close")
+				return
+			}
 			log.Fatal("api server listen: ", err)
 		}
 	}()
@@ -70,47 +75,16 @@ func (s *APIServer) Run() {
 func (s *APIServer) listTarget(c *gin.Context) {
 	jobs, err := s.store.ListTarget()
 	if err != nil {
-		c.JSON(500, err)
+		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
-	c.JSON(200, jobs)
-}
-
-func (s *APIServer) listProfileMeta(c *gin.Context) {
-	sampleType := c.Param("sample_type")
-
-	startTime, err := time.Parse(time.RFC3339, c.Query("start_time"))
-	if err != nil {
-		c.JSON(500, err)
-		return
-	}
-	endTime, err := time.Parse(time.RFC3339, c.Query("end_time"))
-	if err != nil {
-		c.JSON(500, err)
-		return
-	}
-
-	req := struct {
-		Targets []string `json:"targets" form:"targets"`
-	}{}
-	if err := c.ShouldBind(&req); err != nil {
-		c.JSON(500, err)
-		return
-	}
-
-	req.Targets = utils.RemoveDuplicateElement(req.Targets)
-	metas, err := s.store.ListProfileMeta(sampleType, req.Targets, startTime, endTime)
-	if err != nil {
-		c.JSON(500, err)
-		return
-	}
-	c.JSON(200, metas)
+	c.JSON(http.StatusOK, jobs)
 }
 
 func (s *APIServer) listSampleTypes(c *gin.Context) {
 	jobs, err := s.store.ListSampleType()
 	if err != nil {
-		c.JSON(500, err)
+		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 	c.JSON(200, jobs)
@@ -119,26 +93,75 @@ func (s *APIServer) listSampleTypes(c *gin.Context) {
 func (s *APIServer) listGroupSampleTypes(c *gin.Context) {
 	jobs, err := s.store.ListGroupSampleType()
 	if err != nil {
-		c.JSON(500, err)
+		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 	c.JSON(200, jobs)
+}
+
+func (s *APIServer) listProfileMeta(c *gin.Context) {
+	sampleType := c.Param("sample_type")
+
+	if c.Query("start_time") == "" {
+		c.String(http.StatusBadRequest, "start_time is empty")
+		return
+	}
+
+	if c.Query("end_time") == "" {
+		c.String(http.StatusBadRequest, "end_time is empty")
+		return
+	}
+
+	startTime, err := time.Parse(time.RFC3339, c.Query("start_time"))
+	if err != nil {
+		c.String(http.StatusBadRequest, "%s ,%s", "The time format must be RFC3339", err.Error())
+		return
+	}
+	endTime, err := time.Parse(time.RFC3339, c.Query("end_time"))
+	if err != nil {
+		c.String(http.StatusBadRequest, "%s ,%s", "The time format must be RFC3339", err.Error())
+		return
+	}
+
+	req := struct {
+		Targets []string `json:"targets" form:"targets"`
+	}{}
+	if err := c.ShouldBind(&req); err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	req.Targets = utils.RemoveDuplicateElement(req.Targets)
+	metas, err := s.store.ListProfileMeta(sampleType, req.Targets, startTime, endTime)
+	if err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.JSON(200, metas)
 }
 
 func (s *APIServer) getProfile(c *gin.Context) {
 	id := c.Param("id")
 	data, err := s.store.GetProfile(id)
 	if err != nil {
-		c.JSON(500, err)
+		if errors.Is(err, storage.ErrProfileNotFound) {
+			c.String(http.StatusNotFound, "Profile not found")
+			return
+		}
+		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	p, _ := profile.ParseData(data)
+	p, err := profile.ParseData(data)
+	if err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
 	c.Writer.Header().Set("Content-Type", "application/vnd.google.protobuf+gzip")
 	c.Writer.Header().Set("Content-Disposition", "attachment;filename=profile.pb.gz")
 	err = p.Write(c.Writer)
 	if err != nil {
-		c.JSON(500, err)
+		c.String(http.StatusInternalServerError, err.Error())
 	}
 }
 
