@@ -6,7 +6,7 @@
 
 ## [Demo](https://profiling.jia-huang.com)
 
-<img src="assets/profiler.png" alt="profiler">
+<img src="assets/profiler-1.png" alt="profiler">
 
 ### 点击 point 跳转 pprof web
 
