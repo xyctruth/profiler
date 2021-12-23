@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"os"
 	"os/signal"
 	"syscall"
@@ -19,17 +20,15 @@ var (
 )
 
 func main() {
-	if configPath = os.Getenv("CONFIG_PATH"); configPath == "" {
-		configPath = "./collector.yaml"
-	}
-
-	if storagePath = os.Getenv("DATA_PATH"); storagePath == "" {
-		storagePath = "./data"
-	}
+	flag.StringVar(&configPath, "config-path", "./collector.yaml", "Collector configuration file path")
+	flag.StringVar(&storagePath, "data-path", "./data", "The path to store the collected data")
+	flag.Parse()
 
 	log.Info("configPath:", configPath, " storagePath:", storagePath)
 
+	// Register the pprof endpoint
 	utils.RegisterPProf()
+
 	store := badger.NewStore(storagePath)
 	collectorManger := runCollector(configPath, store)
 	apiServer := runAPIServer(store)

@@ -53,11 +53,11 @@ func (s *pprofServer) register(w http.ResponseWriter, r *http.Request) {
 	defer s.mu.Unlock()
 
 	filepath := path.Join(os.TempDir(), id)
-	err = ioutil.WriteFile(filepath, data, 0600)
-	if err != nil {
+	if err = ioutil.WriteFile(filepath, data, 0600); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
 	flags := &pprofFlags{
 		args: []string{"-http=localhost:0", "-no_browser", filepath},
 	}
@@ -78,7 +78,7 @@ func (s *pprofServer) register(w http.ResponseWriter, r *http.Request) {
 			return nil
 		},
 	}
-	if err := driver.PProf(options); err != nil {
+	if err = driver.PProf(options); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

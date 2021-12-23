@@ -42,7 +42,6 @@ collector:
         heap:
           path: /debug/pprof/heap
 `
-
 	changeConfigYAML = `
 collector:
   targetConfigs:
@@ -58,6 +57,11 @@ collector:
         fgprof:
           path: /debug/fgprof?seconds=1
           enable: true
+
+    server2:
+      interval: 1s
+      expiration: 0  # no expiration time. unit day
+      host: localhost:9000
 `
 
 	errHostConfigYAML = `
@@ -105,12 +109,18 @@ func TestChangeConfig(t *testing.T) {
 		if !change {
 			require.NotEqual(t, config, nil)
 			require.Equal(t, len(config.TargetConfigs), 2)
-			require.Equal(t, config.TargetConfigs["profiler-server"].Interval, 2*time.Second)
+			require.Equal(t, 2*time.Second, config.TargetConfigs["profiler-server"].Interval)
+			require.Equal(t, 2*time.Second, config.TargetConfigs["server2"].Interval)
+			profileConfig := buildProfileConfigs(config.TargetConfigs["server2"].ProfileConfigs)
+			require.Equal(t, false, *profileConfig["fgprof"].Enable)
 			change = true
 		} else {
 			require.NotEqual(t, config, nil)
-			require.Equal(t, len(config.TargetConfigs), 1)
-			require.Equal(t, config.TargetConfigs["profiler-server"].Interval, 1*time.Second)
+			require.Equal(t, len(config.TargetConfigs), 2)
+			require.Equal(t, 1*time.Second, config.TargetConfigs["profiler-server"].Interval)
+			require.Equal(t, 1*time.Second, config.TargetConfigs["server2"].Interval)
+			profileConfig := buildProfileConfigs(config.TargetConfigs["server2"].ProfileConfigs)
+			require.Equal(t, true, *profileConfig["fgprof"].Enable)
 		}
 	})
 	_, err = file.Write([]byte(changeConfigYAML))

@@ -179,14 +179,14 @@ func TestListProfileMeta(t *testing.T) {
 
 	e.GET("/api/profile_meta/heap_inuse_space").
 		Expect().
-		Status(http.StatusBadRequest).Text().Equal("start_time is empty")
+		Status(http.StatusBadRequest).Text().Equal("start_time or end_time is empty")
 
 	startTimestamp := time.Now().Add(-1*time.Minute).UnixNano() / time.Millisecond.Nanoseconds()
 	endTimestamp := time.Now().UnixNano() / time.Millisecond.Nanoseconds()
 
 	e.GET("/api/profile_meta/heap_inuse_space").WithQuery("start_time", startTimestamp).
 		Expect().
-		Status(http.StatusBadRequest).Text().Equal("end_time is empty")
+		Status(http.StatusBadRequest).Text().Equal("start_time or end_time is empty")
 
 	e.GET("/api/profile_meta/heap_inuse_space").
 		WithQuery("start_time", startTimestamp).WithQuery("end_time", endTimestamp).
