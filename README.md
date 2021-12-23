@@ -1,4 +1,4 @@
-# 基于 pprof,fgprof 的 Golang 程序连续分析
+# Continuous profiling for golang program based on pprof, fgprof
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/xyctruth/profiler?x=xyctruth)](https://goreportcard.com/report/github.com/xyctruth/profiler)
 [![codecov](https://codecov.io/gh/xyctruth/profiler/branch/master/graph/badge.svg?token=YWNYJK9KQW)](https://codecov.io/gh/xyctruth/profiler)
@@ -6,19 +6,19 @@
 
 ## [Demo](https://profiling.jia-huang.com)
 
-<img src="assets/profiler-1.png" alt="profiler">
+![profiler](assets/profiler-1.png)
 
-### 点击 point 跳转 pprof web
+### Click Point Open Profile UI
 
-<img src="assets/profiler-pprof.png" alt="profiler-pprof">
+![profiler-pprof](assets/profiler-pprof.png)
 
 ## Quick Start
 
-需要被收集分析的golang程序,需要提供 `net/http/pprof` 端点，并配置在 `./collector.yaml` 配置文件中
+需要被收集分析的 `golang` 程序,需要提供 `net/http/pprof` 端点，并配置在 `./collector.yaml` 配置文件中
 
 程序会 watch `collector.yaml` 配置文件变化, 实时加载变化的配置
 
-### 本地启动
+### Dev
 ```bash
      # run server :8080
     go run server/main.go 
@@ -28,11 +28,11 @@
 
 ### In Docker
 ```bash
-    # 简单启动
+    # No persistence
     docker run -d -p 80:80 --name profiler xyctruth/profiler:latest
 
-    # 挂载目录启动
+    # Bind mount a volume
     mkdir -vp ~/profiler/config/
     cp ./collector.yaml ~/profiler/config/
-    docker run -d -p 80:80 -v ~/profiler/data/:/profiler/data/ -v  ~/profiler/config/:/profiler/config/ --name profiler xyctruth/profiler:latest
+    docker run -d -p 80:80 -v ~/profiler/data/:/profiler/data/ -v ~/profiler/config/:/profiler/config/ --name profiler xyctruth/profiler:latest
 ```
