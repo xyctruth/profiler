@@ -48,30 +48,32 @@ func defaultProfileConfigs() map[string]ProfileConfig {
 
 }
 
-func LoadConfig(configPath string, fn func(configmap CollectorConfig)) error {
+// LoadConfig watch configPath change, callback fn
+func LoadConfig(configPath string, fn func(CollectorConfig)) error {
+	var err error
+	var config CollectorConfig
+
 	conf := viper.New()
 	conf.SetConfigFile(configPath)
 	conf.SetConfigType("yaml")
 
-	err := conf.ReadInConfig()
-	if err != nil {
+	if err = conf.ReadInConfig(); err != nil {
 		return fmt.Errorf("Fatal error config file: %w", err)
 	}
 
-	var config CollectorConfig
-	err = conf.UnmarshalKey("collector", &config)
-	if err != nil {
+	if err = conf.UnmarshalKey("collector", &config); err != nil {
 		return fmt.Errorf("Fatal error config CollectorConfig: %w", err)
 	}
 
 	conf.OnConfigChange(func(in fsnotify.Event) {
 		var newConfig CollectorConfig
-		err = conf.UnmarshalKey("collector", &newConfig)
-		if err != nil {
-			log.Info("Fatal error config CollectorConfig: %w")
+		if err = conf.UnmarshalKey("collector", &newConfig); err != nil {
+			log.Error("Fatal error config CollectorConfig: %w")
+			return
 		}
 		fn(newConfig)
 	})
+
 	conf.WatchConfig()
 	fn(config)
 
@@ -83,10 +85,12 @@ type Config struct {
 }
 
 type CollectorConfig struct {
+	//key TargetName
 	TargetConfigs map[string]TargetConfig `yaml:"targetConfigs"`
 }
 
 type TargetConfig struct {
+	//key profile name (profile, fgprof, mutex, heap, goroutine, allocs, block, threadcreate)
 	ProfileConfigs map[string]ProfileConfig `yaml:"profileConfigs"`
 	Interval       time.Duration            `yaml:"interval"`
 	Expiration     time.Duration            `yaml:"expiration"`

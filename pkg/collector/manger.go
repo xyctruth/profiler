@@ -7,6 +7,7 @@ import (
 	"github.com/xyctruth/profiler/pkg/storage"
 )
 
+// Manger Manage multiple collectors to scraping
 type Manger struct {
 	collectors map[string]*Collector
 	store      storage.Store
@@ -14,6 +15,7 @@ type Manger struct {
 	mu         sync.Mutex
 }
 
+// NewManger new Manger instance
 func NewManger(store storage.Store) *Manger {
 	c := &Manger{
 		collectors: make(map[string]*Collector),
@@ -23,6 +25,7 @@ func NewManger(store storage.Store) *Manger {
 	return c
 }
 
+// NewManger stop Manger instance
 func (manger *Manger) Stop() {
 	manger.mu.Lock()
 	defer manger.mu.Unlock()
@@ -33,6 +36,8 @@ func (manger *Manger) Stop() {
 	log.Info("collector manger exit ")
 }
 
+// NewManger Loading collector configuration
+// It can be called multiple times, and the collector updates the configuration
 func (manger *Manger) Load(config CollectorConfig) {
 	manger.mu.Lock()
 	defer manger.mu.Unlock()

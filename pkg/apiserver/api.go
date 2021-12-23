@@ -87,7 +87,7 @@ func (s *APIServer) listSampleTypes(c *gin.Context) {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
-	c.JSON(200, jobs)
+	c.JSON(http.StatusOK, jobs)
 }
 
 func (s *APIServer) listGroupSampleTypes(c *gin.Context) {
@@ -96,29 +96,25 @@ func (s *APIServer) listGroupSampleTypes(c *gin.Context) {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
-	c.JSON(200, jobs)
+	c.JSON(http.StatusOK, jobs)
 }
 
 func (s *APIServer) listProfileMeta(c *gin.Context) {
+	var startTime, endTime time.Time
+	var err error
+
 	sampleType := c.Param("sample_type")
 
-	if c.Query("start_time") == "" {
-		c.String(http.StatusBadRequest, "start_time is empty")
+	if c.Query("start_time") == "" || c.Query("end_time") == "" {
+		c.String(http.StatusBadRequest, "start_time or end_time is empty")
 		return
 	}
 
-	if c.Query("end_time") == "" {
-		c.String(http.StatusBadRequest, "end_time is empty")
-		return
-	}
-
-	startTime, err := time.Parse(time.RFC3339, c.Query("start_time"))
-	if err != nil {
+	if startTime, err = time.Parse(time.RFC3339, c.Query("start_time")); err != nil {
 		c.String(http.StatusBadRequest, "%s ,%s", "The time format must be RFC3339", err.Error())
 		return
 	}
-	endTime, err := time.Parse(time.RFC3339, c.Query("end_time"))
-	if err != nil {
+	if endTime, err = time.Parse(time.RFC3339, c.Query("end_time")); err != nil {
 		c.String(http.StatusBadRequest, "%s ,%s", "The time format must be RFC3339", err.Error())
 		return
 	}
@@ -126,6 +122,7 @@ func (s *APIServer) listProfileMeta(c *gin.Context) {
 	req := struct {
 		Targets []string `json:"targets" form:"targets"`
 	}{}
+
 	if err := c.ShouldBind(&req); err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
@@ -133,11 +130,12 @@ func (s *APIServer) listProfileMeta(c *gin.Context) {
 
 	req.Targets = utils.RemoveDuplicateElement(req.Targets)
 	metas, err := s.store.ListProfileMeta(sampleType, req.Targets, startTime, endTime)
+
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
-	c.JSON(200, metas)
+	c.JSON(http.StatusOK, metas)
 }
 
 func (s *APIServer) getProfile(c *gin.Context) {
@@ -159,8 +157,8 @@ func (s *APIServer) getProfile(c *gin.Context) {
 	}
 	c.Writer.Header().Set("Content-Type", "application/vnd.google.protobuf+gzip")
 	c.Writer.Header().Set("Content-Disposition", "attachment;filename=profile.pb.gz")
-	err = p.Write(c.Writer)
-	if err != nil {
+
+	if err = p.Write(c.Writer); err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
 	}
 }

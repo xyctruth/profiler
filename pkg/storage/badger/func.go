@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/dgraph-io/badger/v3"
-	"github.com/sirupsen/logrus"
 	"github.com/xyctruth/profiler/pkg/storage"
 )
 
@@ -53,24 +52,22 @@ func buildTargetKey(target string) []byte {
 
 func newProfileEntry(id uint64, val []byte, ttl time.Duration) *badger.Entry {
 	entry := badger.NewEntry(buildProfileKey(strconv.FormatUint(id, 10)), val)
-
 	if ttl > 0 {
 		entry = entry.WithTTL(ttl)
 	}
 	return entry
 }
 
-func newProfileMetaEntry(meta *storage.ProfileMeta, ttl time.Duration) *badger.Entry {
+func newProfileMetaEntry(meta *storage.ProfileMeta, ttl time.Duration) (*badger.Entry, error) {
 	metaBytes, err := meta.Encode()
 	if err != nil {
-		logrus.WithError(err).Error("ProfileMeta encode error")
-		return nil
+		return nil, err
 	}
 	entry := badger.NewEntry(buildProfileMetaKey(meta.SampleType, meta.TargetName, time.Now()), metaBytes)
 	if ttl > 0 {
 		entry = entry.WithTTL(ttl)
 	}
-	return entry
+	return entry, nil
 }
 
 func newSampleTypeEntry(sampleType string, profileType string, ttl time.Duration) *badger.Entry {

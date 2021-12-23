@@ -15,6 +15,7 @@ import (
 	"github.com/xyctruth/profiler/pkg/storage"
 )
 
+// Collector Collect target pprof http endpoints
 type Collector struct {
 	TargetName string
 	TargetConfig
@@ -168,7 +169,6 @@ func (collector *Collector) analysis(profileType string, profileBytes []byte) er
 
 	profileID, err := collector.store.SaveProfile(b.Bytes(), collector.Expiration)
 	if err != nil {
-		collector.log.WithError(err).Error("save profile error")
 		return err
 	}
 
@@ -195,7 +195,6 @@ func (collector *Collector) analysis(profileType string, profileBytes []byte) er
 
 	err = collector.store.SaveProfileMeta(metas, collector.Expiration)
 	if err != nil {
-		collector.log.WithError(err).Error("save profile meta error")
 		return err
 	}
 	return nil

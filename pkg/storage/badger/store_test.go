@@ -86,6 +86,16 @@ func TestNewStore(t *testing.T) {
 	require.NotEqual(t, nil, s)
 }
 
+func TestGC(t *testing.T) {
+	dir, err := ioutil.TempDir("./", "temp-*")
+	defer os.RemoveAll(dir)
+	require.Equal(t, nil, err)
+	s := NewStore(dir)
+	defer s.Release()
+	require.NotEqual(t, nil, s)
+	s.(*store).gc()
+}
+
 func TestProfile(t *testing.T) {
 	dir, err := ioutil.TempDir("./", "temp-*")
 	defer os.RemoveAll(dir)
