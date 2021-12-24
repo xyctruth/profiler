@@ -14,7 +14,6 @@ import (
 	"reflect"
 	"sort"
 	"strconv"
-	"sync"
 	"time"
 
 	"github.com/xyctruth/profiler/pkg/internal/v1175/trace"
@@ -28,15 +27,10 @@ type gtype struct {
 	ExecTime int64  // Total execution time of all goroutines in this group.
 }
 
-var (
-	gsInit sync.Once
-	gs     map[uint64]*trace.GDesc
-)
-
 // analyzeGoroutines generates statistics about execution of all goroutines and stores them in gs.
-func analyzeGoroutines(events []*trace.Event) {
-	gsInit.Do(func() {
-		gs = trace.GoroutineStats(events)
+func (traceUI *TraceUI) analyzeGoroutines(events []*trace.Event) {
+	traceUI.gsInit.Do(func() {
+		traceUI.gs = trace.GoroutineStats(events)
 	})
 }
 
@@ -47,9 +41,9 @@ func (traceUI *TraceUI) httpGoroutines(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	analyzeGoroutines(events)
+	traceUI.analyzeGoroutines(events)
 	gss := make(map[uint64]gtype)
-	for _, g := range gs {
+	for _, g := range traceUI.gs {
 		gs1 := gss[g.PC]
 		gs1.ID = g.PC
 		gs1.Name = g.Name
@@ -96,7 +90,7 @@ func (traceUI *TraceUI) httpGoroutine(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("failed to parse id parameter '%v': %v", r.FormValue("id"), err), http.StatusInternalServerError)
 		return
 	}
-	analyzeGoroutines(events)
+	traceUI.analyzeGoroutines(events)
 	var (
 		glist                   []*trace.GDesc
 		name                    string
@@ -104,7 +98,7 @@ func (traceUI *TraceUI) httpGoroutine(w http.ResponseWriter, r *http.Request) {
 		maxTotalTime            int64
 	)
 
-	for _, g := range gs {
+	for _, g := range traceUI.gs {
 		totalExecTime += g.ExecTime
 
 		if g.PC != pc {

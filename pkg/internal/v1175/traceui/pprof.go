@@ -91,9 +91,9 @@ func (traceUI *TraceUI) pprofMatchingGoroutines(id string, events []*trace.Event
 	if err != nil {
 		return nil, fmt.Errorf("invalid goroutine type: %v", id)
 	}
-	analyzeGoroutines(events)
+	traceUI.analyzeGoroutines(events)
 	var res map[uint64][]interval
-	for _, g := range gs {
+	for _, g := range traceUI.gs {
 		if g.PC != pc {
 			continue
 		}

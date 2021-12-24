@@ -12,7 +12,6 @@ import (
 	"math"
 	"net/http"
 	"path/filepath"
-	"runtime"
 	"runtime/debug"
 	"sort"
 	"strconv"
@@ -170,11 +169,12 @@ function onTraceViewerImportFail() {
 // httpTraceViewerHTML serves static part of trace-viewer.
 // This URL is queried from templTrace HTML.
 func httpTraceViewerHTML(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, filepath.Join(runtime.GOROOT(), "misc", "trace", "trace_viewer_full.html"))
+	http.ServeFile(w, r, "./assets/trace_viewer_full.html")
 }
 
 func webcomponentsJS(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, filepath.Join(runtime.GOROOT(), "misc", "trace", "webcomponents.min.js"))
+	path := filepath.Join("./assets/webcomponents.min.js")
+	http.ServeFile(w, r, path)
 }
 
 // httpJsonTrace serves json trace, requested from within templTrace HTML.
@@ -199,8 +199,8 @@ func (traceUI *TraceUI) httpJsonTrace(w http.ResponseWriter, r *http.Request) {
 			log.Printf("failed to parse goid parameter %q: %v", goids, err)
 			return
 		}
-		analyzeGoroutines(res.Events)
-		g, ok := gs[goid]
+		traceUI.analyzeGoroutines(res.Events)
+		g, ok := traceUI.gs[goid]
 		if !ok {
 			log.Printf("failed to find goroutine %d", goid)
 			return
@@ -301,7 +301,7 @@ func (traceUI *TraceUI) splitTrace(res trace.ParseResult) []Range {
 		parsed:  res,
 		endTime: math.MaxInt64,
 	}
-	s, c := splittingTraceConsumer(100 << 20) // 100M
+	s, c := traceUI.splittingTraceConsumer(100 << 20) // 100M
 	if err := generateTrace(params, c); err != nil {
 		dief("%v\n", err)
 	}
@@ -312,7 +312,7 @@ type splitter struct {
 	Ranges []Range
 }
 
-func splittingTraceConsumer(max int) (*splitter, traceConsumer) {
+func (traceUI *TraceUI) splittingTraceConsumer(max int) (*splitter, traceConsumer) {
 	type eventSz struct {
 		Time float64
 		Sz   int
@@ -363,7 +363,7 @@ func splittingTraceConsumer(max int) (*splitter, traceConsumer) {
 				if sum+ev.Sz > max {
 					startTime := time.Duration(sizes[start].Time * 1000)
 					endTime := time.Duration(ev.Time * 1000)
-					ranges = append(ranges, Range{
+					traceUI.ranges = append(traceUI.ranges, Range{
 						Name:      fmt.Sprintf("%v-%v", startTime, endTime),
 						Start:     start,
 						End:       i + 1,
@@ -376,13 +376,13 @@ func splittingTraceConsumer(max int) (*splitter, traceConsumer) {
 					sum += ev.Sz + 1
 				}
 			}
-			if len(ranges) <= 1 {
+			if len(traceUI.ranges) <= 1 {
 				s.Ranges = nil
 				return
 			}
 
 			if end := len(sizes) - 1; start < end {
-				ranges = append(ranges, Range{
+				traceUI.ranges = append(traceUI.ranges, Range{
 					Name:      fmt.Sprintf("%v-%v", time.Duration(sizes[start].Time*1000), time.Duration(sizes[end].Time*1000)),
 					Start:     start,
 					End:       end,
@@ -390,7 +390,7 @@ func splittingTraceConsumer(max int) (*splitter, traceConsumer) {
 					EndTime:   int64(sizes[end].Time * 1000),
 				})
 			}
-			s.Ranges = ranges
+			s.Ranges = traceUI.ranges
 		},
 	}
 }

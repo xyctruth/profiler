@@ -54,28 +54,19 @@ type mmuCacheEntry struct {
 	err      error
 }
 
-var mmuCache struct {
-	m    map[trace.UtilFlags]*mmuCacheEntry
-	lock sync.Mutex
-}
-
-func init() {
-	mmuCache.m = make(map[trace.UtilFlags]*mmuCacheEntry)
-}
-
 func (traceUI *TraceUI) getMMUCurve(r *http.Request) ([][]trace.MutatorUtil, *trace.MMUCurve, error) {
 	var flags trace.UtilFlags
 	for _, flagStr := range strings.Split(r.FormValue("flags"), "|") {
 		flags |= utilFlagNames[flagStr]
 	}
 
-	mmuCache.lock.Lock()
-	c := mmuCache.m[flags]
+	traceUI.mmuCache.lock.Lock()
+	c := traceUI.mmuCache.m[flags]
 	if c == nil {
 		c = new(mmuCacheEntry)
-		mmuCache.m[flags] = c
+		traceUI.mmuCache.m[flags] = c
 	}
-	mmuCache.lock.Unlock()
+	traceUI.mmuCache.lock.Unlock()
 
 	c.init.Do(func() {
 		events, err := traceUI.parseEvents()
@@ -371,7 +362,7 @@ func (traceUI *TraceUI) httpMMUDetails(w http.ResponseWriter, r *http.Request) {
 	// Construct a link for each window.
 	var links []linkedUtilWindow
 	for _, ui := range worst {
-		links = append(links, newLinkedUtilWindow(ui, time.Duration(window)))
+		links = append(links, newLinkedUtilWindow(traceUI, ui, time.Duration(window)))
 	}
 
 	err = json.NewEncoder(w).Encode(links)
@@ -386,10 +377,10 @@ type linkedUtilWindow struct {
 	URL string
 }
 
-func newLinkedUtilWindow(ui trace.UtilWindow, window time.Duration) linkedUtilWindow {
+func newLinkedUtilWindow(traceUI *TraceUI, ui trace.UtilWindow, window time.Duration) linkedUtilWindow {
 	// Find the range containing this window.
 	var r Range
-	for _, r = range ranges {
+	for _, r = range traceUI.ranges {
 		if r.EndTime > ui.Time {
 			break
 		}

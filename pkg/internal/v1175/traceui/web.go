@@ -26,12 +26,19 @@ type TraceUI struct {
 	}
 	ranges   []Range
 	Handlers map[string]http.HandlerFunc
+	gsInit   sync.Once
+	gs       map[uint64]*trace.GDesc
+	mmuCache struct {
+		m    map[trace.UtilFlags]*mmuCacheEntry
+		lock sync.Mutex
+	}
 }
 
 func NewTraceUI(traceFile string) *TraceUI {
 	traceUI := &TraceUI{
 		traceFile: traceFile,
 	}
+	traceUI.mmuCache.m = make(map[trace.UtilFlags]*mmuCacheEntry)
 
 	res, err := traceUI.parseTrace()
 	if err != nil {
@@ -67,14 +74,6 @@ func NewTraceUI(traceFile string) *TraceUI {
 	return traceUI
 }
 
-var ranges []Range
-
-var loader struct {
-	once sync.Once
-	res  trace.ParseResult
-	err  error
-}
-
 // parseEvents is a compatibility wrapper that returns only
 // the Events part of trace.ParseResult returned by parseTrace.
 func (traceUI *TraceUI) parseEvents() ([]*trace.Event, error) {
@@ -86,10 +85,10 @@ func (traceUI *TraceUI) parseEvents() ([]*trace.Event, error) {
 }
 
 func (traceUI *TraceUI) parseTrace() (trace.ParseResult, error) {
-	loader.once.Do(func() {
+	traceUI.loader.once.Do(func() {
 		tracef, err := os.Open(traceUI.traceFile)
 		if err != nil {
-			loader.err = fmt.Errorf("failed to open trace file: %v", err)
+			traceUI.loader.err = fmt.Errorf("failed to open trace file: %v", err)
 			return
 		}
 		defer tracef.Close()
@@ -97,17 +96,17 @@ func (traceUI *TraceUI) parseTrace() (trace.ParseResult, error) {
 		// Parse and symbolize.
 		res, err := trace.Parse(bufio.NewReader(tracef), "")
 		if err != nil {
-			loader.err = fmt.Errorf("failed to parse trace: %v", err)
+			traceUI.loader.err = fmt.Errorf("failed to parse trace: %v", err)
 			return
 		}
-		loader.res = res
+		traceUI.loader.res = res
 	})
-	return loader.res, loader.err
+	return traceUI.loader.res, traceUI.loader.err
 }
 
 // httpMain serves the starting page.
 func (traceUI *TraceUI) httpMain(w http.ResponseWriter, r *http.Request) {
-	if err := templMain.Execute(w, ranges); err != nil {
+	if err := templMain.Execute(w, traceUI.ranges); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -139,11 +138,4 @@ var templMain = template.Must(template.New("").Parse(`
 func dief(msg string, args ...interface{}) {
 	fmt.Fprintf(os.Stderr, msg, args...)
 	os.Exit(1)
-}
-
-var debugMemoryUsage bool
-
-func init() {
-	v := os.Getenv("DEBUG_MEMORY_USAGE")
-	debugMemoryUsage = v != ""
 }

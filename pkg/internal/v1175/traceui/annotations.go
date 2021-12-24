@@ -212,7 +212,7 @@ func (traceUI *TraceUI) httpUserTask(w http.ResponseWriter, r *http.Request) {
 				elapsed = 0
 			}
 
-			what := describeEvent(ev)
+			what := traceUI.describeEvent(ev)
 			if what != "" {
 				events = append(events, event{
 					WhenString: fmt.Sprintf("%2.9f", when.Seconds()),
@@ -305,8 +305,8 @@ func (traceUI *TraceUI) analyzeAnnotations() (annotationAnalysisResult, error) {
 		}
 	}
 	// combine region info.
-	analyzeGoroutines(events)
-	for goid, stats := range gs {
+	traceUI.analyzeGoroutines(events)
+	for goid, stats := range traceUI.gs {
 		// gs is a global var defined in goroutines.go as a result
 		// of analyzeGoroutines. TODO(hyangah): fix this not to depend
 		// on a 'global' var.
@@ -1135,11 +1135,11 @@ func formatUserLog(ev *trace.Event) string {
 	return fmt.Sprintf("%v=%v", k, v)
 }
 
-func describeEvent(ev *trace.Event) string {
+func (traceUI *TraceUI) describeEvent(ev *trace.Event) string {
 	switch ev.Type {
 	case trace.EvGoCreate:
 		goid := ev.Args[0]
-		return fmt.Sprintf("new goroutine %d: %s", goid, gs[goid].Name)
+		return fmt.Sprintf("new goroutine %d: %s", goid, traceUI.gs[goid].Name)
 	case trace.EvGoEnd, trace.EvGoStop:
 		return "goroutine stopped"
 	case trace.EvUserLog:
