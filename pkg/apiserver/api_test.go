@@ -252,7 +252,9 @@ func TestWebProfile(t *testing.T) {
 	s := badger.NewStore(dir)
 	apiServer := NewAPIServer(":8080", s)
 	e := getExpect(apiServer, t)
-	testPprofUI(e, s, t)
+	e.GET("/api/pprof/ui/1999").
+		Expect().
+		Status(http.StatusNotFound).Text().Equal("Profile not found\n")
 }
 
 func getExpect(apiServer *APIServer, t *testing.T) *httpexpect.Expect {

@@ -23,6 +23,15 @@ var (
 		TargetName:     "profiler-server",
 		Value:          1,
 	}
+
+	traceMeta = &storage.ProfileMeta{
+		ProfileID:   1,
+		Timestamp:   time.Now().UnixNano() / time.Millisecond.Nanoseconds(),
+		Duration:    time.Now().UnixNano(),
+		SampleType:  "trace",
+		ProfileType: "trace",
+		TargetName:  "profiler-server",
+	}
 	profileMetas = []*storage.ProfileMeta{
 		{
 			ProfileID:      1,
@@ -115,7 +124,6 @@ func TestProfile(t *testing.T) {
 	time.Sleep(1 * time.Second)
 	_, err = s.GetProfile(strconv.FormatUint(id, 10))
 	require.NotEqual(t, nil, err)
-
 }
 
 func TestProfileMeta(t *testing.T) {

@@ -3,6 +3,8 @@ run:
 
   skip-files:
     - ".*_test.go$"
+  skip-dirs:
+    - "v1175"
 
 linters:
   enable:

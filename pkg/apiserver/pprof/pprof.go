@@ -1,4 +1,4 @@
-package apiserver
+package pprof
 
 import (
 	"errors"
@@ -10,17 +10,18 @@ import (
 
 	"github.com/google/pprof/driver"
 	"github.com/xyctruth/profiler/pkg/storage"
+	"github.com/xyctruth/profiler/pkg/utils"
 )
 
-type pprofServer struct {
+type Server struct {
 	mux      *http.ServeMux
 	mu       sync.Mutex
 	basePath string
 	store    storage.Store
 }
 
-func newPprofServer(basePath string, store storage.Store) *pprofServer {
-	s := &pprofServer{
+func NewPProfServer(basePath string, store storage.Store) *Server {
+	s := &Server{
 		mux:      http.NewServeMux(),
 		basePath: basePath,
 		store:    store,
@@ -29,12 +30,12 @@ func newPprofServer(basePath string, store storage.Store) *pprofServer {
 	return s
 }
 
-func (s *pprofServer) web(w http.ResponseWriter, r *http.Request) {
+func (s *Server) Web(w http.ResponseWriter, r *http.Request) {
 	s.mux.ServeHTTP(w, r)
 }
 
-func (s *pprofServer) register(w http.ResponseWriter, r *http.Request) {
-	id := extractProfileID(r.URL.Path)
+func (s *Server) register(w http.ResponseWriter, r *http.Request) {
+	id := utils.ExtractProfileID(r.URL.Path)
 	if id == "" {
 		http.Error(w, "Invalid parameter", http.StatusBadRequest)
 		return
@@ -58,7 +59,7 @@ func (s *pprofServer) register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	flags := &pprofFlags{
+	flags := &flags{
 		args: []string{"-http=localhost:0", "-no_browser", filepath},
 	}
 

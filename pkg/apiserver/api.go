@@ -9,6 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/pprof/profile"
 	log "github.com/sirupsen/logrus"
+	"github.com/xyctruth/profiler/pkg/apiserver/pprof"
+	"github.com/xyctruth/profiler/pkg/apiserver/trace"
 	"github.com/xyctruth/profiler/pkg/storage"
 	"github.com/xyctruth/profiler/pkg/utils"
 )
@@ -17,15 +19,18 @@ type APIServer struct {
 	store  storage.Store
 	router *gin.Engine
 	srv    *http.Server
-	pprof  *pprofServer
+	pprof  *pprof.Server
+	trace  *trace.Server
 }
 
 func NewAPIServer(addr string, store storage.Store) *APIServer {
 	pprofPath := "/api/pprof/ui"
+	tracePath := "/api/trace/ui"
 
 	apiServer := &APIServer{
 		store: store,
-		pprof: newPprofServer(pprofPath, store),
+		pprof: pprof.NewPProfServer(pprofPath, store),
+		trace: trace.NewServer(tracePath, store),
 	}
 
 	router := gin.Default()
@@ -39,7 +44,9 @@ func NewAPIServer(addr string, store storage.Store) *APIServer {
 	router.Use(HandleCors).GET("/api/profile/:id", apiServer.getProfile)
 
 	// register pprof page
-	router.Use(HandleCors).GET(pprofPath+"/*any", apiServer.webPprof)
+	router.Use(HandleCors).GET(pprofPath+"/*any", apiServer.webPProf)
+	// register trace page
+	router.Use(HandleCors).GET(tracePath+"/*any", apiServer.webTrace)
 
 	srv := &http.Server{
 		Addr:    addr,
@@ -163,7 +170,12 @@ func (s *APIServer) getProfile(c *gin.Context) {
 	}
 }
 
-func (s *APIServer) webPprof(c *gin.Context) {
-	c.Request.URL.RawQuery = removePrefixSampleType(c.Request.URL.RawQuery)
-	s.pprof.web(c.Writer, c.Request)
+func (s *APIServer) webPProf(c *gin.Context) {
+	c.Request.URL.RawQuery = utils.RemovePrefixSampleType(c.Request.URL.RawQuery)
+	s.pprof.Web(c.Writer, c.Request)
+}
+
+func (s *APIServer) webTrace(c *gin.Context) {
+	c.Request.URL.RawQuery = utils.RemovePrefixSampleType(c.Request.URL.RawQuery)
+	s.trace.Web(c.Writer, c.Request)
 }

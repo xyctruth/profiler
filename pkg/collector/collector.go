@@ -12,6 +12,7 @@ import (
 
 	"github.com/google/pprof/profile"
 	"github.com/sirupsen/logrus"
+	"github.com/xyctruth/profiler/pkg/internal/v1175/trace"
 	"github.com/xyctruth/profiler/pkg/storage"
 )
 
@@ -142,6 +143,15 @@ func (collector *Collector) fetch(profileType string, profileConfig ProfileConfi
 		return
 	}
 
+	if profileType == "trace" {
+		err = collector.analysisTrace(profileType, profileBytes)
+		if err != nil {
+			logEntry.WithError(err).Error("analysis result error")
+			return
+		}
+		return
+	}
+
 	err = collector.analysis(profileType, profileBytes)
 	if err != nil {
 		logEntry.WithError(err).Error("analysis result error")
@@ -192,6 +202,34 @@ func (collector *Collector) analysis(profileType string, profileBytes []byte) er
 		}
 		metas = append(metas, meta)
 	}
+
+	err = collector.store.SaveProfileMeta(metas, collector.Expiration)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (collector *Collector) analysisTrace(profileType string, profileBytes []byte) error {
+	buf := &bytes.Buffer{}
+	buf.Write(profileBytes)
+	_, err := trace.Parse(buf, collector.TargetName)
+	if err != nil {
+		return err
+	}
+
+	profileID, err := collector.store.SaveProfile(profileBytes, collector.Expiration)
+	if err != nil {
+		return err
+	}
+	metas := make([]*storage.ProfileMeta, 0, 1)
+	meta := &storage.ProfileMeta{}
+	meta.Timestamp = time.Now().UnixNano() / time.Millisecond.Nanoseconds()
+	meta.ProfileID = profileID
+	meta.SampleType = profileType
+	meta.ProfileType = profileType
+	meta.TargetName = collector.TargetName
+	metas = append(metas, meta)
 
 	err = collector.store.SaveProfileMeta(metas, collector.Expiration)
 	if err != nil {

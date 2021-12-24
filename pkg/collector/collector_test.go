@@ -22,7 +22,7 @@ func TestNewCollector(t *testing.T) {
 	require.Equal(t, collector.Interval, 2*time.Second)
 	require.Equal(t, collector.Expiration, time.Duration(0))
 	require.Equal(t, collector.Host, "localhost:9000")
-	require.Equal(t, len(collector.ProfileConfigs), 8)
+	require.Equal(t, len(collector.ProfileConfigs), 9)
 }
 
 func TestCollectorReload(t *testing.T) {
@@ -97,5 +97,5 @@ func TestCollectorRun(t *testing.T) {
 	require.Equal(t, 1, len(targets))
 
 	sampleTypes, err := store.ListSampleType()
-	require.Equal(t, 18, len(sampleTypes))
+	require.Equal(t, 19, len(sampleTypes))
 }
