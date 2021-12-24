@@ -8,9 +8,13 @@
 
 ![profiler](assets/profiler.png)
 
-### Click Point Open Profile UI
+### Click Point Open Profile UI 
 
 ![profiler-pprof](assets/profiler-pprof.png)
+
+### Click Trace Charts Point Open Trace UI
+
+![profiler-pprof](assets/profiler-trace.png)
 
 ## Quick Start
 
