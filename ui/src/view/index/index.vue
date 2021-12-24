@@ -1,7 +1,7 @@
 <template>
   <div class='index container'>
     <el-row :gutter="22">
-      <el-col :xs="24" :sm="24" :md="24" :lg="18" :xl="18">
+      <el-col :xs="24" :sm="24" :md="24" :lg="20" :xl="20">
         <el-row :gutter="22">
           <el-col>
             <el-card style="margin-bottom: 20px;margin-top:10px">
@@ -10,14 +10,14 @@
               <el-row :gutter="30">
                 <!--              这里按照视图分层-->
 
-                <el-col :xs="24" :sm="24" :md="8" :lg="9" :xl="4">
+                <el-col :xs="24" :sm="24" :md="8" :lg="9" :xl="6">
                   <selectTypes style="margin-right: 20px; width: 90%" v-model:selectTypes="types"></selectTypes>
                 </el-col>
-                <el-col :xs="24" :sm="24" :md="8" :lg="9" :xl="4">
+                <el-col :xs="24" :sm="24" :md="8" :lg="9" :xl="6">
                   <selectProject style="margin-right: 20px;width: 90%"
                                  v-model:selectProjects="projects"></selectProject>
                 </el-col>
-                <el-col :xs="24" :sm="24" :md="8" :lg="9" :xl={span:6,offset:10} >
+                <el-col :xs="24" :sm="24" :md="8" :lg="9" :xl={span:6,offset:6} >
                   <selectTimeRange class="time-range-container" v-model:timeRange="timeRange"
                                    style="width: 90%"></selectTimeRange>
                 </el-col>
@@ -61,7 +61,7 @@
         </el-row>
 
       </el-col>
-      <el-col :md="6" :lg="6" :xl="6" class="hidden-md-and-down">
+      <el-col :md="6" :lg="4" :xl="4" class="hidden-md-and-down">
         <el-row>
           <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
             <el-affix :offset="10" class="guid">
@@ -113,9 +113,19 @@ const jump = (item) => {
 </style>
 <style lang="scss">
 
+.container{
+  margin-left: 15px;
+  margin-right: 15px;
+}
+
 @media only screen and (max-width: 1200px) {
   .hidden-md-and-down {
     display: none !important
+  }
+
+  .container{
+    margin-left: 5px;
+    margin-right: 5px;
   }
 }
 
