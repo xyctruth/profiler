@@ -1,4 +1,4 @@
-package apiserver
+package pprof
 
 import (
 	"fmt"
@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/xyctruth/profiler/pkg/storage"
 
@@ -15,6 +16,23 @@ import (
 	"github.com/xyctruth/profiler/pkg/storage/badger"
 )
 
+func initProfileData(s storage.Store, t *testing.T) (uint64, uint64, uint64) {
+	invalidId, err := s.SaveProfile([]byte{}, time.Second*10)
+	require.Equal(t, nil, err)
+	require.Equal(t, uint64(0), invalidId)
+
+	invalidId2, err := s.SaveProfile([]byte("haha"), time.Second*10)
+	require.Equal(t, nil, err)
+	require.Equal(t, uint64(1), invalidId2)
+
+	profileBytes, err := ioutil.ReadFile("../profile.pb.gz")
+	require.Equal(t, nil, err)
+	id, err := s.SaveProfile(profileBytes, time.Second*10)
+	require.Equal(t, nil, err)
+	require.Equal(t, uint64(2), id)
+	return invalidId, invalidId2, id
+}
+
 func TestPprofServer(t *testing.T) {
 	dir, err := ioutil.TempDir("./", "temp-*")
 	require.Equal(t, nil, err)
@@ -22,7 +40,7 @@ func TestPprofServer(t *testing.T) {
 
 	store := badger.NewStore(dir)
 
-	pprofServer := newPprofServer("/api/pprof/ui", store)
+	pprofServer := NewPProfServer("/api/pprof/ui", store)
 
 	httpServer := httptest.NewServer(pprofServer.mux)
 	defer httpServer.Close()

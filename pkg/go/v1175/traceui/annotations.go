@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package traceweb
+package traceui
 
 import (
 	"bytes"
@@ -22,8 +22,8 @@ import (
 )
 
 // httpUserTasks reports all tasks found in the trace.
-func httpUserTasks(w http.ResponseWriter, r *http.Request) {
-	res, err := analyzeAnnotations()
+func (traceUI *TraceUI) httpUserTasks(w http.ResponseWriter, r *http.Request) {
+	res, err := traceUI.analyzeAnnotations()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -58,8 +58,8 @@ func httpUserTasks(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func httpUserRegions(w http.ResponseWriter, r *http.Request) {
-	res, err := analyzeAnnotations()
+func (traceUI *TraceUI) httpUserRegions(w http.ResponseWriter, r *http.Request) {
+	res, err := traceUI.analyzeAnnotations()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -96,13 +96,13 @@ func httpUserRegions(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func httpUserRegion(w http.ResponseWriter, r *http.Request) {
+func (traceUI *TraceUI) httpUserRegion(w http.ResponseWriter, r *http.Request) {
 	filter, err := newRegionFilter(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	res, err := analyzeAnnotations()
+	res, err := traceUI.analyzeAnnotations()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -155,14 +155,14 @@ func httpUserRegion(w http.ResponseWriter, r *http.Request) {
 }
 
 // httpUserTask presents the details of the selected tasks.
-func httpUserTask(w http.ResponseWriter, r *http.Request) {
+func (traceUI *TraceUI) httpUserTask(w http.ResponseWriter, r *http.Request) {
 	filter, err := newTaskFilter(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	res, err := analyzeAnnotations()
+	res, err := traceUI.analyzeAnnotations()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -186,7 +186,7 @@ func httpUserTask(w http.ResponseWriter, r *http.Request) {
 		GCTime     time.Duration
 	}
 
-	base := time.Duration(firstTimestamp()) * time.Nanosecond // trace start
+	base := time.Duration(traceUI.firstTimestamp()) * time.Nanosecond // trace start
 
 	var data []entry
 
@@ -267,8 +267,8 @@ type regionTypeID struct {
 
 // analyzeAnnotations analyzes user annotation events and
 // returns the task descriptors keyed by internal task id.
-func analyzeAnnotations() (annotationAnalysisResult, error) {
-	res, err := parseTrace()
+func (traceUI *TraceUI) analyzeAnnotations() (annotationAnalysisResult, error) {
+	res, err := traceUI.parseTrace()
 	if err != nil {
 		return annotationAnalysisResult{}, fmt.Errorf("failed to parse trace: %v", err)
 	}
@@ -286,13 +286,13 @@ func analyzeAnnotations() (annotationAnalysisResult, error) {
 		switch typ := ev.Type; typ {
 		case trace.EvUserTaskCreate, trace.EvUserTaskEnd, trace.EvUserLog:
 			taskid := ev.Args[0]
-			task := tasks.task(taskid)
+			task := tasks.task(traceUI, taskid)
 			task.addEvent(ev)
 
 			// retrieve parent task information
 			if typ == trace.EvUserTaskCreate {
 				if parentID := ev.Args[1]; parentID != 0 {
-					parentTask := tasks.task(parentID)
+					parentTask := tasks.task(traceUI, parentID)
 					task.parent = parentTask
 					if parentTask != nil {
 						parentTask.children = append(parentTask.children, task)
@@ -312,16 +312,16 @@ func analyzeAnnotations() (annotationAnalysisResult, error) {
 		// on a 'global' var.
 		for _, s := range stats.Regions {
 			if s.TaskID != 0 {
-				task := tasks.task(s.TaskID)
+				task := tasks.task(traceUI, s.TaskID)
 				task.goroutines[goid] = struct{}{}
-				task.regions = append(task.regions, regionDesc{UserRegionDesc: s, G: goid})
+				task.regions = append(task.regions, newRegionDesc(traceUI, s, goid))
 			}
 			var frame trace.Frame
 			if s.Start != nil {
 				frame = *s.Start.Stk[0]
 			}
 			id := regionTypeID{Frame: frame, Type: s.Name}
-			regions[id] = append(regions[id], regionDesc{UserRegionDesc: s, G: goid})
+			regions[id] = append(regions[id], newRegionDesc(traceUI, s, goid))
 		}
 	}
 
@@ -340,6 +340,7 @@ func analyzeAnnotations() (annotationAnalysisResult, error) {
 
 // taskDesc represents a task.
 type taskDesc struct {
+	traceUI    *TraceUI
 	name       string              // user-provided task name
 	id         uint64              // internal task id
 	events     []*trace.Event      // sorted based on timestamp.
@@ -353,9 +354,10 @@ type taskDesc struct {
 	children []*taskDesc
 }
 
-func newTaskDesc(id uint64) *taskDesc {
+func newTaskDesc(traceUI *TraceUI, id uint64) *taskDesc {
 	return &taskDesc{
 		id:         id,
+		traceUI:    traceUI,
 		goroutines: make(map[uint64]struct{}),
 	}
 }
@@ -385,13 +387,18 @@ func (task *taskDesc) String() string {
 
 // regionDesc represents a region.
 type regionDesc struct {
+	traceUI *TraceUI
 	*trace.UserRegionDesc
 	G uint64 // id of goroutine where the region was defined
 }
 
+func newRegionDesc(traceUI *TraceUI, userRegionDesc *trace.UserRegionDesc, goid uint64) regionDesc {
+	return regionDesc{traceUI: traceUI, UserRegionDesc: userRegionDesc, G: goid}
+}
+
 type allTasks map[uint64]*taskDesc
 
-func (tasks allTasks) task(taskID uint64) *taskDesc {
+func (tasks allTasks) task(traceUI *TraceUI, taskID uint64) *taskDesc {
 	if taskID == 0 {
 		return nil // notask
 	}
@@ -401,10 +408,8 @@ func (tasks allTasks) task(taskID uint64) *taskDesc {
 		return t
 	}
 
-	t = &taskDesc{
-		id:         taskID,
-		goroutines: make(map[uint64]struct{}),
-	}
+	t = newTaskDesc(traceUI, taskID)
+
 	tasks[taskID] = t
 	return t
 }
@@ -457,7 +462,7 @@ func (task *taskDesc) firstTimestamp() int64 {
 	if task != nil && task.create != nil {
 		return task.create.Ts
 	}
-	return firstTimestamp()
+	return task.traceUI.firstTimestamp()
 }
 
 // lastTimestamp returns the last timestamp of this task in this
@@ -478,7 +483,7 @@ func (task *taskDesc) endTimestamp() int64 {
 	if task != nil && task.end != nil {
 		return task.end.Ts
 	}
-	return lastTimestamp()
+	return task.traceUI.lastTimestamp()
 }
 
 func (task *taskDesc) duration() time.Duration {
@@ -541,7 +546,7 @@ func (task *taskDesc) overlappingInstant(ev *trace.Event) bool {
 // as well.
 func (task *taskDesc) overlappingDuration(ev *trace.Event) (time.Duration, bool) {
 	start := ev.Ts
-	end := lastTimestamp()
+	end := task.traceUI.lastTimestamp()
 	if ev.Link != nil {
 		end = ev.Link.Ts
 	}
@@ -621,7 +626,7 @@ func (region *regionDesc) firstTimestamp() int64 {
 	if region.Start != nil {
 		return region.Start.Ts
 	}
-	return firstTimestamp()
+	return region.traceUI.firstTimestamp()
 }
 
 // lastTimestamp returns the timestamp of region end event.
@@ -631,7 +636,7 @@ func (region *regionDesc) lastTimestamp() int64 {
 	if region.End != nil {
 		return region.End.Ts
 	}
-	return lastTimestamp()
+	return region.traceUI.lastTimestamp()
 }
 
 // RelatedGoroutines returns IDs of goroutines related to the task. A goroutine

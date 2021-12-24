@@ -4,7 +4,7 @@
 
 // Serving of pprof-like profiles.
 
-package traceweb
+package traceui
 
 import (
 	"bufio"
@@ -49,14 +49,14 @@ type interval struct {
 	begin, end int64 // nanoseconds.
 }
 
-func pprofByGoroutine(compute func(io.Writer, map[uint64][]interval, []*trace.Event) error) func(w io.Writer, r *http.Request) error {
+func (traceUI *TraceUI) pprofByGoroutine(compute func(io.Writer, map[uint64][]interval, []*trace.Event) error) func(w io.Writer, r *http.Request) error {
 	return func(w io.Writer, r *http.Request) error {
 		id := r.FormValue("id")
-		events, err := parseEvents()
+		events, err := traceUI.parseEvents()
 		if err != nil {
 			return err
 		}
-		gToIntervals, err := pprofMatchingGoroutines(id, events)
+		gToIntervals, err := traceUI.pprofMatchingGoroutines(id, events)
 		if err != nil {
 			return err
 		}
@@ -64,17 +64,17 @@ func pprofByGoroutine(compute func(io.Writer, map[uint64][]interval, []*trace.Ev
 	}
 }
 
-func pprofByRegion(compute func(io.Writer, map[uint64][]interval, []*trace.Event) error) func(w io.Writer, r *http.Request) error {
+func (traceUI *TraceUI) pprofByRegion(compute func(io.Writer, map[uint64][]interval, []*trace.Event) error) func(w io.Writer, r *http.Request) error {
 	return func(w io.Writer, r *http.Request) error {
 		filter, err := newRegionFilter(r)
 		if err != nil {
 			return err
 		}
-		gToIntervals, err := pprofMatchingRegions(filter)
+		gToIntervals, err := traceUI.pprofMatchingRegions(filter)
 		if err != nil {
 			return err
 		}
-		events, _ := parseEvents()
+		events, _ := traceUI.parseEvents()
 
 		return compute(w, gToIntervals, events)
 	}
@@ -83,7 +83,7 @@ func pprofByRegion(compute func(io.Writer, map[uint64][]interval, []*trace.Event
 // pprofMatchingGoroutines parses the goroutine type id string (i.e. pc)
 // and returns the ids of goroutines of the matching type and its interval.
 // If the id string is empty, returns nil without an error.
-func pprofMatchingGoroutines(id string, events []*trace.Event) (map[uint64][]interval, error) {
+func (traceUI *TraceUI) pprofMatchingGoroutines(id string, events []*trace.Event) (map[uint64][]interval, error) {
 	if id == "" {
 		return nil, nil
 	}
@@ -102,7 +102,7 @@ func pprofMatchingGoroutines(id string, events []*trace.Event) (map[uint64][]int
 		}
 		endTime := g.EndTime
 		if g.EndTime == 0 {
-			endTime = lastTimestamp() // the trace doesn't include the goroutine end event. Use the trace end time.
+			endTime = traceUI.lastTimestamp() // the trace doesn't include the goroutine end event. Use the trace end time.
 		}
 		res[g.ID] = []interval{{begin: g.StartTime, end: endTime}}
 	}
@@ -114,8 +114,8 @@ func pprofMatchingGoroutines(id string, events []*trace.Event) (map[uint64][]int
 
 // pprofMatchingRegions returns the time intervals of matching regions
 // grouped by the goroutine id. If the filter is nil, returns nil without an error.
-func pprofMatchingRegions(filter *regionFilter) (map[uint64][]interval, error) {
-	res, err := analyzeAnnotations()
+func (traceUI *TraceUI) pprofMatchingRegions(filter *regionFilter) (map[uint64][]interval, error) {
+	res, err := traceUI.analyzeAnnotations()
 	if err != nil {
 		return nil, err
 	}

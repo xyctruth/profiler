@@ -157,7 +157,12 @@
           useDirtyRect: true,
         });
         chart.on('click', function (params) {
-          window.open(`${baseConfig.reqUrl}/api/pprof/ui/${params.data.sourceData.ProfileID}?si=${title}`)
+          if (title === "trace") {
+            window.open(`${baseConfig.reqUrl}/api/trace/ui/${params.data.sourceData.ProfileID}`)
+          }else{
+            window.open(`${baseConfig.reqUrl}/api/pprof/ui/${params.data.sourceData.ProfileID}?si=${title}`)
+
+          }
         });
       }
       chart.setOption(Object.assign(chartOptions, {

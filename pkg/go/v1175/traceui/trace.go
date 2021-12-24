@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package traceweb
+package traceui
 
 import (
 	"encoding/json"
@@ -24,8 +24,8 @@ import (
 )
 
 // httpTrace serves either whole trace (goid==0) or trace for goid goroutine.
-func httpTrace(w http.ResponseWriter, r *http.Request) {
-	_, err := parseTrace()
+func (traceUI *TraceUI) httpTrace(w http.ResponseWriter, r *http.Request) {
+	_, err := traceUI.parseTrace()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -44,7 +44,7 @@ func httpTrace(w http.ResponseWriter, r *http.Request) {
 var templTrace = `
 <html>
 <head>
-<script src="/webcomponents.min.js"></script>
+<script src="webcomponents.min.js"></script>
 <script>
 'use strict';
 
@@ -56,7 +56,7 @@ function onTraceViewerImportFail() {
 }
 </script>
 
-<link rel="import" href="/trace_viewer_html"
+<link rel="import" href="trace_viewer_html"
       onerror="onTraceViewerImportFail(event)">
 
 <style type="text/css">
@@ -156,7 +156,7 @@ function onTraceViewerImportFail() {
     viewer.globalMode = true;
     Polymer.dom(document.body).appendChild(viewer);
 
-    url = '/jsontrace?{{PARAMS}}';
+    url = 'jsontrace?{{PARAMS}}';
     load();
   });
 }());
@@ -178,10 +178,10 @@ func webcomponentsJS(w http.ResponseWriter, r *http.Request) {
 }
 
 // httpJsonTrace serves json trace, requested from within templTrace HTML.
-func httpJsonTrace(w http.ResponseWriter, r *http.Request) {
+func (traceUI *TraceUI) httpJsonTrace(w http.ResponseWriter, r *http.Request) {
 	defer debug.FreeOSMemory()
 	// This is an AJAX handler, so instead of http.Error we use log.Printf to log errors.
-	res, err := parseTrace()
+	res, err := traceUI.parseTrace()
 	if err != nil {
 		log.Printf("failed to parse trace: %v", err)
 		return
@@ -210,7 +210,7 @@ func httpJsonTrace(w http.ResponseWriter, r *http.Request) {
 		if g.EndTime != 0 {
 			params.endTime = g.EndTime
 		} else { // The goroutine didn't end.
-			params.endTime = lastTimestamp()
+			params.endTime = traceUI.lastTimestamp()
 		}
 		params.maing = goid
 		params.gs = trace.RelatedGoroutines(res.Events, goid)
@@ -220,7 +220,7 @@ func httpJsonTrace(w http.ResponseWriter, r *http.Request) {
 			log.Printf("failed to parse taskid parameter %q: %v", taskids, err)
 			return
 		}
-		annotRes, _ := analyzeAnnotations()
+		annotRes, _ := traceUI.analyzeAnnotations()
 		task, ok := annotRes.tasks[taskid]
 		if !ok || len(task.events) == 0 {
 			log.Printf("failed to find task with id %d", taskid)
@@ -246,7 +246,7 @@ func httpJsonTrace(w http.ResponseWriter, r *http.Request) {
 			log.Printf("failed to parse focustask parameter %q: %v", taskids, err)
 			return
 		}
-		annotRes, _ := analyzeAnnotations()
+		annotRes, _ := traceUI.analyzeAnnotations()
 		task, ok := annotRes.tasks[taskid]
 		if !ok || len(task.events) == 0 {
 			log.Printf("failed to find task with id %d", taskid)
@@ -296,7 +296,7 @@ func (r Range) URL() string {
 // splitTrace splits the trace into a number of ranges,
 // each resulting in approx 100MB of json output
 // (trace viewer can hardly handle more).
-func splitTrace(res trace.ParseResult) []Range {
+func (traceUI *TraceUI) splitTrace(res trace.ParseResult) []Range {
 	params := &traceParams{
 		parsed:  res,
 		endTime: math.MaxInt64,
@@ -1133,8 +1133,8 @@ func isSystemGoroutine(entryFn string) bool {
 }
 
 // firstTimestamp returns the timestamp of the first event record.
-func firstTimestamp() int64 {
-	res, _ := parseTrace()
+func (traceUI *TraceUI) firstTimestamp() int64 {
+	res, _ := traceUI.parseTrace()
 	if len(res.Events) > 0 {
 		return res.Events[0].Ts
 	}
@@ -1142,8 +1142,8 @@ func firstTimestamp() int64 {
 }
 
 // lastTimestamp returns the timestamp of the last event record.
-func lastTimestamp() int64 {
-	res, _ := parseTrace()
+func (traceUI *TraceUI) lastTimestamp() int64 {
+	res, _ := traceUI.parseTrace()
 	if n := len(res.Events); n > 1 {
 		return res.Events[n-1].Ts
 	}

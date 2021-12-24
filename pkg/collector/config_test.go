@@ -183,7 +183,7 @@ func TestBuildProfileConfigs(t *testing.T) {
 
 	profileConfigs := buildProfileConfigs(serverConfig.ProfileConfigs)
 
-	require.Equal(t, len(profileConfigs), 8)
+	require.Equal(t, len(profileConfigs), 9)
 
 	require.Equal(t, defaultProfileConfigs()["fgprof"].Path, profileConfigs["fgprof"].Path)
 	require.Equal(t, utils.Bool(false), profileConfigs["fgprof"].Enable)

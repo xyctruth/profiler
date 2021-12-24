@@ -32,4 +32,4 @@ Note that while the various profiles available when launching
 (the 'view trace' page) comes from the Chrome/Chromium project
 and is only actively tested on that browser.
 */
-package traceweb
+package traceui

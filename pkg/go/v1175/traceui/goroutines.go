@@ -4,7 +4,7 @@
 
 // Goroutine-related profiles.
 
-package traceweb
+package traceui
 
 import (
 	"fmt"
@@ -41,8 +41,8 @@ func analyzeGoroutines(events []*trace.Event) {
 }
 
 // httpGoroutines serves list of goroutine groups.
-func httpGoroutines(w http.ResponseWriter, r *http.Request) {
-	events, err := parseEvents()
+func (traceUI *TraceUI) httpGoroutines(w http.ResponseWriter, r *http.Request) {
+	events, err := traceUI.parseEvents()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -82,10 +82,10 @@ Goroutines: <br>
 `))
 
 // httpGoroutine serves list of goroutines in a particular group.
-func httpGoroutine(w http.ResponseWriter, r *http.Request) {
+func (traceUI *TraceUI) httpGoroutine(w http.ResponseWriter, r *http.Request) {
 	// TODO(hyangah): support format=csv (raw data)
 
-	events, err := parseEvents()
+	events, err := traceUI.parseEvents()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

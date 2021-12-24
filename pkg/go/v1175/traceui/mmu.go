@@ -23,7 +23,7 @@
 // could potentially put confidence intervals on these estimates and
 // render this progressively as we refine the distributions.
 
-package traceweb
+package traceui
 
 import (
 	"encoding/json"
@@ -63,7 +63,7 @@ func init() {
 	mmuCache.m = make(map[trace.UtilFlags]*mmuCacheEntry)
 }
 
-func getMMUCurve(r *http.Request) ([][]trace.MutatorUtil, *trace.MMUCurve, error) {
+func (traceUI *TraceUI) getMMUCurve(r *http.Request) ([][]trace.MutatorUtil, *trace.MMUCurve, error) {
 	var flags trace.UtilFlags
 	for _, flagStr := range strings.Split(r.FormValue("flags"), "|") {
 		flags |= utilFlagNames[flagStr]
@@ -78,7 +78,7 @@ func getMMUCurve(r *http.Request) ([][]trace.MutatorUtil, *trace.MMUCurve, error
 	mmuCache.lock.Unlock()
 
 	c.init.Do(func() {
-		events, err := parseEvents()
+		events, err := traceUI.parseEvents()
 		if err != nil {
 			c.err = err
 		} else {
@@ -95,8 +95,8 @@ func httpMMU(w http.ResponseWriter, r *http.Request) {
 }
 
 // httpMMUPlot serves the JSON data for the MMU plot.
-func httpMMUPlot(w http.ResponseWriter, r *http.Request) {
-	mu, mmuCurve, err := getMMUCurve(r)
+func (traceUI *TraceUI) httpMMUPlot(w http.ResponseWriter, r *http.Request) {
+	mu, mmuCurve, err := traceUI.getMMUCurve(r)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("failed to parse events: %v", err), http.StatusInternalServerError)
 		return
@@ -197,7 +197,7 @@ var templMMU = `<!doctype html>
         container.css('opacity', '.5');
         refreshChart.count++;
         var seq = refreshChart.count;
-        $.getJSON('/mmuPlot?flags=' + mmuFlags())
+        $.getJSON('mmuPlot?flags=' + mmuFlags())
          .fail(function(xhr, status, error) {
            alert('failed to load plot: ' + status);
          })
@@ -353,8 +353,8 @@ var templMMU = `<!doctype html>
 `
 
 // httpMMUDetails serves details of an MMU graph at a particular window.
-func httpMMUDetails(w http.ResponseWriter, r *http.Request) {
-	_, mmuCurve, err := getMMUCurve(r)
+func (traceUI *TraceUI) httpMMUDetails(w http.ResponseWriter, r *http.Request) {
+	_, mmuCurve, err := traceUI.getMMUCurve(r)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("failed to parse events: %v", err), http.StatusInternalServerError)
 		return

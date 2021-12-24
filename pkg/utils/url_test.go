@@ -1,4 +1,4 @@
-package apiserver
+package utils
 
 import (
 	"testing"
@@ -47,16 +47,16 @@ func TestExtractProfileId(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := extractProfileID(tt.input)
+			got := ExtractProfileID(tt.input)
 			assert.Equal(t, tt.want, got)
 		})
 	}
 }
 
 func TestRemovePrefixSampleType(t *testing.T) {
-	rawQuery := removePrefixSampleType("si=heap_alloc_space")
+	rawQuery := RemovePrefixSampleType("si=heap_alloc_space")
 	assert.Equal(t, "si=alloc_space", rawQuery)
 
-	rawQuery = removePrefixSampleType("")
+	rawQuery = RemovePrefixSampleType("")
 	assert.Equal(t, "", rawQuery)
 }

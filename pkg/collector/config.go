@@ -20,6 +20,10 @@ func defaultProfileConfigs() map[string]ProfileConfig {
 			Path:   "/debug/fgprof?seconds=10",
 			Enable: utils.BoolPtr(true),
 		},
+		"trace": {
+			Path:   "/debug/pprof/trace?seconds=10",
+			Enable: utils.BoolPtr(true),
+		},
 		"mutex": {
 			Path:   "/debug/pprof/mutex",
 			Enable: utils.BoolPtr(true),
