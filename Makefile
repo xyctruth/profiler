@@ -1,5 +1,4 @@
 IMG ?= profiler:latest
-TEST_PATH ?=./pkg/...
 
 .PHONY: docker-build
 docker-build:
@@ -19,7 +18,7 @@ docker-push:
 
 .PHONY: test
 test:
-	go test -race -v -coverprofile=cover.out  ${TEST_PATH}
+	go test -race -v -coverprofile=cover.out  $(shell go list ./pkg/... | grep -v go/v1175)
 
 .PHONY: cover-ui
 cover-ui: test
@@ -29,3 +28,6 @@ cover-ui: test
 .PHONY: fmt
 fmt:
 	gofmt -w $(shell find . -name "*.go")
+
+lint:
+	golangci-lint run
