@@ -169,11 +169,11 @@ function onTraceViewerImportFail() {
 // httpTraceViewerHTML serves static part of trace-viewer.
 // This URL is queried from templTrace HTML.
 func httpTraceViewerHTML(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "./assets/trace_viewer_full")
+	http.ServeFile(w, r, "./pkg/internal/v1175/assets/trace_viewer_full")
 }
 
 func webcomponentsJS(w http.ResponseWriter, r *http.Request) {
-	path := filepath.Join("./assets/webcomponents.min.js")
+	path := filepath.Join("./pkg/internal/v1175/assets/webcomponents.min.js")
 	http.ServeFile(w, r, path)
 }
 

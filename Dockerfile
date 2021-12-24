@@ -23,8 +23,9 @@ RUN apk add dumb-init
 # server
 COPY --from=builder /workspace/profiler .
 COPY collector.yaml ./config/collector.yaml
-COPY assets/trace_viewer_full.html ./assets/trace_viewer_full.html
-COPY assets/webcomponents.min.js ./assets/webcomponents.min.js
+# go trace assets
+COPY pkg/internal/v1175/assets/trace_viewer_full ./pkg/internal/v1175/assets/trace_viewer_full
+COPY pkg/internal/v1175/assets/webcomponents.min.js ./pkg/internal/v1175/assets/webcomponents.min.js
 
 # ui
 COPY --from=ui-builder /workspace/dist /usr/share/nginx/html/

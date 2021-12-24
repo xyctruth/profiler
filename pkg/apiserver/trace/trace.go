@@ -2,9 +2,7 @@ package trace
 
 import (
 	"errors"
-	"io/ioutil"
 	"net/http"
-	"os"
 	"path"
 	"sync"
 
@@ -53,13 +51,7 @@ func (s *Server) register(w http.ResponseWriter, r *http.Request) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	filepath := path.Join(os.TempDir(), id)
-	if err = ioutil.WriteFile(filepath, data, 0600); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	ui := traceui.NewTraceUI(filepath)
+	ui := traceui.NewTraceUI(data)
 
 	curPath := path.Join(s.basePath, id) + "/"
 	for pattern, handler := range ui.Handlers {

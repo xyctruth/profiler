@@ -6,6 +6,7 @@ package traceui
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"html/template"
 	"net/http"
@@ -18,8 +19,8 @@ import (
 )
 
 type TraceUI struct {
-	traceFile string
-	loader    struct {
+	data   []byte
+	loader struct {
 		once sync.Once
 		res  trace.ParseResult
 		err  error
@@ -34,9 +35,9 @@ type TraceUI struct {
 	}
 }
 
-func NewTraceUI(traceFile string) *TraceUI {
+func NewTraceUI(data []byte) *TraceUI {
 	traceUI := &TraceUI{
-		traceFile: traceFile,
+		data: data,
 	}
 	traceUI.mmuCache.m = make(map[trace.UtilFlags]*mmuCacheEntry)
 
@@ -86,15 +87,9 @@ func (traceUI *TraceUI) parseEvents() ([]*trace.Event, error) {
 
 func (traceUI *TraceUI) parseTrace() (trace.ParseResult, error) {
 	traceUI.loader.once.Do(func() {
-		tracef, err := os.Open(traceUI.traceFile)
-		if err != nil {
-			traceUI.loader.err = fmt.Errorf("failed to open trace file: %v", err)
-			return
-		}
-		defer tracef.Close()
-
+		buf := bytes.NewBuffer(traceUI.data)
 		// Parse and symbolize.
-		res, err := trace.Parse(bufio.NewReader(tracef), "")
+		res, err := trace.Parse(bufio.NewReader(buf), "")
 		if err != nil {
 			traceUI.loader.err = fmt.Errorf("failed to parse trace: %v", err)
 			return
