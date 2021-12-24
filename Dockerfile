@@ -1,5 +1,5 @@
 # Build Server
-FROM golang:1.16 as builder
+FROM golang:1.17 as builder
 WORKDIR /workspace
 COPY ./ ./
 RUN GOPROXY="https://goproxy.io,direct"  CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -o profiler ./server/main.go
