@@ -3,7 +3,7 @@
 </script>
 
 <template>
-  <div style="padding:20px 40px;">
+  <div style=" width: 100%;overflow: hidden">
 <!--    <MyHeader></MyHeader>-->
     <router-view/>
     <el-backtop />
