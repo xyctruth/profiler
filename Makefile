@@ -18,7 +18,7 @@ docker-push:
 
 .PHONY: test
 test:
-	go test -race -v -coverprofile=cover.out  $(shell go list ./pkg/... | grep -v go/v1175)
+	go test -race -v -coverprofile=cover.out  $(shell go list ./pkg/... | grep -v v1175)
 
 .PHONY: cover-ui
 cover-ui: test

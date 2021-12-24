@@ -28,12 +28,17 @@ collector:
         fgprof:
           path: /debug/fgprof?seconds=1
           enable: true
+        trace:
+          path: /debug/pprof/trace?seconds=1
+          enable: true
 
     server2:
       interval: 2s
       expiration: 30000h
       host: localhost:9000
       profileConfigs: # rewrite default profile config
+        trace:
+          enable: false
         fgprof:
           enable: false
         profile:
@@ -41,6 +46,7 @@ collector:
           enable: false
         heap:
           path: /debug/pprof/heap
+
 `
 	changeConfigYAML = `
 collector:
@@ -57,6 +63,9 @@ collector:
         fgprof:
           path: /debug/fgprof?seconds=1
           enable: true
+        trace:
+          path: /debug/pprof/trace?seconds=1
+          enable: true
 
     server2:
       interval: 1s
@@ -72,12 +81,6 @@ collector:
       expiration: 0  # no expiration time. unit day
       host: localhost:9001
       profileConfigs: # default scrape (profile, heap, allocs, black, mutex, fgprof)
-        profile:
-          path: /debug/pprof/profile?seconds=1
-          enable: false
-        fgprof:
-          path: /debug/fgprof?seconds=1
-          enable: false
 `
 
 	errConfigYAML = `
@@ -88,12 +91,6 @@ collector:
 		expiration: 0  # no expiration time. unit day
 		host: localhost:9001
 		profileConfigs: # default scrape (profile, heap, allocs, black, mutex, fgprof)
-		  profile:
-			path: /debug/pprof/profile?seconds=1
-			enable: false
-		  fgprof:
-			path: /debug/fgprof?seconds=1
-			enable: false
 `
 )
 
@@ -145,12 +142,12 @@ func TestLoadConfig(t *testing.T) {
 		require.Equal(t, 2*time.Second, serverConfig.Interval)
 		require.Equal(t, time.Duration(0), serverConfig.Expiration)
 		require.Equal(t, "localhost:9000", serverConfig.Host)
-		require.Equal(t, 2, len(serverConfig.ProfileConfigs))
+		require.Equal(t, 3, len(serverConfig.ProfileConfigs))
 
 		serverConfig, ok = config.TargetConfigs["server2"]
 		require.Equal(t, ok, true)
 		require.Equal(t, 30000*time.Hour, serverConfig.Expiration)
-		require.Equal(t, 3, len(serverConfig.ProfileConfigs))
+		require.Equal(t, 4, len(serverConfig.ProfileConfigs))
 	})
 	require.Equal(t, err, nil)
 }
@@ -179,7 +176,7 @@ func TestBuildProfileConfigs(t *testing.T) {
 
 	serverConfig, ok := config.TargetConfigs["server2"]
 	require.Equal(t, true, ok)
-	require.Equal(t, 3, len(serverConfig.ProfileConfigs))
+	require.Equal(t, 4, len(serverConfig.ProfileConfigs))
 
 	profileConfigs := buildProfileConfigs(serverConfig.ProfileConfigs)
 
