@@ -6,7 +6,7 @@
 
 ## [Demo](https://profiling.jia-huang.com)
 
-![profiler](assets/profiler-1.png)
+![profiler](assets/profiler.png)
 
 ### Click Point Open Profile UI
 
