@@ -4,6 +4,7 @@
     :multiple="true"
     :collapse-tags="true"
     placeholder="选择服务"
+    clearable="true"
     filterable>
     <el-option
       v-for="(item,index) in options"

@@ -4,6 +4,7 @@
     :collapse-tags="true"
     :multiple="true"
     placeholder="选择类型"
+    clearable="true"
     filterable>
     <el-option-group
       v-for="group in options"

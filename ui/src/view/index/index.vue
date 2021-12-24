@@ -10,16 +10,16 @@
               <el-row :gutter="30">
                 <!--              这里按照视图分层-->
 
-                <el-col :xs="24" :sm="24" :md="8" :lg="9" :xl="6">
-                  <selectTypes style="margin-right: 20px; width: 90%" v-model:selectTypes="types"></selectTypes>
+                <el-col :xs="24" :sm="24" :md="5" :lg="5" :xl="5">
+                  <selectTypes style="width: 100%" v-model:selectTypes="types"></selectTypes>
                 </el-col>
-                <el-col :xs="24" :sm="24" :md="8" :lg="9" :xl="6">
-                  <selectProject style="margin-right: 20px;width: 90%"
+                <el-col :xs="24" :sm="24" :md="5" :lg="5" :xl="5">
+                  <selectProject style="width: 100%"
                                  v-model:selectProjects="projects"></selectProject>
                 </el-col>
-                <el-col :xs="24" :sm="24" :md="8" :lg="9" :xl={span:6,offset:6} >
+                <el-col :xs="24" :sm="24" :md={span:4,offset:10} :lg={span:4,offset:10} :xl={span:4,offset:10} >
                   <selectTimeRange class="time-range-container" v-model:timeRange="timeRange"
-                                   style="width: 90%"></selectTimeRange>
+                                   style="width: 100%"></selectTimeRange>
                 </el-col>
 
               </el-row>
@@ -28,7 +28,7 @@
             </el-card>
 
             <div>
-              <el-col :xs="24" :sm="24" :md="0" :lg="0" :xl="0" style="padding-right: 0px;padding-left: 0px; width: 100%">
+              <el-col :xs="24" :sm="24" :md="24" :lg="0" :xl="0" style="padding-right: 0px;padding-left: 0px; width: 100%">
                 <el-affix :offset="10" class="guid">
                   <el-card>
                     <el-button
