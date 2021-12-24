@@ -11,6 +11,8 @@ collector:
       expiration: 168h #7 day
       host: localhost:9000
       profileConfigs: # rewrite default profile config
+        trace:
+          enable: false
         fgprof:
           enable: false
         profile:
