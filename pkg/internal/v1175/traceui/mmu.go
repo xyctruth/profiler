@@ -36,7 +36,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/xyctruth/profiler/pkg/go/v1175/trace"
+	"github.com/xyctruth/profiler/pkg/internal/v1175/trace"
 )
 
 var utilFlagNames = map[string]trace.UtilFlags{

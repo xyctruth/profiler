@@ -19,8 +19,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/xyctruth/profiler/pkg/go/v1175/trace"
-	"github.com/xyctruth/profiler/pkg/go/v1175/traceviewer"
+	"github.com/xyctruth/profiler/pkg/internal/v1175/trace"
+	"github.com/xyctruth/profiler/pkg/internal/v1175/traceviewer"
 )
 
 // httpTrace serves either whole trace (goid==0) or trace for goid goroutine.

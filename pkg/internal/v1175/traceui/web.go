@@ -14,7 +14,7 @@ import (
 
 	_ "net/http/pprof" // Required to use pprof
 
-	"github.com/xyctruth/profiler/pkg/go/v1175/trace"
+	"github.com/xyctruth/profiler/pkg/internal/v1175/trace"
 )
 
 type TraceUI struct {

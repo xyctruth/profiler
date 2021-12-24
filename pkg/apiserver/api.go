@@ -6,12 +6,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/xyctruth/profiler/pkg/apiserver/trace"
-
 	"github.com/gin-gonic/gin"
 	"github.com/google/pprof/profile"
 	log "github.com/sirupsen/logrus"
 	"github.com/xyctruth/profiler/pkg/apiserver/pprof"
+	"github.com/xyctruth/profiler/pkg/apiserver/trace"
 	"github.com/xyctruth/profiler/pkg/storage"
 	"github.com/xyctruth/profiler/pkg/utils"
 )
@@ -20,8 +19,8 @@ type APIServer struct {
 	store  storage.Store
 	router *gin.Engine
 	srv    *http.Server
-	pprof  *pprof.PProfServer
-	trace  *trace.TraceServer
+	pprof  *pprof.Server
+	trace  *trace.Server
 }
 
 func NewAPIServer(addr string, store storage.Store) *APIServer {
@@ -31,7 +30,7 @@ func NewAPIServer(addr string, store storage.Store) *APIServer {
 	apiServer := &APIServer{
 		store: store,
 		pprof: pprof.NewPProfServer(pprofPath, store),
-		trace: trace.NewTraceServer(tracePath, store),
+		trace: trace.NewServer(tracePath, store),
 	}
 
 	router := gin.Default()

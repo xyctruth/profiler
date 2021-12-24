@@ -8,20 +8,20 @@ import (
 	"path"
 	"sync"
 
-	"github.com/xyctruth/profiler/pkg/go/v1175/traceui"
+	"github.com/xyctruth/profiler/pkg/internal/v1175/traceui"
 	"github.com/xyctruth/profiler/pkg/storage"
 	"github.com/xyctruth/profiler/pkg/utils"
 )
 
-type TraceServer struct {
+type Server struct {
 	mux      *http.ServeMux
 	mu       sync.Mutex
 	basePath string
 	store    storage.Store
 }
 
-func NewTraceServer(basePath string, store storage.Store) *TraceServer {
-	s := &TraceServer{
+func NewServer(basePath string, store storage.Store) *Server {
+	s := &Server{
 		mux:      http.NewServeMux(),
 		basePath: basePath,
 		store:    store,
@@ -30,11 +30,11 @@ func NewTraceServer(basePath string, store storage.Store) *TraceServer {
 	return s
 }
 
-func (s *TraceServer) Web(w http.ResponseWriter, r *http.Request) {
+func (s *Server) Web(w http.ResponseWriter, r *http.Request) {
 	s.mux.ServeHTTP(w, r)
 }
 
-func (s *TraceServer) register(w http.ResponseWriter, r *http.Request) {
+func (s *Server) register(w http.ResponseWriter, r *http.Request) {
 	id := utils.ExtractProfileID(r.URL.Path)
 	if id == "" {
 		http.Error(w, "Invalid parameter", http.StatusBadRequest)
