@@ -14,7 +14,7 @@
 
 ### Click Trace Charts Point Open Trace UI
 
-![profiler-pprof](assets/trace.png)
+![profiler-pprof](assets/profiler-trace.png)
 
 ## Quick Start
 
