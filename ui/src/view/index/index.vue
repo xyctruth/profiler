@@ -114,8 +114,8 @@ const jump = (item) => {
 <style lang="scss">
 
 .container{
-  margin-left: 15px;
-  margin-right: 15px;
+  margin-left: 20px;
+  margin-right: 20px;
 }
 
 @media only screen and (max-width: 1200px) {
