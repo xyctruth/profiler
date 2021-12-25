@@ -9,9 +9,7 @@
 `profiler` 基于 `pprof` 与 `go trace` 持续性能剖析工具
 
 - 根据配置文件收集目标服务的样本, 收集程序会监听配置文件变化实时更新收集目标
-  -  `pprof` （profile, mutex, heap, goroutine, allocs, block, threadcreate）
-  - `trace`
-  - `fgprof`
+- 支持的样本 `trace` `fgprof` `profile` `mutex` `heap` `goroutine` `allocs` `block` `threadcreate`
 - 提供图表观测服务性能指标的趋势，找出性能问题的时间点
 - 点击图标中的气泡跳转到 `pprof` 与 `trace` 的详细页面进行进一步详细的分析
 
