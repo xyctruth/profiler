@@ -18,8 +18,9 @@ type store struct {
 func NewStore(path string) storage.Store {
 	db, err := badger.Open(
 		badger.DefaultOptions(path).
-		WithLoggingLevel(3).
-		WithBypassLockGuard(true))
+			WithLoggingLevel(3).
+			WithBypassLockGuard(true))
+
 	if err != nil {
 		panic(err)
 	}
