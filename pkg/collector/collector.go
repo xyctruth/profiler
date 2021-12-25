@@ -12,7 +12,6 @@ import (
 
 	"github.com/google/pprof/profile"
 	"github.com/sirupsen/logrus"
-	"github.com/xyctruth/profiler/pkg/internal/v1175/trace"
 	"github.com/xyctruth/profiler/pkg/storage"
 )
 
@@ -213,10 +212,11 @@ func (collector *Collector) analysis(profileType string, profileBytes []byte) er
 func (collector *Collector) analysisTrace(profileType string, profileBytes []byte) error {
 	buf := &bytes.Buffer{}
 	buf.Write(profileBytes)
-	_, err := trace.Parse(buf, collector.TargetName)
-	if err != nil {
-		return err
-	}
+
+	//_, err := trace.Parse(buf, collector.TargetName)
+	//if err != nil {
+	//	return err
+	//}
 
 	profileID, err := collector.store.SaveProfile(profileBytes, collector.Expiration)
 	if err != nil {
