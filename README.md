@@ -34,10 +34,6 @@
 
 ## 快速入门
 
-### 配置文件
-
-需要被收集分析的 `golang` 程序,需要提供 `net/http/pprof` 端点，并配置在 `./collector.yaml` 配置文件中
-
 ### 本地启动
 ```bash
 # run server :8080
@@ -57,4 +53,81 @@ docker run -d -p 80:80 --name profiler xyctruth/profiler:latest
 mkdir -vp ~/profiler/config/
 cp ./collector.yaml ~/profiler/config/
 docker run -d -p 80:80 -v ~/profiler/data/:/profiler/data/ -v ~/profiler/config/:/profiler/config/ --name profiler xyctruth/profiler:latest
+```
+
+### 抓取配置
+
+需要被收集分析的 `golang` 程序,需要提供 `net/http/pprof` 端点，并配置在 `./collector.yaml` 配置文件中
+
+`collector.yaml`
+
+```yaml
+collector:
+  targetConfigs:
+
+    profiler-server:        # 服务名称
+      interval: 15s         # 抓取间隔
+      expiration: 0         # 无过期时间
+      host: localhost:9000  # 目标服务host
+      profileConfigs:       # 默认抓取 (trace, profile, fgprof, mutex, heap, goroutine, allocs, block, threadcreate)
+        
+    server2:
+      interval: 10s
+      expiration: 168h      # 过期时间7天
+      host: localhost:9000
+      profileConfigs:       # 覆盖默认配置（trace,fgprof,profile,heap）的部分字段
+        trace:
+          enable: false
+        fgprof:
+          enable: false
+        profile:
+          path: /debug/pprof/profile?seconds=10
+          enable: false
+        heap:
+          path: /debug/pprof/heap
+
+```
+
+`profileConfigs` 默认配置
+```go
+func defaultProfileConfigs() map[string]ProfileConfig {
+	return map[string]ProfileConfig{
+		"profile": {
+			Path:   "/debug/pprof/profile?seconds=10",
+			Enable: utils.BoolPtr(true),
+		},
+		"fgprof": {
+			Path:   "/debug/fgprof?seconds=10",
+			Enable: utils.BoolPtr(true),
+		},
+		"trace": {
+			Path:   "/debug/pprof/trace?seconds=10",
+			Enable: utils.BoolPtr(true),
+		},
+		"mutex": {
+			Path:   "/debug/pprof/mutex",
+			Enable: utils.BoolPtr(true),
+		},
+		"heap": {
+			Path:   "/debug/pprof/heap",
+			Enable: utils.BoolPtr(true),
+		},
+		"goroutine": {
+			Path:   "/debug/pprof/goroutine",
+			Enable: utils.BoolPtr(true),
+		},
+		"allocs": {
+			Path:   "/debug/pprof/allocs",
+			Enable: utils.BoolPtr(true),
+		},
+		"block": {
+			Path:   "/debug/pprof/block",
+			Enable: utils.BoolPtr(true),
+		},
+		"threadcreate": {
+			Path:   "/debug/pprof/threadcreate",
+			Enable: utils.BoolPtr(true),
+		},
+	}
+}
 ```

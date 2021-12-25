@@ -49,7 +49,6 @@ func defaultProfileConfigs() map[string]ProfileConfig {
 			Enable: utils.BoolPtr(true),
 		},
 	}
-
 }
 
 // LoadConfig watch configPath change, callback fn
