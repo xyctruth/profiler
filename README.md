@@ -55,11 +55,11 @@ cp ./collector.yaml ~/profiler/config/
 docker run -d -p 80:80 -v ~/profiler/data/:/profiler/data/ -v ~/profiler/config/:/profiler/config/ --name profiler xyctruth/profiler:latest
 ```
 
-### 抓取配置
+## 抓取配置
 
 需要被收集分析的 `golang` 程序,需要提供 `net/http/pprof` 端点，并配置在 `./collector.yaml` 配置文件中
 
-`collector.yaml`
+### `collector.yaml`
 
 ```yaml
 collector:
@@ -88,7 +88,7 @@ collector:
 
 ```
 
-`profileConfigs` 默认配置
+### `profileConfigs` 默认配置
 ```go
 func defaultProfileConfigs() map[string]ProfileConfig {
 	return map[string]ProfileConfig{
