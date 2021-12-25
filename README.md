@@ -8,14 +8,14 @@
 
 ## `profiler` 基于 `pprof` 与 `go trace` 持续性能剖析工具
 
-- 根据配置文件收集目标服务的样本, 收集程序会监听配置文件变化实时更新收集目标
+- 根据配置文件收集目标服务的样本, 收集程序会监听配置文件的变化,即时应用变化后的配置文件
 - 支持的样本 `trace` `fgprof` `profile` `mutex` `heap` `goroutine` `allocs` `block` `threadcreate`
-- 提供图表观测服务性能指标的趋势，找出性能问题的时间点
-- 点击图标中的气泡跳转到 `pprof` 与 `trace` 的详细页面进行进一步详细的分析
+- 提供 `chart` 观测服务性能指标的趋势，找出性能问题的时间点
+- 点击 `chart` 中的气泡跳转到 `pprof` 与 `trace` 的详细页面进行进一步详细的分析
 
 <table>
   <tr>
-      <td width="50%" align="center"><b>pprof图表</b></td>
+      <td width="50%" align="center"><b>pprof chart</b></td>
       <td width="50%" align="center"><b>点击气泡跳转pprof详情</b></td>
   </tr>
   <tr>
@@ -23,7 +23,7 @@
      <td><img src="https://xtruth.oss-cn-shenzhen.aliyuncs.com/profiler-pprof.png"/></td>
   </tr>
   <tr>
-      <td width="50%" align="center"><b>trace图表</b></td>
+      <td width="50%" align="center"><b>trace chart</b></td>
       <td width="50%" align="center"><b>点击气泡跳转trace详情</b></td>
   </tr>
   <tr>
@@ -57,7 +57,9 @@ docker run -d -p 80:80 -v ~/profiler/data/:/profiler/data/ -v ~/profiler/config/
 
 ## 抓取配置
 
-需要被收集分析的 `golang` 程序,需要提供 `net/http/pprof` 端点，并配置在 `./collector.yaml` 配置文件中
+需要被收集分析的 `golang` 程序,需要提供 `net/http/pprof` 端点，并配置在 `./collector.yaml` 配置文件中。
+
+配置文件可以在线更新，收集程序会监听配置文件的变化，即时应用变化后的配置文件。
 
 ### `collector.yaml`
 
@@ -65,17 +67,17 @@ docker run -d -p 80:80 -v ~/profiler/data/:/profiler/data/ -v ~/profiler/config/
 collector:
   targetConfigs:
 
-    profiler-server:        # 服务名称
+    profiler-server:        # 目标名称
       interval: 15s         # 抓取间隔
       expiration: 0         # 无过期时间
       host: localhost:9000  # 目标服务host
-      profileConfigs:       # 默认抓取 (trace, profile, fgprof, mutex, heap, goroutine, allocs, block, threadcreate)
+      profileConfigs:       # 使用默认配置 
         
     server2:
       interval: 10s
       expiration: 168h      # 过期时间7天
       host: localhost:9000
-      profileConfigs:       # 覆盖默认配置（trace,fgprof,profile,heap）的部分字段
+      profileConfigs:       # 覆盖部分默认配置字段
         trace:
           enable: false
         fgprof:
@@ -89,45 +91,34 @@ collector:
 ```
 
 ### `profileConfigs` 默认配置
-```go
-func defaultProfileConfigs() map[string]ProfileConfig {
-	return map[string]ProfileConfig{
-		"profile": {
-			Path:   "/debug/pprof/profile?seconds=10",
-			Enable: utils.BoolPtr(true),
-		},
-		"fgprof": {
-			Path:   "/debug/fgprof?seconds=10",
-			Enable: utils.BoolPtr(true),
-		},
-		"trace": {
-			Path:   "/debug/pprof/trace?seconds=10",
-			Enable: utils.BoolPtr(true),
-		},
-		"mutex": {
-			Path:   "/debug/pprof/mutex",
-			Enable: utils.BoolPtr(true),
-		},
-		"heap": {
-			Path:   "/debug/pprof/heap",
-			Enable: utils.BoolPtr(true),
-		},
-		"goroutine": {
-			Path:   "/debug/pprof/goroutine",
-			Enable: utils.BoolPtr(true),
-		},
-		"allocs": {
-			Path:   "/debug/pprof/allocs",
-			Enable: utils.BoolPtr(true),
-		},
-		"block": {
-			Path:   "/debug/pprof/block",
-			Enable: utils.BoolPtr(true),
-		},
-		"threadcreate": {
-			Path:   "/debug/pprof/threadcreate",
-			Enable: utils.BoolPtr(true),
-		},
-	}
-}
+
+```yaml
+profileConfigs:
+  profile:
+    Path:   "/debug/pprof/profile?seconds=10"
+    Enable: true
+  fgprof:
+    Path:   "/debug/fgprof?seconds=10"
+    Enable: true
+  trace:
+    Path:   "/debug/pprof/trace?seconds=10"
+    Enable: true
+  mutex:
+    Path:   "/debug/pprof/mutex"
+    Enable: true
+  heap:
+    Path:   "/debug/pprof/heap"
+    Enable: true
+  goroutine:
+    Path:   "/debug/pprof/goroutine"
+    Enable: true
+  allocs:
+    Path:   "/debug/pprof/allocs"
+    Enable: true
+  block:
+    Path:   "/debug/pprof/block"
+    Enable: true
+  threadcreate:
+    Path:   "/debug/pprof/threadcreate"
+    Enable: true
 ```
