@@ -1,6 +1,8 @@
 package apiserver
 
 import (
+	"bytes"
+	"compress/gzip"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -8,15 +10,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gin-gonic/gin"
-
-	"github.com/xyctruth/profiler/pkg/storage"
-
-	"github.com/stretchr/testify/require"
-
-	"github.com/xyctruth/profiler/pkg/storage/badger"
-
 	"github.com/gavv/httpexpect/v2"
+	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/require"
+	"github.com/xyctruth/profiler/pkg/internal/v1175/trace"
+	"github.com/xyctruth/profiler/pkg/storage"
+	"github.com/xyctruth/profiler/pkg/storage/badger"
 )
 
 var (
@@ -93,7 +92,7 @@ func initProfileData(s storage.Store, t *testing.T) (uint64, uint64, uint64) {
 	require.Equal(t, nil, err)
 	require.Equal(t, uint64(1), invalidId2)
 
-	profileBytes, err := ioutil.ReadFile("./profile.pb.gz")
+	profileBytes, err := ioutil.ReadFile("./profile.gz")
 	require.Equal(t, nil, err)
 	id, err := s.SaveProfile(profileBytes, time.Second*10)
 	require.Equal(t, nil, err)
@@ -223,21 +222,13 @@ func TestGetProfile(t *testing.T) {
 	defer os.RemoveAll(dir)
 
 	s := badger.NewStore(dir)
-	invalidId, invalidId2, id := initProfileData(s, t)
+	_, _, id := initProfileData(s, t)
 	apiServer := NewAPIServer(":8080", s)
 	e := getExpect(apiServer, t)
 
 	e.GET("/api/profile/999").
 		Expect().
 		Status(http.StatusNotFound)
-
-	e.GET(fmt.Sprintf("/api/profile/%d", invalidId)).
-		Expect().
-		Status(http.StatusInternalServerError).Text().Equal("parsing profile: empty input file")
-
-	e.GET(fmt.Sprintf("/api/profile/%d", invalidId2)).
-		Expect().
-		Status(http.StatusInternalServerError).Text().Equal("parsing profile: unrecognized profile format")
 
 	e.GET(fmt.Sprintf("/api/profile/%d", id)).
 		Expect().
@@ -267,4 +258,16 @@ func getExpect(apiServer *APIServer, t *testing.T) *httpexpect.Expect {
 		},
 		Reporter: httpexpect.NewAssertReporter(t),
 	})
+}
+
+func TestGZIP(t *testing.T) {
+	f1, err := os.Open("./trace.gz")
+	require.Equal(t, nil, err)
+	gzipReader, _ := gzip.NewReader(f1)
+	defer gzipReader.Close()
+	b, err := ioutil.ReadAll(gzipReader)
+	buf := bytes.NewReader(b)
+	_, err = trace.Parse(buf, "")
+	require.Equal(t, nil, err)
+
 }

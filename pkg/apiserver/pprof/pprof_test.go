@@ -25,7 +25,7 @@ func initProfileData(s storage.Store, t *testing.T) (uint64, uint64, uint64) {
 	require.Equal(t, nil, err)
 	require.Equal(t, uint64(1), invalidId2)
 
-	profileBytes, err := ioutil.ReadFile("../profile.pb.gz")
+	profileBytes, err := ioutil.ReadFile("../profile.gz")
 	require.Equal(t, nil, err)
 	id, err := s.SaveProfile(profileBytes, time.Second*10)
 	require.Equal(t, nil, err)
