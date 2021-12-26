@@ -1,7 +1,10 @@
 package trace
 
 import (
+	"bytes"
+	"compress/gzip"
 	"errors"
+	"io/ioutil"
 	"net/http"
 	"path"
 	"sync"
@@ -48,10 +51,19 @@ func (s *Server) register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	buf := bytes.NewBuffer(data)
+	gzipReader, _ := gzip.NewReader(buf)
+	defer gzipReader.Close()
+	b, err := ioutil.ReadAll(gzipReader)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	ui := traceui.NewTraceUI(data)
+	ui := traceui.NewTraceUI(b)
 
 	curPath := path.Join(s.basePath, id) + "/"
 	for pattern, handler := range ui.Handlers {
