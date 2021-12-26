@@ -44,7 +44,7 @@ func main() {
 }
 
 func runAPIServer(store storage.Store) *apiserver.APIServer {
-	apiServer := apiserver.NewAPIServer(":8080", store)
+	apiServer := apiserver.NewAPIServer(":8081", store)
 	apiServer.Run()
 	return apiServer
 }
