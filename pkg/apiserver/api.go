@@ -1,13 +1,14 @@
 package apiserver
 
 import (
+	"bytes"
+	"compress/gzip"
 	"context"
 	"errors"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/pprof/profile"
 	log "github.com/sirupsen/logrus"
 	"github.com/xyctruth/profiler/pkg/apiserver/pprof"
 	"github.com/xyctruth/profiler/pkg/apiserver/trace"
@@ -42,6 +43,7 @@ func NewAPIServer(addr string, store storage.Store) *APIServer {
 	router.Use(HandleCors).GET("/api/group_sample_types", apiServer.listGroupSampleTypes)
 	router.Use(HandleCors).GET("/api/profile_meta/:sample_type", apiServer.listProfileMeta)
 	router.Use(HandleCors).GET("/api/profile/:id", apiServer.getProfile)
+	router.Use(HandleCors).GET("/api/trace/:id", apiServer.getTrace)
 
 	// register pprof page
 	router.Use(HandleCors).GET(pprofPath+"/*any", apiServer.webPProf)
@@ -157,17 +159,40 @@ func (s *APIServer) getProfile(c *gin.Context) {
 		return
 	}
 
-	p, err := profile.ParseData(data)
+	c.Writer.Header().Set("Content-Encoding", "gzip")
+	c.Writer.Header().Set("Content-Disposition", "attachment;filename=profile_"+id+".pb.gz")
+	c.Data(200, "application/vnd.google.protobuf+gzip", data)
+}
+
+func (s *APIServer) getTrace(c *gin.Context) {
+	id := c.Param("id")
+	data, err := s.store.GetProfile(id)
+	if err != nil {
+		if errors.Is(err, storage.ErrProfileNotFound) {
+			c.String(http.StatusNotFound, "Profile not found")
+			return
+		}
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	var compressData bytes.Buffer
+	gzipWriter := gzip.NewWriter(&compressData)
+	defer gzipWriter.Close()
+	_, err = gzipWriter.Write(data)
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
-	c.Writer.Header().Set("Content-Type", "application/vnd.google.protobuf+gzip")
-	c.Writer.Header().Set("Content-Disposition", "attachment;filename=profile.pb.gz")
-
-	if err = p.Write(c.Writer); err != nil {
+	err = gzipWriter.Flush()
+	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
+		return
 	}
+
+	c.Writer.Header().Set("Content-Encoding", "gzip")
+	c.Writer.Header().Set("Content-Disposition", "attachment;filename=trace_"+id+".gz")
+	c.Data(200, "application/octet-stream", compressData.Bytes())
 }
 
 func (s *APIServer) webPProf(c *gin.Context) {

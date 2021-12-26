@@ -1,12 +1,16 @@
 package apiserver
 
 import (
+	"bytes"
+	"compress/gzip"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"testing"
 	"time"
+
+	"github.com/xyctruth/profiler/pkg/internal/v1175/trace"
 
 	"github.com/gin-gonic/gin"
 
@@ -93,7 +97,7 @@ func initProfileData(s storage.Store, t *testing.T) (uint64, uint64, uint64) {
 	require.Equal(t, nil, err)
 	require.Equal(t, uint64(1), invalidId2)
 
-	profileBytes, err := ioutil.ReadFile("./profile.pb.gz")
+	profileBytes, err := ioutil.ReadFile("./profile.gz")
 	require.Equal(t, nil, err)
 	id, err := s.SaveProfile(profileBytes, time.Second*10)
 	require.Equal(t, nil, err)
@@ -267,4 +271,16 @@ func getExpect(apiServer *APIServer, t *testing.T) *httpexpect.Expect {
 		},
 		Reporter: httpexpect.NewAssertReporter(t),
 	})
+}
+
+func TestGZIP(t *testing.T) {
+	f1, err := os.Open("./trace.gz")
+	require.Equal(t, nil, err)
+	gzipReader, _ := gzip.NewReader(f1)
+	defer gzipReader.Close()
+	b, err := ioutil.ReadAll(gzipReader)
+	buf := bytes.NewReader(b)
+	_, err = trace.Parse(buf, "")
+	require.Equal(t, nil, err)
+
 }
