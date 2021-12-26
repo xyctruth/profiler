@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"path"
+	"strings"
 	"sync"
 
 	"github.com/xyctruth/profiler/pkg/internal/v1175/traceui"
@@ -52,10 +53,14 @@ func (s *Server) register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	buf := bytes.NewBuffer(data)
-	gzipReader, _ := gzip.NewReader(buf)
+	gzipReader, err := gzip.NewReader(buf)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	defer gzipReader.Close()
 	b, err := ioutil.ReadAll(gzipReader)
-	if err != nil {
+	if err != nil && !strings.Contains(err.Error(), "unexpected EOF") {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
