@@ -2,6 +2,7 @@ package collector
 
 import (
 	"bytes"
+	"compress/gzip"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -210,15 +211,19 @@ func (collector *Collector) analysis(profileType string, profileBytes []byte) er
 }
 
 func (collector *Collector) analysisTrace(profileType string, profileBytes []byte) error {
-	buf := &bytes.Buffer{}
-	buf.Write(profileBytes)
+	var compressData bytes.Buffer
+	gzipWriter := gzip.NewWriter(&compressData)
+	defer gzipWriter.Close()
+	_, err := gzipWriter.Write(profileBytes)
+	if err != nil {
+		return err
+	}
+	err = gzipWriter.Flush()
+	if err != nil {
+		return err
+	}
 
-	//_, err := trace.Parse(buf, collector.TargetName)
-	//if err != nil {
-	//	return err
-	//}
-
-	profileID, err := collector.store.SaveProfile(profileBytes, collector.Expiration)
+	profileID, err := collector.store.SaveProfile(compressData.Bytes(), collector.Expiration)
 	if err != nil {
 		return err
 	}

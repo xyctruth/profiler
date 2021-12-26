@@ -1,8 +1,6 @@
 package apiserver
 
 import (
-	"bytes"
-	"compress/gzip"
 	"context"
 	"errors"
 	"net/http"
@@ -176,23 +174,9 @@ func (s *APIServer) getTrace(c *gin.Context) {
 		return
 	}
 
-	var compressData bytes.Buffer
-	gzipWriter := gzip.NewWriter(&compressData)
-	defer gzipWriter.Close()
-	_, err = gzipWriter.Write(data)
-	if err != nil {
-		c.String(http.StatusInternalServerError, err.Error())
-		return
-	}
-	err = gzipWriter.Flush()
-	if err != nil {
-		c.String(http.StatusInternalServerError, err.Error())
-		return
-	}
-
 	c.Writer.Header().Set("Content-Encoding", "gzip")
 	c.Writer.Header().Set("Content-Disposition", "attachment;filename=trace_"+id+".gz")
-	c.Data(200, "application/octet-stream", compressData.Bytes())
+	c.Data(200, "application/octet-stream", data)
 }
 
 func (s *APIServer) webPProf(c *gin.Context) {
