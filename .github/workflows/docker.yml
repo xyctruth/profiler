@@ -14,14 +14,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Login Docker Hub
-      run: |
-        docker login --username=xyctruth --password=${{ secrets.DOCKER_TOKEN }}
     - name: Build the Docker image
       run: |
        make docker-build IMG=xyctruth/profiler:latest
     - name: Push the Docker image
       if: ${{ github.event_name != 'pull_request' }}
       run: |
+        docker login --username=xyctruth --password=${{ secrets.DOCKER_TOKEN }}
         make docker-push IMG=xyctruth/profiler:latest
 
