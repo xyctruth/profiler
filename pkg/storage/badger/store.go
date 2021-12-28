@@ -22,7 +22,8 @@ func NewStore(path string) storage.Store {
 			WithBypassLockGuard(true).
 			WithNumMemtables(1).
 			WithNumLevelZeroTables(1).
-			WithNumLevelZeroTablesStall(2))
+			WithNumLevelZeroTablesStall(2).
+			WithValueLogFileSize(1 << 28))
 
 	if err != nil {
 		panic(err)
