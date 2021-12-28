@@ -19,7 +19,10 @@ func NewStore(path string) storage.Store {
 	db, err := badger.Open(
 		badger.DefaultOptions(path).
 			WithLoggingLevel(3).
-			WithBypassLockGuard(true))
+			WithBypassLockGuard(true).
+			WithNumMemtables(1).
+			WithNumLevelZeroTables(1).
+			WithNumLevelZeroTablesStall(2))
 
 	if err != nil {
 		panic(err)
