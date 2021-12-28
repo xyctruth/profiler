@@ -119,13 +119,19 @@ var templMain = template.Must(template.New("").Parse(`
 	<a href="trace">View trace</a><br>
 {{end}}
 <a href="goroutines">Goroutine analysis</a><br>
-<!-- <a href="io">Network blocking profile</a> (<a href="io?raw=1" download="io.profile">⬇</a>)<br> -->
-<!-- <a href="block">Synchronization blocking profile</a> (<a href="block?raw=1" download="block.profile">⬇</a>)<br>  -->
-<!-- <a href="syscall">Syscall blocking profile</a> (<a href="syscall?raw=1" download="syscall.profile">⬇</a>)<br> -->
-<!-- <a href="sched">Scheduler latency profile</a> (<a href="sche?raw=1" download="sched.profile">⬇</a>)<br> -->
 <a href="usertasks">User-defined tasks</a><br>
 <a href="userregions">User-defined regions</a><br>
 <a href="mmu">Minimum mutator utilization</a><br>
+
+<!-- <a href="io">Network blocking profile</a> -->
+(<a href="io?raw=1" download="io.profile">Network blocking profile⬇</a>)<br> 
+<!-- <a href="block">Synchronization blocking profile</a> -->
+(<a href="block?raw=1" download="block.profile">Synchronization blocking profile⬇</a>)<br> 
+<!-- <a href="syscall">Syscall blocking profile</a> --> 
+(<a href="syscall?raw=1" download="syscall.profile">Syscall blocking profile⬇</a>)<br> 
+<!-- <a href="sched">Scheduler latency profile</a> --> 
+(<a href="sche?raw=1" download="sched.profile">Scheduler latency profile⬇</a>)<br>
+
 </body>
 </html>
 `))
