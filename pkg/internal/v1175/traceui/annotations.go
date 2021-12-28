@@ -959,7 +959,7 @@ var templUserRegionTypes = template.Must(template.New("").Parse(`
 {{range $}}
   <tr>
     <td>{{.Type}}<br>{{.Frame.Fn}}<br>{{.Frame.File}}:{{.Frame.Line}}</td>
-    <td><a href="/userregion?type={{.Type}}&pc={{.Frame.PC | printf "%x"}}">{{.Histogram.Count}}</a></td>
+    <td><a href="userregion?type={{.Type}}&pc={{.Frame.PC | printf "%x"}}">{{.Histogram.Count}}</a></td>
     <td>{{.Histogram.ToHTML (.UserRegionURL)}}</td>
   </tr>
 {{end}}
@@ -997,7 +997,7 @@ var templUserTaskTypes = template.Must(template.New("").Parse(`
 
 </style>
 <body>
-Search log text: <form action="/usertask"><input name="logtext" type="text"><input type="submit"></form><br>
+Search log text: <form action="usertask"><input name="logtext" type="text"><input type="submit"></form><br>
 <table border="1" sortable="1">
 <tr>
 <th>Task type</th>
@@ -1007,7 +1007,7 @@ Search log text: <form action="/usertask"><input name="logtext" type="text"><inp
 {{range $}}
   <tr>
     <td>{{.Type}}</td>
-    <td><a href="/usertask?type={{.Type}}">{{.Count}}</a></td>
+    <td><a href="usertask?type={{.Type}}">{{.Count}}</a></td>
     <td>{{.Histogram.ToHTML (.UserTaskURL true)}}</td>
   </tr>
 {{end}}
@@ -1076,8 +1076,8 @@ Search log text: <form onsubmit="window.location.search+='&logtext='+window.logt
                 <td class="elapsed">{{$el.Duration}}</td>
 		<td></td>
                 <td>
-<a href="/trace?focustask={{$el.ID}}#{{asMillisecond $el.Start}}:{{asMillisecond $el.End}}">Task {{$el.ID}}</a>
-<a href="/trace?taskid={{$el.ID}}#{{asMillisecond $el.Start}}:{{asMillisecond $el.End}}">(goroutine view)</a>
+<a href="trace?focustask={{$el.ID}}#{{asMillisecond $el.Start}}:{{asMillisecond $el.End}}">Task {{$el.ID}}</a>
+<a href="trace?taskid={{$el.ID}}#{{asMillisecond $el.Start}}:{{asMillisecond $el.End}}">(goroutine view)</a>
 ({{if .Complete}}complete{{else}}incomplete{{end}})</td>
         </tr>
         {{range $el.Events}}
@@ -1263,10 +1263,10 @@ function reloadTable(key, value) {
 
 {{ with $p := filterParams .Filter}}
 <table class="summary">
-	<tr><td>Network Wait Time:</td><td> <a href="/regionio?{{$p}}">graph</a><a href="/regionio?{{$p}}&raw=1" download="io.profile">(download)</a></td></tr>
-	<tr><td>Sync Block Time:</td><td> <a href="/regionblock?{{$p}}">graph</a><a href="/regionblock?{{$p}}&raw=1" download="block.profile">(download)</a></td></tr>
-	<tr><td>Blocking Syscall Time:</td><td> <a href="/regionsyscall?{{$p}}">graph</a><a href="/regionsyscall?{{$p}}&raw=1" download="syscall.profile">(download)</a></td></tr>
-	<tr><td>Scheduler Wait Time:</td><td> <a href="/regionsched?{{$p}}">graph</a><a href="/regionsched?{{$p}}&raw=1" download="sched.profile">(download)</a></td></tr>
+	<tr><td>Network Wait Time:</td><td> <a href="regionio?{{$p}}">graph</a><a href="regionio?{{$p}}&raw=1" download="io.profile">(download)</a></td></tr>
+	<tr><td>Sync Block Time:</td><td> <a href="regionblock?{{$p}}">graph</a><a href="regionblock?{{$p}}&raw=1" download="block.profile">(download)</a></td></tr>
+	<tr><td>Blocking Syscall Time:</td><td> <a href="regionsyscall?{{$p}}">graph</a><a href="regionsyscall?{{$p}}&raw=1" download="syscall.profile">(download)</a></td></tr>
+	<tr><td>Scheduler Wait Time:</td><td> <a href="regionsched?{{$p}}">graph</a><a href="regionsched?{{$p}}&raw=1" download="sched.profile">(download)</a></td></tr>
 </table>
 {{ end }}
 <p>
@@ -1286,8 +1286,8 @@ function reloadTable(key, value) {
 </tr>
 {{range .Data}}
   <tr>
-    <td> <a href="/trace?goid={{.G}}">{{.G}}</a> </td>
-    <td> {{if .TaskID}}<a href="/trace?focustask={{.TaskID}}">{{.TaskID}}</a>{{end}} </td>
+    <td> <a href="trace?goid={{.G}}">{{.G}}</a> </td>
+    <td> {{if .TaskID}}<a href="trace?focustask={{.TaskID}}">{{.TaskID}}</a>{{end}} </td>
     <td> {{prettyDuration .TotalTime}} </td>
     <td>
         <div class="stacked-bar-graph">

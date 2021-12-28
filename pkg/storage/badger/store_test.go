@@ -255,3 +255,45 @@ func TestProfileMetaArray(t *testing.T) {
 	}
 	s.Release()
 }
+
+func BenchmarkBadger1(b *testing.B) {
+	dir, err := ioutil.TempDir("./", "temp-*")
+	if err != nil {
+		panic(err)
+	}
+	defer os.RemoveAll(dir)
+	s := NewStore(dir)
+	defer s.Release()
+	res, err := os.ReadFile("./trace_119091.gz")
+	if err != nil {
+		panic(err)
+	}
+
+	for i := 0; i < b.N; i++ {
+		_, err = s.SaveProfile(res, time.Hour*24*7)
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
+func BenchmarkBadger2(b *testing.B) {
+	dir, err := ioutil.TempDir("./", "temp-*")
+	if err != nil {
+		panic(err)
+	}
+	defer os.RemoveAll(dir)
+	s := NewStoreTest(dir)
+	defer s.Release()
+	res, err := os.ReadFile("./trace_119091.gz")
+	if err != nil {
+		panic(err)
+	}
+
+	for i := 0; i < b.N; i++ {
+		_, err = s.SaveProfile(res, time.Hour*24*7)
+		if err != nil {
+			panic(err)
+		}
+	}
+}
