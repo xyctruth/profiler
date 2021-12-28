@@ -20,4 +20,3 @@ collector:
           enable: false
         heap:
           path: /debug/pprof/heap
-

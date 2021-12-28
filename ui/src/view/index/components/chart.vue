@@ -67,15 +67,16 @@
           focus: 'series',
         },
       }
+
       const chartOptions = {
         animation: false, // 关闭加载动画
-
         legend: {
           type: 'scroll',
           orient: 'vertical',
           right: 10,
           top: 20,
           bottom: 20,
+          selectedMode: 'multiple',
         },
         grid: {
           left: 100,
@@ -117,7 +118,7 @@
           },
           formatter: (params) => {
             return formatTooltip(params, unit)
-          },
+          }
         },
         series: []
       }
@@ -165,6 +166,11 @@
           }
         });
       }
+
+      if (title ==="trace"){
+        chartOptions.legend.selectedMode = 'single'
+      }
+
       chart.setOption(Object.assign(chartOptions, {
         series: echartData,
       }), true);

@@ -69,7 +69,7 @@ var templGoroutines = template.Must(template.New("").Parse(`
 <body>
 Goroutines: <br>
 {{range $}}
-  <a href="/goroutine?id={{.ID}}">{{.Name}}</a> N={{.N}} <br>
+  <a href="goroutine?id={{.ID}}">{{.Name}}</a> N={{.N}} <br>
 {{end}}
 </body>
 </html>

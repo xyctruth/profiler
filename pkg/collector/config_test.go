@@ -48,6 +48,34 @@ collector:
           path: /debug/pprof/heap
 
 `
+	tracelConfigYAML = `
+collector:
+  targetConfigs:
+    profiler-server:
+      interval: 2s
+      expiration: 0  # no expiration time. unit day
+      host: localhost:9000
+      profileConfigs: # default scrape (profile, heap, allocs, black, mutex, fgprof)
+        profile:
+          enable: false
+        fgprof:
+          enable: false
+        trace:
+          enable: true
+        mutex:
+          enable: false
+        heap:
+          enable: false
+        goroutine:
+          enable: false
+        allocs:
+          enable: false
+        block:
+          enable: false
+        threadcreate:
+          enable: false
+
+`
 	changeConfigYAML = `
 collector:
   targetConfigs:

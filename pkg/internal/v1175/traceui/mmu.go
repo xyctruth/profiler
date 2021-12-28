@@ -261,7 +261,7 @@ var templMMU = `<!doctype html>
         var details = $('#details');
         details.empty();
         var windowNS = curve[items[0].row][0];
-        var url = '/mmuDetails?window=' + windowNS + '&flags=' + mmuFlags();
+        var url = 'mmuDetails?window=' + windowNS + '&flags=' + mmuFlags();
         $.getJSON(url)
          .fail(function(xhr, status, error) {
             details.text(status + ': ' + url + ' could not be loaded');

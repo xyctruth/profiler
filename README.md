@@ -95,30 +95,30 @@ collector:
 ```yaml
 profileConfigs:
   profile:
-    Path: "/debug/pprof/profile?seconds=10"
-    Enable: true
+    path: /debug/pprof/profile?seconds=10
+    enable: true
   fgprof:
-    Path: "/debug/fgprof?seconds=10"
-    Enable: true
+    path: /debug/fgprof?seconds=10
+    enable: true
   trace:
-    Path: "/debug/pprof/trace?seconds=10"
-    Enable: true
+    path: /debug/pprof/trace?seconds=10
+    enable: true
   mutex:
-    Path: "/debug/pprof/mutex"
-    Enable: true
+    path: /debug/pprof/mutex
+    enable: true
   heap:
-    Path: "/debug/pprof/heap"
-    Enable: true
+    path: /debug/pprof/heap
+    enable: true
   goroutine:
-    Path: "/debug/pprof/goroutine"
-    Enable: true
+    path: /debug/pprof/goroutine
+    enable: true
   allocs:
-    Path: "/debug/pprof/allocs"
-    Enable: true
+    path: /debug/pprof/allocs
+    enable: true
   block:
-    Path: "/debug/pprof/block"
-    Enable: true
+    path: /debug/pprof/block
+    enable: true
   threadcreate:
-    Path: "/debug/pprof/threadcreate"
-    Enable: true
+    path: /debug/pprof/threadcreate
+    enable: true
 ```
