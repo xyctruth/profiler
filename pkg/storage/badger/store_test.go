@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/xyctruth/profiler/pkg/storage"
-
+	"github.com/dgraph-io/badger/v3"
 	"github.com/stretchr/testify/require"
+	"github.com/xyctruth/profiler/pkg/storage"
 )
 
 var (
@@ -262,7 +262,26 @@ func BenchmarkBadger1(b *testing.B) {
 		panic(err)
 	}
 	defer os.RemoveAll(dir)
-	s := NewStore(dir)
+
+	db, err := badger.Open(
+		badger.DefaultOptions(dir).
+			WithLoggingLevel(3).
+			WithBypassLockGuard(true))
+
+	if err != nil {
+		panic(err)
+	}
+
+	s := &store{
+		db:   db,
+		path: dir,
+	}
+
+	s.seq, err = s.db.GetSequence(Sequence, 1000)
+	if err != nil {
+		panic(err)
+	}
+
 	defer s.Release()
 	res, err := os.ReadFile("./trace_119091.gz")
 	if err != nil {
@@ -283,7 +302,30 @@ func BenchmarkBadger2(b *testing.B) {
 		panic(err)
 	}
 	defer os.RemoveAll(dir)
-	s := NewStoreTest(dir)
+
+	db, err := badger.Open(
+		badger.DefaultOptions(dir).
+			WithLoggingLevel(3).
+			WithBypassLockGuard(true).
+			//WithNumMemtables(1).
+			//WithNumLevelZeroTables(1).
+			//WithNumLevelZeroTablesStall(2).
+			WithValueLogFileSize(64 << 20))
+
+	if err != nil {
+		panic(err)
+	}
+
+	s := &store{
+		db:   db,
+		path: dir,
+	}
+
+	s.seq, err = s.db.GetSequence(Sequence, 1000)
+	if err != nil {
+		panic(err)
+	}
+
 	defer s.Release()
 	res, err := os.ReadFile("./trace_119091.gz")
 	if err != nil {

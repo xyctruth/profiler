@@ -19,34 +19,8 @@ func NewStore(path string) storage.Store {
 	db, err := badger.Open(
 		badger.DefaultOptions(path).
 			WithLoggingLevel(3).
-			WithBypassLockGuard(true))
-	if err != nil {
-		panic(err)
-	}
-
-	s := &store{
-		db:   db,
-		path: path,
-	}
-	s.seq, err = s.db.GetSequence(Sequence, 1000)
-	if err != nil {
-		panic(err)
-	}
-
-	go s.GC()
-
-	return s
-}
-
-func NewStoreTest(path string) storage.Store {
-	db, err := badger.Open(
-		badger.DefaultOptions(path).
-			WithLoggingLevel(3).
 			WithBypassLockGuard(true).
-			WithNumMemtables(1).
-			WithNumLevelZeroTables(1).
-			WithNumLevelZeroTablesStall(2).
-			WithValueLogFileSize(1 << 28))
+			WithValueLogFileSize(64 << 20))
 
 	if err != nil {
 		panic(err)
