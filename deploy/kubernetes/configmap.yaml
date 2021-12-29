@@ -7,38 +7,6 @@ data:
   collector.yaml: |
     collector:
       targetConfigs:
-        test:
-          interval: 1s
-          expiration: 24h  # no expiration time
-          host: localhost:9000
-          profileConfigs: # default scrape  (profile, fgprof, mutex, heap, goroutine, allocs, block, threadcreate, trace)
-            profile:
-              path: /debug/pprof/profile?seconds=10
-              enable: false
-            fgprof:
-              path: /debug/fgprof?seconds=10
-              enable: false
-            trace:
-              path: /debug/pprof/trace?seconds=10
-              enable: false
-            mutex:
-              path: /debug/pprof/mutex
-              enable: false
-            heap:
-              path: /debug/pprof/heap
-              enable: true
-            goroutine:
-              path: /debug/pprof/goroutine
-              enable: false
-            allocs:
-              path: /debug/pprof/allocs
-              enable: false
-            block:
-              path: /debug/pprof/block
-              enable: false
-            threadcreate:
-              path: /debug/pprof/threadcreate
-              enable: false
         profiler-server:
           interval: 5m
           expiration: 168h
