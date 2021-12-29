@@ -6,7 +6,7 @@
 
 >  [GitHub](https://github.com/xyctruth/profiler) [Demo](https://profiling.jia-huang.com)
 
-## `profiler` 基于 `pprof` 与 `go trace` 持续性能剖析工具
+## `profiler` 基于 `go pprof` 与 `go trace` 持续性能剖析工具
 
 - 根据配置文件收集目标服务的样本, 收集程序会监听配置文件的变化,即时应用变化后的配置文件
 - 支持的样本 `trace` `fgprof` `profile` `mutex` `heap` `goroutine` `allocs` `block` `threadcreate`

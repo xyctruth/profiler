@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"errors"
 	"time"
 
 	"github.com/vmihailenco/msgpack/v5"
@@ -49,6 +50,9 @@ type ProfileMeta struct {
 
 func (meta *ProfileMeta) Encode() ([]byte, error) {
 	b, err := msgpack.Marshal(meta)
+	if len(b) > (1 << 10) {
+		return nil, errors.New("meta size > (1 << 10) , badger WithValueThreshold is 1kb")
+	}
 	if err != nil {
 		return nil, err
 	}

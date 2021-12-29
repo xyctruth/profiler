@@ -20,7 +20,7 @@ func NewStore(path string) storage.Store {
 		badger.DefaultOptions(path).
 			WithLoggingLevel(3).
 			WithBypassLockGuard(true).
-			WithValueLogFileSize(64 << 20))
+			WithValueThreshold(1 << 10))
 
 	if err != nil {
 		panic(err)
