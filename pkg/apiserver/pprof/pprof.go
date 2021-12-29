@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 	"sync"
+	"time"
 
 	"github.com/google/pprof/driver"
 	"github.com/xyctruth/profiler/pkg/storage"
@@ -18,6 +19,7 @@ type Server struct {
 	mu       sync.Mutex
 	basePath string
 	store    storage.Store
+	exitChan chan struct{}
 }
 
 func NewPProfServer(basePath string, store storage.Store) *Server {
@@ -25,9 +27,34 @@ func NewPProfServer(basePath string, store storage.Store) *Server {
 		mux:      http.NewServeMux(),
 		basePath: basePath,
 		store:    store,
+		exitChan: make(chan struct{}),
 	}
 	s.mux.HandleFunc("/", s.register)
+
+	go func() {
+		ticker := time.NewTicker(1 * time.Minute)
+		defer ticker.Stop()
+		for {
+			select {
+			case <-s.exitChan:
+				return
+			case <-ticker.C:
+				s.gc()
+			}
+		}
+	}()
 	return s
+}
+
+func (s *Server) Exit() {
+	close(s.exitChan)
+}
+
+func (s *Server) gc() {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.mux = http.NewServeMux()
+	s.mux.HandleFunc("/", s.register)
 }
 
 func (s *Server) Web(w http.ResponseWriter, r *http.Request) {

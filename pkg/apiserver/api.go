@@ -59,6 +59,9 @@ func NewAPIServer(addr string, store storage.Store) *APIServer {
 }
 
 func (s *APIServer) Stop() {
+	s.pprof.Exit()
+	s.trace.Exit()
+
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	if err := s.srv.Shutdown(ctx); err != nil {
