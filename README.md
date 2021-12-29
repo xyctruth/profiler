@@ -4,7 +4,7 @@
 [![codecov](https://codecov.io/gh/xyctruth/profiler/branch/master/graph/badge.svg?token=YWNYJK9KQW)](https://codecov.io/gh/xyctruth/profiler)
 [![Build status](https://img.shields.io/github/workflow/status/xyctruth/profiler/Server-Build/master)](https://github.com/xyctruth/profiler/actions/workflows/server-build.yml)
 
-> [Demo](https://profiling.jia-huang.com)
+>  [GitHub](https://github.com/xyctruth/profiler) [Demo](https://profiling.jia-huang.com)
 
 ## `profiler` 基于 `pprof` 与 `go trace` 持续性能剖析工具
 
