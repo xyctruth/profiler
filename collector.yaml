@@ -6,17 +6,3 @@ collector:
       expiration: 0  # no expiration time
       host: localhost:9000
       profileConfigs: # default scrape  (profile, fgprof, mutex, heap, goroutine, allocs, block, threadcreate, trace)
-    server2:
-      interval: 10s
-      expiration: 168h #7 day
-      host: localhost:9000
-      profileConfigs: # rewrite default profile config
-        trace:
-          enable: false
-        fgprof:
-          enable: false
-        profile:
-          path: /debug/pprof/profile?seconds=10
-          enable: false
-        heap:
-          path: /debug/pprof/heap
