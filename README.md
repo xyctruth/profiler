@@ -15,7 +15,7 @@
 
 <table>
   <tr>
-      <td width="50%" align="center"><b>pprof chart</b></td>
+      <td width="50%" align="center"><b>chart</b></td>
       <td width="50%" align="center"><b>点击气泡跳转pprof详情</b></td>
   </tr>
   <tr>
