@@ -102,7 +102,7 @@ func initProfileData(s storage.Store, t *testing.T) (uint64, uint64, uint64, uin
 	require.Equal(t, nil, err)
 	traceID, err := s.SaveProfile(traceBytes, time.Second*10)
 	require.Equal(t, nil, err)
-	require.Equal(t, uint64(2), id)
+	require.Equal(t, uint64(3), traceID)
 	return invalidId, invalidId2, id, traceID
 }
 

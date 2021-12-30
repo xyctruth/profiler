@@ -7,6 +7,7 @@ import (
 	"errors"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -188,7 +189,7 @@ func (s *APIServer) getTrace(c *gin.Context) {
 	}
 	defer gzipReader.Close()
 	b, err := ioutil.ReadAll(gzipReader)
-	if err != nil {
+	if err != nil && !strings.Contains(err.Error(), "unexpected EOF") {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
