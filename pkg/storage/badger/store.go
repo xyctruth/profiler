@@ -10,14 +10,14 @@ import (
 )
 
 type store struct {
-	db   *badger.DB
-	path string
-	seq  *badger.Sequence
+	db  *badger.DB
+	opt Options
+	seq *badger.Sequence
 }
 
-func NewStore(path string) storage.Store {
+func NewStore(opt Options) storage.Store {
 	db, err := badger.Open(
-		badger.DefaultOptions(path).
+		badger.DefaultOptions(opt.Path).
 			WithLoggingLevel(3).
 			WithBypassLockGuard(true).
 			WithValueThreshold(1 << 10))
@@ -27,8 +27,8 @@ func NewStore(path string) storage.Store {
 	}
 
 	s := &store{
-		db:   db,
-		path: path,
+		db:  db,
+		opt: opt,
 	}
 	s.seq, err = s.db.GetSequence(Sequence, 1000)
 	if err != nil {
@@ -43,7 +43,7 @@ func NewStore(path string) storage.Store {
 func (s *store) GC() {
 	s.gc()
 
-	ticker := time.NewTicker(5 * time.Minute)
+	ticker := time.NewTicker(s.opt.GCInternal)
 	defer ticker.Stop()
 	for range ticker.C {
 		s.gc()

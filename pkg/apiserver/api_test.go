@@ -92,13 +92,13 @@ func initProfileData(s storage.Store, t *testing.T) (uint64, uint64, uint64, uin
 	require.Equal(t, nil, err)
 	require.Equal(t, uint64(1), invalidId2)
 
-	profileBytes, err := ioutil.ReadFile("./profile.gz")
+	profileBytes, err := ioutil.ReadFile("./testdata/profile.gz")
 	require.Equal(t, nil, err)
 	id, err := s.SaveProfile(profileBytes, time.Second*10)
 	require.Equal(t, nil, err)
 	require.Equal(t, uint64(2), id)
 
-	traceBytes, err := ioutil.ReadFile("./trace.gz")
+	traceBytes, err := ioutil.ReadFile("./testdata/trace.gz")
 	require.Equal(t, nil, err)
 	traceID, err := s.SaveProfile(traceBytes, time.Second*10)
 	require.Equal(t, nil, err)
@@ -110,8 +110,8 @@ func TestApiServer(t *testing.T) {
 	dir, err := ioutil.TempDir("./", "temp-*")
 	require.Equal(t, nil, err)
 	defer os.RemoveAll(dir)
-	s := badger.NewStore(dir)
-	apiServer := NewAPIServer(":8080", s)
+	s := badger.NewStore(badger.DefaultOptions(dir))
+	apiServer := NewAPIServer(DefaultOptions(s))
 	apiServer.Run()
 	defer apiServer.Stop()
 }
@@ -120,11 +120,11 @@ func TestBasisAPI(t *testing.T) {
 	dir, err := ioutil.TempDir("./", "temp-*")
 	require.Equal(t, nil, err)
 	defer os.RemoveAll(dir)
-	s := badger.NewStore(dir)
+	s := badger.NewStore(badger.DefaultOptions(dir))
 
 	initMateData(s, t)
 
-	apiServer := NewAPIServer(":8080", s)
+	apiServer := NewAPIServer(DefaultOptions(s))
 
 	e := getExpect(apiServer, t)
 
@@ -170,11 +170,11 @@ func TestListProfileMeta(t *testing.T) {
 	require.Equal(t, nil, err)
 	defer os.RemoveAll(dir)
 
-	s := badger.NewStore(dir)
+	s := badger.NewStore(badger.DefaultOptions(dir))
 
 	initMateData(s, t)
 
-	apiServer := NewAPIServer(":8080", s)
+	apiServer := NewAPIServer(DefaultOptions(s))
 
 	e := getExpect(apiServer, t)
 
@@ -227,9 +227,9 @@ func TestGetProfile(t *testing.T) {
 	require.Equal(t, nil, err)
 	defer os.RemoveAll(dir)
 
-	s := badger.NewStore(dir)
+	s := badger.NewStore(badger.DefaultOptions(dir))
 	_, _, id, traceID := initProfileData(s, t)
-	apiServer := NewAPIServer(":8080", s)
+	apiServer := NewAPIServer(DefaultOptions(s))
 	e := getExpect(apiServer, t)
 
 	e.GET("/api/profile/999").
@@ -254,8 +254,8 @@ func TestWebProfile(t *testing.T) {
 	require.Equal(t, nil, err)
 	defer os.RemoveAll(dir)
 
-	s := badger.NewStore(dir)
-	apiServer := NewAPIServer(":8080", s)
+	s := badger.NewStore(badger.DefaultOptions(dir))
+	apiServer := NewAPIServer(DefaultOptions(s))
 	e := getExpect(apiServer, t)
 	e.GET("/api/pprof/ui/1999").
 		Expect().
@@ -267,8 +267,8 @@ func TestTraceProfile(t *testing.T) {
 	require.Equal(t, nil, err)
 	defer os.RemoveAll(dir)
 
-	s := badger.NewStore(dir)
-	apiServer := NewAPIServer(":8080", s)
+	s := badger.NewStore(badger.DefaultOptions(dir))
+	apiServer := NewAPIServer(DefaultOptions(s))
 	e := getExpect(apiServer, t)
 	e.GET("/api/trace/ui/1999").
 		Expect().
@@ -288,7 +288,7 @@ func getExpect(apiServer *APIServer, t *testing.T) *httpexpect.Expect {
 }
 
 func TestGZIP(t *testing.T) {
-	f1, err := os.Open("./trace.gz")
+	f1, err := os.Open("./testdata/trace.gz")
 	require.Equal(t, nil, err)
 	gzipReader, _ := gzip.NewReader(f1)
 	defer gzipReader.Close()

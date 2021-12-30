@@ -24,7 +24,7 @@ func initTraceData(s storage.Store, t *testing.T) (uint64, uint64, uint64) {
 	require.Equal(t, nil, err)
 	require.Equal(t, uint64(1), invalidId2)
 
-	traceBytes, err := ioutil.ReadFile("../trace.gz")
+	traceBytes, err := ioutil.ReadFile("../testdata/trace.gz")
 	require.Equal(t, nil, err)
 	id, err := s.SaveProfile(traceBytes, time.Second*10)
 	require.Equal(t, nil, err)
@@ -37,9 +37,9 @@ func TestServer(t *testing.T) {
 	require.Equal(t, nil, err)
 	defer os.RemoveAll(dir)
 
-	store := badger.NewStore(dir)
+	store := badger.NewStore(badger.DefaultOptions(dir))
 
-	pprofServer := NewServer("/api/trace/ui", store)
+	pprofServer := NewServer("/api/trace/ui", store, 1*time.Second)
 	defer pprofServer.Exit()
 
 	httpServer := httptest.NewServer(pprofServer.mux)

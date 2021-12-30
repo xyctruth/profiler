@@ -19,6 +19,7 @@ import (
 )
 
 type APIServer struct {
+	opt    Options
 	store  storage.Store
 	router *gin.Engine
 	srv    *http.Server
@@ -26,14 +27,15 @@ type APIServer struct {
 	trace  *trace.Server
 }
 
-func NewAPIServer(addr string, store storage.Store) *APIServer {
+func NewAPIServer(opt Options) *APIServer {
 	pprofPath := "/api/pprof/ui"
 	tracePath := "/api/trace/ui"
 
 	apiServer := &APIServer{
-		store: store,
-		pprof: pprof.NewServer(pprofPath, store),
-		trace: trace.NewServer(tracePath, store),
+		opt:   opt,
+		store: opt.Store,
+		pprof: pprof.NewServer(pprofPath, opt.Store, opt.GCInternal),
+		trace: trace.NewServer(tracePath, opt.Store, opt.GCInternal),
 	}
 
 	router := gin.Default()
@@ -53,7 +55,7 @@ func NewAPIServer(addr string, store storage.Store) *APIServer {
 	router.Use(HandleCors).GET(tracePath+"/*any", apiServer.webTrace)
 
 	srv := &http.Server{
-		Addr:    addr,
+		Addr:    opt.Addr,
 		Handler: router,
 	}
 

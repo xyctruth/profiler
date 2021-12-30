@@ -25,7 +25,7 @@ func initProfileData(s storage.Store, t *testing.T) (uint64, uint64, uint64) {
 	require.Equal(t, nil, err)
 	require.Equal(t, uint64(1), invalidId2)
 
-	profileBytes, err := ioutil.ReadFile("../profile.gz")
+	profileBytes, err := ioutil.ReadFile("../testdata/profile.gz")
 	require.Equal(t, nil, err)
 	id, err := s.SaveProfile(profileBytes, time.Second*10)
 	require.Equal(t, nil, err)
@@ -38,9 +38,9 @@ func TestServer(t *testing.T) {
 	require.Equal(t, nil, err)
 	defer os.RemoveAll(dir)
 
-	store := badger.NewStore(dir)
+	store := badger.NewStore(badger.DefaultOptions(dir))
 
-	pprofServer := NewServer("/api/pprof/ui", store)
+	pprofServer := NewServer("/api/pprof/ui", store, 1*time.Second)
 	defer pprofServer.Exit()
 
 	httpServer := httptest.NewServer(pprofServer.mux)

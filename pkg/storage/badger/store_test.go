@@ -90,7 +90,7 @@ func TestNewStore(t *testing.T) {
 	dir, err := ioutil.TempDir("./", "temp-*")
 	defer os.RemoveAll(dir)
 	require.Equal(t, nil, err)
-	s := NewStore(dir)
+	s := NewStore(DefaultOptions(dir))
 	defer s.Release()
 	require.NotEqual(t, nil, s)
 }
@@ -99,7 +99,7 @@ func TestGC(t *testing.T) {
 	dir, err := ioutil.TempDir("./", "temp-*")
 	defer os.RemoveAll(dir)
 	require.Equal(t, nil, err)
-	s := NewStore(dir)
+	s := NewStore(DefaultOptions(dir))
 	defer s.Release()
 	require.NotEqual(t, nil, s)
 	s.(*store).gc()
@@ -109,7 +109,7 @@ func TestProfile(t *testing.T) {
 	dir, err := ioutil.TempDir("./", "temp-*")
 	defer os.RemoveAll(dir)
 	require.Equal(t, nil, err)
-	s := NewStore(dir)
+	s := NewStore(DefaultOptions(dir))
 	defer s.Release()
 	require.NotEqual(t, nil, s)
 
@@ -130,7 +130,7 @@ func TestProfileMeta(t *testing.T) {
 	dir, err := ioutil.TempDir("./", "temp-*")
 	defer os.RemoveAll(dir)
 	require.Equal(t, nil, err)
-	s := NewStore(dir)
+	s := NewStore(DefaultOptions(dir))
 	defer s.Release()
 	require.NotEqual(t, nil, s)
 
@@ -185,7 +185,7 @@ func TestProfileMetaArray(t *testing.T) {
 	dir, err := ioutil.TempDir("./", "temp-*")
 	defer os.RemoveAll(dir)
 	require.Equal(t, nil, err)
-	s := NewStore(dir)
+	s := NewStore(DefaultOptions(dir).WithGCInternal(time.Second))
 	defer s.Release()
 	require.NotEqual(t, nil, s)
 
@@ -273,8 +273,8 @@ func BenchmarkBadger1(b *testing.B) {
 	}
 
 	s := &store{
-		db:   db,
-		path: dir,
+		db:  db,
+		opt: DefaultOptions(dir),
 	}
 
 	s.seq, err = s.db.GetSequence(Sequence, 1000)
@@ -317,8 +317,8 @@ func BenchmarkBadger2(b *testing.B) {
 	}
 
 	s := &store{
-		db:   db,
-		path: dir,
+		db:  db,
+		opt: DefaultOptions(dir),
 	}
 
 	s.seq, err = s.db.GetSequence(Sequence, 1000)

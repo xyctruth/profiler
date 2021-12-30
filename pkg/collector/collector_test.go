@@ -30,7 +30,7 @@ func TestCollectorReload(t *testing.T) {
 	require.Equal(t, nil, err)
 	defer os.RemoveAll(dir)
 
-	store := badger.NewStore(dir)
+	store := badger.NewStore(badger.DefaultOptions(dir))
 	defer store.Release()
 
 	wg := &sync.WaitGroup{}
@@ -73,7 +73,7 @@ func TestCollectorRun(t *testing.T) {
 	dir, err := ioutil.TempDir("./", "temp-*")
 	require.Equal(t, nil, err)
 	defer os.RemoveAll(dir)
-	store := badger.NewStore(dir)
+	store := badger.NewStore(badger.DefaultOptions(dir))
 	defer store.Release()
 
 	wg := &sync.WaitGroup{}

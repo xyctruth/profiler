@@ -35,6 +35,8 @@ COPY --from=ui-builder /workspace/nginx.conf /etc/nginx/nginx.conf
 ENV PROFILER_API_URL="127.0.0.1:8080"
 ENV DATA_PATH=/profiler/data
 ENV CONFIG_PATH=/profiler/config/collector.yaml
+ENV DATA_GC_INTERNAL=5m
+ENV UI_GC_INTERNAL=1m
 
 COPY entrypoint.sh ./entrypoint.sh
 RUN chmod +x entrypoint.sh

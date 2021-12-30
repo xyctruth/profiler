@@ -22,7 +22,7 @@ type Server struct {
 	exitChan chan struct{}
 }
 
-func NewServer(basePath string, store storage.Store) *Server {
+func NewServer(basePath string, store storage.Store, gcInternal time.Duration) *Server {
 	s := &Server{
 		mux:      http.NewServeMux(),
 		basePath: basePath,
@@ -32,7 +32,7 @@ func NewServer(basePath string, store storage.Store) *Server {
 	s.mux.HandleFunc("/", s.register)
 
 	go func() {
-		ticker := time.NewTicker(1 * time.Minute)
+		ticker := time.NewTicker(gcInternal)
 		defer ticker.Stop()
 		for {
 			select {
