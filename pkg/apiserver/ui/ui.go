@@ -1,35 +1,35 @@
-package trace
+package ui
 
 import (
-	"bytes"
-	"compress/gzip"
 	"errors"
-	"io/ioutil"
 	"net/http"
-	"path"
-	"strings"
 	"sync"
 	"time"
 
-	"github.com/xyctruth/profiler/pkg/internal/v1175/traceui"
 	"github.com/xyctruth/profiler/pkg/storage"
 	"github.com/xyctruth/profiler/pkg/utils"
 )
 
+type Driver func(basePath string, mux *http.ServeMux, id string, data []byte) error
+
 type Server struct {
+	cache    map[string]struct{}
 	mux      *http.ServeMux
 	mu       sync.Mutex
 	basePath string
 	store    storage.Store
 	exitChan chan struct{}
+	drive    Driver
 }
 
-func NewServer(basePath string, store storage.Store, gcInternal time.Duration) *Server {
+func NewServer(basePath string, store storage.Store, gcInternal time.Duration, drive Driver) *Server {
 	s := &Server{
 		mux:      http.NewServeMux(),
 		basePath: basePath,
 		store:    store,
 		exitChan: make(chan struct{}),
+		cache:    make(map[string]struct{}),
+		drive:    drive,
 	}
 	s.mux.HandleFunc("/", s.register)
 
@@ -57,6 +57,7 @@ func (s *Server) gc() {
 	defer s.mu.Unlock()
 	s.mux = http.NewServeMux()
 	s.mux.HandleFunc("/", s.register)
+	s.cache = make(map[string]struct{})
 }
 
 func (s *Server) Web(w http.ResponseWriter, r *http.Request) {
@@ -64,11 +65,20 @@ func (s *Server) Web(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) register(w http.ResponseWriter, r *http.Request) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	id := utils.ExtractProfileID(r.URL.Path)
 	if id == "" {
 		http.Error(w, "Invalid parameter", http.StatusBadRequest)
 		return
 	}
+
+	if _, ok := s.cache[id]; ok {
+		http.Redirect(w, r, r.URL.Path+"?"+r.URL.RawQuery, http.StatusSeeOther)
+		return
+	}
+
 	data, err := s.store.GetProfile(id)
 	if err != nil {
 		if errors.Is(err, storage.ErrProfileNotFound) {
@@ -79,38 +89,12 @@ func (s *Server) register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	buf := bytes.NewBuffer(data)
-	gzipReader, err := gzip.NewReader(buf)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer gzipReader.Close()
-	b, err := ioutil.ReadAll(gzipReader)
-	if err != nil && !strings.Contains(err.Error(), "unexpected EOF") {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	ui, err := traceui.NewUI(b)
+	err = s.drive(s.basePath, s.mux, id, data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	curPath := path.Join(s.basePath, id) + "/"
-	for pattern, handler := range ui.Handlers {
-		var joinedPattern string
-		if pattern == "/" {
-			joinedPattern = curPath
-		} else {
-			joinedPattern = path.Join(curPath, pattern)
-		}
-		s.mux.Handle(joinedPattern, handler)
-	}
-
+	s.cache[id] = struct{}{}
 	http.Redirect(w, r, r.URL.Path+"?"+r.URL.RawQuery, http.StatusSeeOther)
 }

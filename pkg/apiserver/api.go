@@ -12,8 +12,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
-	"github.com/xyctruth/profiler/pkg/apiserver/pprof"
-	"github.com/xyctruth/profiler/pkg/apiserver/trace"
+	"github.com/xyctruth/profiler/pkg/apiserver/ui"
+	"github.com/xyctruth/profiler/pkg/apiserver/ui/pprof"
+	"github.com/xyctruth/profiler/pkg/apiserver/ui/trace"
 	"github.com/xyctruth/profiler/pkg/storage"
 	"github.com/xyctruth/profiler/pkg/utils"
 )
@@ -23,8 +24,8 @@ type APIServer struct {
 	store  storage.Store
 	router *gin.Engine
 	srv    *http.Server
-	pprof  *pprof.Server
-	trace  *trace.Server
+	pprof  *ui.Server
+	trace  *ui.Server
 }
 
 func NewAPIServer(opt Options) *APIServer {
@@ -34,8 +35,8 @@ func NewAPIServer(opt Options) *APIServer {
 	apiServer := &APIServer{
 		opt:   opt,
 		store: opt.Store,
-		pprof: pprof.NewServer(pprofPath, opt.Store, opt.GCInternal),
-		trace: trace.NewServer(tracePath, opt.Store, opt.GCInternal),
+		pprof: ui.NewServer(pprofPath, opt.Store, opt.GCInternal, pprof.Driver),
+		trace: ui.NewServer(tracePath, opt.Store, opt.GCInternal, trace.Driver),
 	}
 
 	router := gin.Default()
