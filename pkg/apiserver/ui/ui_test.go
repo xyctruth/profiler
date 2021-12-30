@@ -61,7 +61,7 @@ func TestPProfServer(t *testing.T) {
 
 	store := badger.NewStore(badger.DefaultOptions(dir))
 
-	pprofServer := NewServer("/api/pprof/ui", store, 1*time.Second, pprof.Driver)
+	pprofServer := NewServer("/api/pprof/ui", store, 1*time.Minute, pprof.Driver)
 	defer pprofServer.Exit()
 
 	httpServer := httptest.NewServer(pprofServer.mux)
@@ -131,7 +131,7 @@ func TestTraceServer(t *testing.T) {
 
 	store := badger.NewStore(badger.DefaultOptions(dir))
 
-	traceServer := NewServer("/api/trace/ui", store, 1*time.Second, trace.Driver)
+	traceServer := NewServer("/api/trace/ui", store, 1*time.Minute, trace.Driver)
 	defer traceServer.Exit()
 
 	httpServer := httptest.NewServer(traceServer.mux)

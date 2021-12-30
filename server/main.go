@@ -26,12 +26,17 @@ func main() {
 	flag.StringVar(&configPath, "config-path", "./collector.yaml", "Collector configuration file path")
 	flag.StringVar(&dataPath, "data-path", "./data", "Collector Data file path")
 	flag.DurationVar(&dataGCInternal, "data-gc-internal", 5*time.Minute, "Collector Data gc internal")
-	flag.DurationVar(&uiGCInternal, "ui-gc-internal", 2*time.Minute, "Trace and pprof ui gc internal")
+	flag.DurationVar(&uiGCInternal, "ui-gc-internal", 2*time.Minute, "Trace and pprof ui gc internal, must be greater than or equal to 1m")
 
 	flag.Parse()
 
 	log.WithFields(log.Fields{"configPath": configPath, "dataPath": dataPath, "dataGCInternal": dataGCInternal.String(), "uiGCInternal": uiGCInternal.String()}).
 		Info("flag parse")
+
+	if uiGCInternal < time.Minute {
+		log.Fatal("ui-gc-internal must be greater than or equal to 1m")
+		return
+	}
 
 	// Register the pprof endpoint
 	utils.RegisterPProf()
