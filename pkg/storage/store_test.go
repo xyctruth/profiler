@@ -29,4 +29,8 @@ func TestEncode(t *testing.T) {
 	require.Equal(t, profileMeta.Duration, meta.Duration)
 	require.Equal(t, profileMeta.SampleTypeUnit, meta.SampleTypeUnit)
 	require.Equal(t, profileMeta.SampleType, meta.SampleType)
+
+	profileMeta.ProfileType = string(make([]byte, 1024, 1024))
+	b, err = profileMeta.Encode()
+	require.NotEqual(t, err, nil)
 }

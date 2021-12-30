@@ -296,16 +296,16 @@ func (r Range) URL() string {
 // splitTrace splits the trace into a number of ranges,
 // each resulting in approx 100MB of json output
 // (trace viewer can hardly handle more).
-func (traceUI *TraceUI) splitTrace(res trace.ParseResult) []Range {
+func (traceUI *TraceUI) splitTrace(res trace.ParseResult) ([]Range, error) {
 	params := &traceParams{
 		parsed:  res,
 		endTime: math.MaxInt64,
 	}
 	s, c := traceUI.splittingTraceConsumer(100 << 20) // 100M
 	if err := generateTrace(params, c); err != nil {
-		dief("%v\n", err)
+		return nil, err
 	}
-	return s.Ranges
+	return s.Ranges, nil
 }
 
 type splitter struct {

@@ -83,7 +83,7 @@ func initMateData(s storage.Store, t *testing.T) {
 	require.Equal(t, nil, err)
 }
 
-func initProfileData(s storage.Store, t *testing.T) (uint64, uint64, uint64) {
+func initProfileData(s storage.Store, t *testing.T) (uint64, uint64, uint64, uint64) {
 	invalidId, err := s.SaveProfile([]byte{}, time.Second*10)
 	require.Equal(t, nil, err)
 	require.Equal(t, uint64(0), invalidId)
@@ -97,7 +97,13 @@ func initProfileData(s storage.Store, t *testing.T) (uint64, uint64, uint64) {
 	id, err := s.SaveProfile(profileBytes, time.Second*10)
 	require.Equal(t, nil, err)
 	require.Equal(t, uint64(2), id)
-	return invalidId, invalidId2, id
+
+	traceBytes, err := ioutil.ReadFile("./trace.gz")
+	require.Equal(t, nil, err)
+	traceID, err := s.SaveProfile(traceBytes, time.Second*10)
+	require.Equal(t, nil, err)
+	require.Equal(t, uint64(2), id)
+	return invalidId, invalidId2, id, traceID
 }
 
 func TestApiServer(t *testing.T) {
@@ -222,7 +228,7 @@ func TestGetProfile(t *testing.T) {
 	defer os.RemoveAll(dir)
 
 	s := badger.NewStore(dir)
-	_, _, id := initProfileData(s, t)
+	_, _, id, traceID := initProfileData(s, t)
 	apiServer := NewAPIServer(":8080", s)
 	e := getExpect(apiServer, t)
 
@@ -233,6 +239,14 @@ func TestGetProfile(t *testing.T) {
 	e.GET(fmt.Sprintf("/api/profile/%d", id)).
 		Expect().
 		Status(http.StatusOK).Header("Content-Type").Equal("application/vnd.google.protobuf+gzip")
+
+	e.GET("/api/trace/999").
+		Expect().
+		Status(http.StatusNotFound)
+
+	e.GET(fmt.Sprintf("/api/trace/%d", traceID)).
+		Expect().
+		Status(http.StatusOK).Header("Content-Type").Equal("application/octet-stream")
 }
 
 func TestWebProfile(t *testing.T) {
@@ -244,6 +258,19 @@ func TestWebProfile(t *testing.T) {
 	apiServer := NewAPIServer(":8080", s)
 	e := getExpect(apiServer, t)
 	e.GET("/api/pprof/ui/1999").
+		Expect().
+		Status(http.StatusNotFound).Text().Equal("Profile not found\n")
+}
+
+func TestTraceProfile(t *testing.T) {
+	dir, err := ioutil.TempDir("./", "temp-*")
+	require.Equal(t, nil, err)
+	defer os.RemoveAll(dir)
+
+	s := badger.NewStore(dir)
+	apiServer := NewAPIServer(":8080", s)
+	e := getExpect(apiServer, t)
+	e.GET("/api/trace/ui/1999").
 		Expect().
 		Status(http.StatusNotFound).Text().Equal("Profile not found\n")
 }

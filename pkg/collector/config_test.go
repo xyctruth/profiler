@@ -137,7 +137,7 @@ func TestChangeConfig(t *testing.T) {
 			require.Equal(t, 2*time.Second, config.TargetConfigs["profiler-server"].Interval)
 			require.Equal(t, 2*time.Second, config.TargetConfigs["server2"].Interval)
 			profileConfig := buildProfileConfigs(config.TargetConfigs["server2"].ProfileConfigs)
-			require.Equal(t, false, *profileConfig["fgprof"].Enable)
+			require.Equal(t, utils.BoolPtr(false), profileConfig["fgprof"].Enable)
 			change = true
 		} else {
 			require.NotEqual(t, config, nil)
@@ -145,7 +145,7 @@ func TestChangeConfig(t *testing.T) {
 			require.Equal(t, 1*time.Second, config.TargetConfigs["profiler-server"].Interval)
 			require.Equal(t, 1*time.Second, config.TargetConfigs["server2"].Interval)
 			profileConfig := buildProfileConfigs(config.TargetConfigs["server2"].ProfileConfigs)
-			require.Equal(t, true, *profileConfig["fgprof"].Enable)
+			require.Equal(t, utils.BoolPtr(true), profileConfig["fgprof"].Enable)
 		}
 	})
 	_, err = file.Write([]byte(changeConfigYAML))

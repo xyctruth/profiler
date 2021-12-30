@@ -1,8 +1,11 @@
 package apiserver
 
 import (
+	"bytes"
+	"compress/gzip"
 	"context"
 	"errors"
+	"io/ioutil"
 	"net/http"
 	"time"
 
@@ -28,7 +31,7 @@ func NewAPIServer(addr string, store storage.Store) *APIServer {
 
 	apiServer := &APIServer{
 		store: store,
-		pprof: pprof.NewPProfServer(pprofPath, store),
+		pprof: pprof.NewServer(pprofPath, store),
 		trace: trace.NewServer(tracePath, store),
 	}
 
@@ -177,9 +180,21 @@ func (s *APIServer) getTrace(c *gin.Context) {
 		return
 	}
 
-	c.Writer.Header().Set("Content-Encoding", "gzip")
-	c.Writer.Header().Set("Content-Disposition", "attachment;filename=trace_"+id+".gz")
-	c.Data(200, "application/octet-stream", data)
+	buf := bytes.NewBuffer(data)
+	gzipReader, err := gzip.NewReader(buf)
+	if err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+	defer gzipReader.Close()
+	b, err := ioutil.ReadAll(gzipReader)
+	if err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.Writer.Header().Set("Content-Disposition", "attachment;filename=trace_"+id+".out")
+	c.Data(200, "application/octet-stream", b)
 }
 
 func (s *APIServer) webPProf(c *gin.Context) {

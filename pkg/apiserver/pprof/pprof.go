@@ -22,7 +22,7 @@ type Server struct {
 	exitChan chan struct{}
 }
 
-func NewPProfServer(basePath string, store storage.Store) *Server {
+func NewServer(basePath string, store storage.Store) *Server {
 	s := &Server{
 		mux:      http.NewServeMux(),
 		basePath: basePath,

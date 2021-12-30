@@ -95,7 +95,11 @@ func (s *Server) register(w http.ResponseWriter, r *http.Request) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	ui := traceui.NewTraceUI(b)
+	ui, err := traceui.NewUI(b)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	curPath := path.Join(s.basePath, id) + "/"
 	for pattern, handler := range ui.Handlers {

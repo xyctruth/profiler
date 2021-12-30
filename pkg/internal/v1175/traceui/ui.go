@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
-	"os"
 	"sync"
 
 	_ "net/http/pprof" // Required to use pprof
@@ -35,7 +34,7 @@ type TraceUI struct {
 	}
 }
 
-func NewTraceUI(data []byte) *TraceUI {
+func NewUI(data []byte) (*TraceUI, error) {
 	traceUI := &TraceUI{
 		data: data,
 	}
@@ -43,9 +42,13 @@ func NewTraceUI(data []byte) *TraceUI {
 
 	res, err := traceUI.parseTrace()
 	if err != nil {
-		dief("%v\n", err)
+		return nil, err
 	}
-	traceUI.ranges = traceUI.splitTrace(res)
+	traceUI.ranges, err = traceUI.splitTrace(res)
+	if err != nil {
+		return nil, err
+	}
+
 	handlers := make(map[string]http.HandlerFunc)
 	handlers["/"] = traceUI.httpMain
 	handlers["/mmu"] = httpMMU
@@ -72,7 +75,7 @@ func NewTraceUI(data []byte) *TraceUI {
 	handlers["/goroutine"] = traceUI.httpGoroutine
 
 	traceUI.Handlers = handlers
-	return traceUI
+	return traceUI, nil
 }
 
 // parseEvents is a compatibility wrapper that returns only
@@ -135,8 +138,3 @@ var templMain = template.Must(template.New("").Parse(`
 </body>
 </html>
 `))
-
-func dief(msg string, args ...interface{}) {
-	fmt.Fprintf(os.Stderr, msg, args...)
-	os.Exit(1)
-}

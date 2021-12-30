@@ -33,14 +33,15 @@ func initProfileData(s storage.Store, t *testing.T) (uint64, uint64, uint64) {
 	return invalidId, invalidId2, id
 }
 
-func TestPprofServer(t *testing.T) {
+func TestServer(t *testing.T) {
 	dir, err := ioutil.TempDir("./", "temp-*")
 	require.Equal(t, nil, err)
 	defer os.RemoveAll(dir)
 
 	store := badger.NewStore(dir)
 
-	pprofServer := NewPProfServer("/api/pprof/ui", store)
+	pprofServer := NewServer("/api/pprof/ui", store)
+	defer pprofServer.Exit()
 
 	httpServer := httptest.NewServer(pprofServer.mux)
 	defer httpServer.Close()
@@ -52,10 +53,10 @@ func TestPprofServer(t *testing.T) {
 		Expect().
 		Status(http.StatusBadRequest).Text().Equal("Invalid parameter\n")
 
-	testPprofUI(e, store, t)
+	testUI(e, store, t, pprofServer)
 }
 
-func testPprofUI(e *httpexpect.Expect, store storage.Store, t *testing.T) {
+func testUI(e *httpexpect.Expect, store storage.Store, t *testing.T, pprofServer *Server) {
 	invalidId, invalidId2, id := initProfileData(store, t)
 
 	e.GET("/api/pprof/ui/1999").
@@ -89,6 +90,8 @@ func testPprofUI(e *httpexpect.Expect, store storage.Store, t *testing.T) {
 	e.GET(fmt.Sprintf("/api/pprof/ui/%d/top", id)).WithQuery("si", "alloc_space").
 		Expect().
 		Status(http.StatusOK).Header("Content-Type").Equal("text/html")
+
+	pprofServer.gc()
 
 	e.GET(fmt.Sprintf("/api/pprof/ui/%d/top", id)).WithQuery("si", "alloc_space").
 		Expect().
