@@ -21,15 +21,15 @@
 <table>
   <tr>
       <td width="50%" align="center"><b>图表趋势</b></td>
-      <td width="50%" align="center"><b>点击气泡跳转pprof详情</b></td>
+      <td width="50%" align="center"><b>点击气泡跳转 Profile 详情</b></td>
   </tr>
   <tr>
      <td><img src="https://xtruth.oss-cn-shenzhen.aliyuncs.com/profiler.png"/></td>
      <td><img src="https://xtruth.oss-cn-shenzhen.aliyuncs.com/profiler-pprof.png"/></td>
   </tr>
   <tr>
-      <td width="50%" align="center"><b>点击气泡跳转trace详情</b></td>
-      <td width="50%" align="center"><b>点击气泡跳转trace详情</b></td>
+      <td width="50%" align="center"><b>点击气泡跳转 Trace 详情</b></td>
+      <td width="50%" align="center"><b>点击气泡跳转 Trace 详情</b></td>
   </tr>
   <tr>
      <td><img src="https://xtruth.oss-cn-shenzhen.aliyuncs.com/profiler-trace.png"/></td>
