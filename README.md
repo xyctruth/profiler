@@ -6,7 +6,7 @@
 
 >  [GitHub](https://github.com/xyctruth/profiler) [Demo](https://profiling.jia-huang.com)
 
-## profiler 是一个基于 go pprof 与 go trace 持续性能剖析工具
+## Profiler 是一个基于 go pprof 与 go trace 持续性能剖析工具
 
 - **样本采集**
     - `trace` `fgprof` `profile` `mutex` `heap` `goroutine` `allocs` `block` `threadcreate`
