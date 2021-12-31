@@ -6,16 +6,21 @@
 
 >  [GitHub](https://github.com/xyctruth/profiler) [Demo](https://profiling.jia-huang.com)
 
-## profiler 基于 go pprof 与 go trace 持续性能剖析工具
+## profiler 是一个基于 go pprof 与 go trace 持续性能剖析工具
 
-- 根据配置文件收集目标服务的样本, 收集程序会监听配置文件的变化,即时应用变化后的配置文件
-- 支持的样本 `trace` `fgprof` `profile` `mutex` `heap` `goroutine` `allocs` `block` `threadcreate`
-- 提供 `chart` 观测服务性能指标的趋势，找出性能问题的时间点
-- 点击 `chart` 中的气泡跳转到 `pprof` 与 `trace` 的详细页面进行进一步详细的分析
+- **样本采集**
+    - `trace` `fgprof` `profile` `mutex` `heap` `goroutine` `allocs` `block` `threadcreate`
+- **配置动态加载**
+  - 根据配置文件收集目标服务的样本, 收集程序会监听配置文件的变化,即时应用变化后的配置文件
+- **图表趋势**
+  - 提供图表观测多个服务性能指标的趋势，找出性能问题的时间点
+  - 每一个气泡都是一份 Profile 与 Trace 的样本文件
+- **详细分析**
+  - 点击图表中的气泡跳转到 Profile 与 Trace 的详细页面进行进一步详细的分析
 
 <table>
   <tr>
-      <td width="50%" align="center"><b>pprof chart</b></td>
+      <td width="50%" align="center"><b>图表趋势</b></td>
       <td width="50%" align="center"><b>点击气泡跳转pprof详情</b></td>
   </tr>
   <tr>
@@ -40,7 +45,9 @@
 go run server/main.go 
 
 # run ui :80
-cd ui && npm install --registry=https://registry.npm.taobao.org && npm run dev --base_api_url=http://localhost:8080 
+cd ui 
+npm install --registry=https://registry.npm.taobao.org 
+npm run dev --base_api_url=http://localhost:8080 
 ```
 
 ### In Docker
