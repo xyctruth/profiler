@@ -6,32 +6,32 @@
 
 > [English](./README-EN.md) / [中文](./README-ZH.md)
 
-## Profiler is a continuous profiling tool that base go pprof and go trace
+## Profiler 是一个基于 go pprof 与 go trace 持续性能剖析工具
 
-- **Sample collection**
-  - `trace` `fgprof` `profile` `mutex` `heap` `goroutine` `allocs` `block` `threadcreate`
-- **dynamic loading configuration**
-  - Collect samples of the target service according to the configuration file. The collection program will monitor the changes of the configuration file and apply the changed configuration file immediately
-- **Chart trend**
-  - Provide charts to observe the trend of multiple service performance indicators and find the time point of performance problems
-  - Each bubble is a sample file of Profile and Trace
-- **Detailed analysis**
-  - Click the bubbles in the charts to jump to the detailed page of Profile and Trace for further detailed analysis
+- **样本采集**
+    - `trace` `fgprof` `profile` `mutex` `heap` `goroutine` `allocs` `block` `threadcreate`
+- **配置动态加载**
+    - 根据配置文件收集目标服务的样本, 收集程序会监听配置文件的变化,即时应用变化后的配置文件
+- **图表趋势**
+    - 提供图表观测多个服务性能指标的趋势，找出性能问题的时间点
+    - 每一个气泡都是一份 Profile 与 Trace 的样本文件
+- **详细分析**
+    - 点击图表中的气泡跳转到 Profile 与 Trace 的详细页面进行进一步详细的分析
 
 ### [Demo](https://profiling.jia-huang.com)
 
 <table>
   <tr>
-      <td width="50%" align="center"><b>Chart trend</b></td>
-      <td width="50%" align="center"><b>Click the bubble to jump the detailed profile</b></td>
+      <td width="50%" align="center"><b>图表趋势</b></td>
+      <td width="50%" align="center"><b>点击气泡跳转 Profile 详情</b></td>
   </tr>
   <tr>
      <td><img src="https://xtruth.oss-cn-shenzhen.aliyuncs.com/profiler.png"/></td>
      <td><img src="https://xtruth.oss-cn-shenzhen.aliyuncs.com/profiler-pprof.png"/></td>
   </tr>
   <tr>
-      <td width="50%" align="center"><b>Click the bubble to jump to the detailed trace</b></td>
-      <td width="50%" align="center"><b>Click the bubble to jump to the detailed trance</b></td>
+      <td width="50%" align="center"><b>点击气泡跳转 Trace 详情</b></td>
+      <td width="50%" align="center"><b>点击气泡跳转 Trace 详情</b></td>
   </tr>
   <tr>
      <td><img src="https://xtruth.oss-cn-shenzhen.aliyuncs.com/profiler-trace.png"/></td>
@@ -39,9 +39,9 @@
   </tr>
 </table>
 
-## Get started quickly
+## 快速入门
 
-### Local start
+### 本地启动
 ```bash
 # run server :8080
 go run server/main.go 
@@ -55,20 +55,20 @@ npm run dev --base_api_url=http://localhost:8080
 ### In Docker
 
 ```bash
-# No persistence
+# 无持久化
 docker run -d -p 80:80 --name profiler xyctruth/profiler:latest
 
-# Persistence
+# 持久化
 mkdir -vp ~/profiler/config/
 cp ./collector.yaml ~/profiler/config/
 docker run -d -p 80:80 -v ~/profiler/data/:/profiler/data/ -v ~/profiler/config/:/profiler/config/ --name profiler xyctruth/profiler:latest
 ```
 
-## Collector configuration
+## Collector 集配置
 
-The `golang` program that needs to be collected and analyzed needs to provide the `net/http/pprof` endpoint and configure it in the `./collector.yaml` configuration file.
+需要被收集分析的 `golang` 程序,需要提供 `net/http/pprof` 端点，并配置在 `./collector.yaml` 配置文件中。
 
-The configuration file can be updated online, and the collection program will monitor the change of the configuration file and apply the changed configuration file immediately.
+配置文件可以在线更新，收集程序会监听配置文件的变化，即时应用变化后的配置文件。
 
 ### `collector.yaml`
 
@@ -76,17 +76,17 @@ The configuration file can be updated online, and the collection program will mo
 collector:
   targetConfigs:
 
-    profiler-server:        # Target name
-      interval: 15s         # Crawl time
-      expiration: 0         # No expiration time
-      host: localhost:9000  # Target service host
-      profileConfigs:       # Use default configuration
+    profiler-server:        # 目标名称
+      interval: 15s         # 抓取间隔
+      expiration: 0         # 无过期时间
+      host: localhost:9000  # 目标服务host
+      profileConfigs:       # 使用默认配置 
         
     server2:
       interval: 10s
-      expiration: 168h      # Expiration time seven days
+      expiration: 168h      # 过期时间7天
       host: localhost:9000
-      profileConfigs:       # Override some default configuration fields
+      profileConfigs:       # 覆盖部分默认配置字段
         trace:
           enable: false
         fgprof:
@@ -99,7 +99,7 @@ collector:
 
 ```
 
-### default configuration of `profileConfigs`
+### `profileConfigs` 默认配置
 
 ```yaml
 profileConfigs:
