@@ -30,3 +30,12 @@ jobs:
           #disable-autolabeler: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker image
+        if: ${{ github.event_name != 'pull_request' }}
+        run: |
+          docker build -t xyctruth/profiler:latest .
+          docker tag xyctruth/profiler:latest xyctruth/profiler:${GITHUB_REF##refs/tags/}
+          docker login --username=xyctruth --password=${{ secrets.DOCKER_TOKEN }}
+          docker push xyctruth/profiler:latest
+          docker push xyctruth/profiler:${GITHUB_REF##refs/tags/}
