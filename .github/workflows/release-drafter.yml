@@ -4,7 +4,7 @@ on:
   push:
     # branches to consider in the event; optional, defaults to all
     branches:
-      - main
+      - master
   # pull_request event is required only for autolabeler
   pull_request:
     # Only following types are handled by the action, but one can default to all as well
@@ -30,3 +30,12 @@ jobs:
           #disable-autolabeler: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker image
+        if: ${{ github.event_name != 'pull_request' }}
+        run: |
+          docker build -t xyctruth/profiler:latest .
+          docker tag xyctruth/profiler:latest xyctruth/profiler:${GITHUB_REF##refs/tags/}
+          docker login --username=xyctruth --password=${{ secrets.DOCKER_TOKEN }}
+          docker push xyctruth/profiler:latest
+          docker push xyctruth/profiler:${GITHUB_REF##refs/tags/}
