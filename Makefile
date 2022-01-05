@@ -12,10 +12,6 @@ docker-run:
 docker-stop:
 	docker stop profiler && docker rm profiler
 
-.PHONY: docker-push
-docker-push:
-	docker push ${IMG}
-
 .PHONY: test
 test:
 	go test -race -v -coverprofile=cover.out  $(shell go list ./pkg/... | grep -v v1175)
