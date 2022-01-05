@@ -24,6 +24,7 @@ jobs:
 
       # Drafts your next Release notes as Pull Requests are merged into "master"
       - uses: release-drafter/release-drafter@v5
+        id: create_release
         # (Optional) specify config name to use, relative to .github/. Default: release-drafter.yml
         with:
           config-name: release-drafter-config.yml
@@ -36,7 +37,7 @@ jobs:
         if: ${{ github.event_name != 'pull_request' }}
         run: |
           docker build -t xyctruth/profiler:latest .
-          docker tag xyctruth/profiler:latest xyctruth/profiler:${GITHUB_REF##refs/tags/}
+          docker tag xyctruth/profiler:latest xyctruth/profiler:${{ steps.create_release.outputs.tag_name }}
           docker login --username=xyctruth --password=${{ secrets.DOCKER_TOKEN }}
           docker push xyctruth/profiler:latest
-          docker push xyctruth/profiler:${GITHUB_REF##refs/tags/}
+          docker push xyctruth/profiler:${{ steps.create_release.outputs.tag_name }}
