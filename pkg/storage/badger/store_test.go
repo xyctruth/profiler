@@ -277,7 +277,7 @@ func BenchmarkBadger1(b *testing.B) {
 		opt: DefaultOptions(dir),
 	}
 
-	s.seq, err = s.db.GetSequence(Sequence, 1000)
+	s.profileSeq, err = s.db.GetSequence(ProfileSequence, 1000)
 	if err != nil {
 		panic(err)
 	}
@@ -321,7 +321,7 @@ func BenchmarkBadger2(b *testing.B) {
 		opt: DefaultOptions(dir),
 	}
 
-	s.seq, err = s.db.GetSequence(Sequence, 1000)
+	s.profileSeq, err = s.db.GetSequence(ProfileSequence, 1000)
 	if err != nil {
 		panic(err)
 	}

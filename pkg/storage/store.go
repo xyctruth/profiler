@@ -13,10 +13,10 @@ type Store interface {
 	// SaveProfile Save profile，return profile id
 	// data binaries file
 	// ttl profile expiration time
-	SaveProfile(data []byte, ttl time.Duration) (uint64, error)
+	SaveProfile(data []byte, ttl time.Duration) (string, error)
 
 	// SaveProfileMeta Save profile meta data
-	SaveProfileMeta(targetName string, labels TargetLabels, metas []*ProfileMeta, ttl time.Duration) error
+	SaveProfileMeta(metas []*ProfileMeta, ttl time.Duration) error
 	// SaveProfileMeta Get profile meta data list
 	ListProfileMeta(sampleType string, targetFilter []string, startTime, endTime time.Time) ([]*ProfileMetaByTarget, error)
 
@@ -56,7 +56,7 @@ type ProfileMetaByTarget struct {
 }
 
 type ProfileMeta struct {
-	ProfileID      uint64
+	ProfileID      string
 	ProfileType    string
 	SampleType     string
 	TargetName     string
@@ -64,6 +64,7 @@ type ProfileMeta struct {
 	Value          int64
 	Timestamp      int64
 	Duration       int64
+	Labels         TargetLabels
 }
 
 func (meta *ProfileMeta) Encode() ([]byte, error) {

@@ -2,6 +2,7 @@ package badger
 
 import (
 	"errors"
+	"strconv"
 	"time"
 
 	"github.com/dgraph-io/badger/v3"
@@ -10,9 +11,10 @@ import (
 )
 
 type store struct {
-	db  *badger.DB
-	opt Options
-	seq *badger.Sequence
+	db         *badger.DB
+	opt        Options
+	profileSeq *badger.Sequence
+	metaSeq    *badger.Sequence
 }
 
 func NewStore(opt Options) storage.Store {
@@ -30,7 +32,12 @@ func NewStore(opt Options) storage.Store {
 		db:  db,
 		opt: opt,
 	}
-	s.seq, err = s.db.GetSequence(Sequence, 1000)
+	s.profileSeq, err = s.db.GetSequence(ProfileSequence, 1000)
+	if err != nil {
+		panic(err)
+	}
+
+	s.metaSeq, err = s.db.GetSequence(MetaSequence, 1000)
 	if err != nil {
 		panic(err)
 	}
@@ -79,53 +86,56 @@ func (s *store) GetProfile(id string) ([]byte, error) {
 	return date, err
 }
 
-func (s *store) SaveProfile(profileData []byte, ttl time.Duration) (uint64, error) {
-	id, err := s.seq.Next()
+func (s *store) SaveProfile(profileData []byte, ttl time.Duration) (string, error) {
+	id, err := s.profileSeq.Next()
 	if err != nil {
-		return 0, err
+		return "", err
 	}
-
+	idStr := strconv.FormatUint(id, 10)
 	err = s.db.Update(func(txn *badger.Txn) error {
-		return txn.SetEntry(newProfileEntry(id, profileData, ttl))
+		return txn.SetEntry(newProfileEntry(idStr, profileData, ttl))
 	})
 
-	return id, err
+	return idStr, err
 }
 
-func (s *store) SaveProfileMeta(targetName string, labels storage.TargetLabels, metas []*storage.ProfileMeta, ttl time.Duration) error {
-	return s.db.Update(func(txn *badger.Txn) error {
-		var err error
+func (s *store) SaveProfileMeta(metas []*storage.ProfileMeta, ttl time.Duration) error {
+	err := s.db.Update(func(txn *badger.Txn) error {
+
 		for _, meta := range metas {
-			if err = txn.SetEntry(newSampleTypeEntry(meta.SampleType, meta.ProfileType, ttl)); err != nil {
+
+			id, err := s.metaSeq.Next()
+			if err != nil {
 				return err
 			}
+			idStr := strconv.FormatUint(id, 10)
 
 			var profileMetaEntry *badger.Entry
-			if profileMetaEntry, err = newProfileMetaEntry(meta, ttl); err != nil {
+			if profileMetaEntry, err = newProfileMetaEntry(idStr, meta, ttl); err != nil {
 				return err
 			}
 			if err = txn.SetEntry(profileMetaEntry); err != nil {
 				return err
 			}
-		}
 
-		var targetEntry *badger.Entry
-		if targetEntry, err = newTargetEntry(targetName, labels, ttl); err != nil {
-			return err
-		}
-		if err = txn.SetEntry(targetEntry); err != nil {
-			return err
-		}
-
-		labelsEntry := newLabelsEntry(labels, ttl)
-		for _, entry := range labelsEntry {
-			if err = txn.SetEntry(entry); err != nil {
+			if err = txn.SetEntry(newSampleTypeEntry(meta.SampleType, meta.ProfileType, ttl)); err != nil {
 				return err
 			}
-		}
 
+			if err = txn.SetEntry(newTargetEntry(meta.TargetName, ttl)); err != nil {
+				return err
+			}
+
+			labelsEntry := newLabelsEntry(meta.Labels, id, ttl)
+			for _, entry := range labelsEntry {
+				if err = txn.SetEntry(entry); err != nil {
+					return err
+				}
+			}
+		}
 		return nil
 	})
+	return err
 }
 
 func (s *store) ListProfileMeta(sampleType string, targetFilter []string, startTime, endTime time.Time) ([]*storage.ProfileMetaByTarget, error) {
@@ -273,7 +283,12 @@ func (s *store) ListLabel() ([]string, error) {
 }
 
 func (s *store) Release() {
-	if err := s.seq.Release(); err != nil {
+	if err := s.profileSeq.Release(); err != nil {
+		log.WithError(err).Error("store release")
+		return
+	}
+
+	if err := s.metaSeq.Release(); err != nil {
 		log.WithError(err).Error("store release")
 		return
 	}

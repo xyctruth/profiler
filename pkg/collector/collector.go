@@ -200,10 +200,15 @@ func (collector *Collector) analysis(profileType string, profileBytes []byte) er
 		} else {
 			meta.SampleType = profileType
 		}
+
+		meta.Labels = collector.Labels
+		meta.Labels["Name"] = collector.TargetName
+		meta.Labels["SampleType"] = meta.SampleType
+
 		metas = append(metas, meta)
 	}
 
-	err = collector.store.SaveProfileMeta(collector.TargetName, collector.Labels, metas, collector.Expiration)
+	err = collector.store.SaveProfileMeta(metas, collector.Expiration)
 	if err != nil {
 		return err
 	}
@@ -234,9 +239,14 @@ func (collector *Collector) analysisTrace(profileType string, profileBytes []byt
 	meta.ProfileType = profileType
 	meta.SampleType = profileType
 	meta.TargetName = collector.TargetName
+
+	meta.Labels = collector.Labels
+	meta.Labels["Name"] = collector.TargetName
+	meta.Labels["SampleType"] = meta.SampleType
+
 	metas = append(metas, meta)
 
-	err = collector.store.SaveProfileMeta(collector.TargetName, collector.Labels, metas, collector.Expiration)
+	err = collector.store.SaveProfileMeta(metas, collector.Expiration)
 	if err != nil {
 		return err
 	}
