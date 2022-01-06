@@ -15,6 +15,7 @@ var (
 	PrefixProfileMeta = []byte{0x82}
 	PrefixSampleType  = []byte{0x83}
 	PrefixTarget      = []byte{0x84}
+	PrefixLabel       = []byte{0x85}
 )
 
 func buildProfileKey(id string) []byte {
@@ -50,6 +51,14 @@ func buildTargetKey(target string) []byte {
 	return buf.Bytes()
 }
 
+func buildLabelKey(key, val, target string) []byte {
+	buf := bytes.NewBuffer(PrefixLabel)
+	buf.Write([]byte(key))
+	buf.Write([]byte(val))
+	buf.Write([]byte(target))
+	return buf.Bytes()
+}
+
 func newProfileEntry(id uint64, val []byte, ttl time.Duration) *badger.Entry {
 	entry := badger.NewEntry(buildProfileKey(strconv.FormatUint(id, 10)), val)
 	if ttl > 0 {
@@ -78,12 +87,24 @@ func newSampleTypeEntry(sampleType string, profileType string, ttl time.Duration
 	return entry
 }
 
-func newTargetKeyEntry(target string, ttl time.Duration) *badger.Entry {
-	entry := badger.NewEntry(buildTargetKey(target), []byte{})
+func newTargetEntry(target string, ttl time.Duration) *badger.Entry {
+	entry := badger.NewEntry(buildTargetKey(target), nil)
 	if ttl > 0 {
 		entry = entry.WithTTL(ttl)
 	}
 	return entry
+}
+
+func newLabelsEntry(labels map[string]string, target string, ttl time.Duration) []*badger.Entry {
+	entries := make([]*badger.Entry, 0, len(labels))
+	for key, val := range labels {
+		entry := badger.NewEntry(buildLabelKey(key, val, target), nil)
+		if ttl > 0 {
+			entry = entry.WithTTL(ttl)
+		}
+		entries = append(entries, entry)
+	}
+	return entries
 }
 
 func deleteSampleTypeKey(sampleType []byte) string {

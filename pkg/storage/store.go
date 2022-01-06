@@ -8,7 +8,7 @@ import (
 )
 
 type Store interface {
-	// GetProfile Get profile binaries by profile id
+	// GetProfile Get profile binaries by profile id, return profile binaries
 	GetProfile(id string) ([]byte, error)
 	// SaveProfile Save profile，return profile id
 	// data binaries file
@@ -39,13 +39,13 @@ type ProfileMetaByTarget struct {
 
 type ProfileMeta struct {
 	ProfileID      uint64
+	ProfileType    string
+	SampleType     string
+	TargetName     string
+	SampleTypeUnit string
 	Value          int64
 	Timestamp      int64
 	Duration       int64
-	SampleTypeUnit string
-	ProfileType    string
-	TargetName     string
-	SampleType     string
 }
 
 func (meta *ProfileMeta) Encode() ([]byte, error) {

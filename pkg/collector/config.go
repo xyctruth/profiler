@@ -93,11 +93,12 @@ type CollectorConfig struct {
 }
 
 type TargetConfig struct {
-	//key profile name (profile, fgprof, mutex, heap, goroutine, allocs, block, threadcreate)
+	//key is profile name (profile, fgprof, mutex, heap, goroutine, allocs, block, threadcreate)
 	ProfileConfigs map[string]ProfileConfig `yaml:"profileConfigs"`
 	Interval       time.Duration            `yaml:"interval"`
 	Expiration     time.Duration            `yaml:"expiration"`
 	Host           string                   `yaml:"host"`
+	Labels         map[string]string        `yaml:"labels"`
 }
 
 type ProfileConfig struct {

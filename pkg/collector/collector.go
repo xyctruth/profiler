@@ -187,11 +187,11 @@ func (collector *Collector) analysis(profileType string, profileBytes []byte) er
 		meta := &storage.ProfileMeta{}
 		meta.Timestamp = time.Now().UnixNano() / time.Millisecond.Nanoseconds()
 		meta.ProfileID = profileID
-		meta.Duration = p.DurationNanos
-		meta.SampleType = p.SampleType[i].Type
-		meta.SampleTypeUnit = p.SampleType[i].Unit
 		meta.ProfileType = profileType
 		meta.TargetName = collector.TargetName
+
+		meta.Duration = p.DurationNanos
+		meta.SampleTypeUnit = p.SampleType[i].Unit
 		for _, s := range p.Sample {
 			meta.Value += s.Value[i]
 		}
@@ -231,8 +231,8 @@ func (collector *Collector) analysisTrace(profileType string, profileBytes []byt
 	meta := &storage.ProfileMeta{}
 	meta.Timestamp = time.Now().UnixNano() / time.Millisecond.Nanoseconds()
 	meta.ProfileID = profileID
-	meta.SampleType = profileType
 	meta.ProfileType = profileType
+	meta.SampleType = profileType
 	meta.TargetName = collector.TargetName
 	metas = append(metas, meta)
 

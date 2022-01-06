@@ -99,7 +99,7 @@ func (s *store) SaveProfileMeta(metas []*storage.ProfileMeta, ttl time.Duration)
 			if err = txn.SetEntry(newSampleTypeEntry(meta.SampleType, meta.ProfileType, ttl)); err != nil {
 				return err
 			}
-			if err = txn.SetEntry(newTargetKeyEntry(meta.TargetName, ttl)); err != nil {
+			if err = txn.SetEntry(newTargetEntry(meta.TargetName, ttl)); err != nil {
 				return err
 			}
 			var profileMetaEntry *badger.Entry
