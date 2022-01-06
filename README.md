@@ -3,15 +3,18 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/xyctruth/profiler?x=xyctruth)](https://goreportcard.com/report/github.com/xyctruth/profiler)
 [![codecov](https://codecov.io/gh/xyctruth/profiler/branch/master/graph/badge.svg?token=YWNYJK9KQW)](https://codecov.io/gh/xyctruth/profiler)
 [![Build status](https://img.shields.io/github/workflow/status/xyctruth/profiler/Server-Build/master)](https://github.com/xyctruth/profiler/actions/workflows/server-build.yml)
+[![Release status](https://img.shields.io/github/v/release/xyctruth/profiler)](https://github.com/xyctruth/profiler/releases)
+[![LICENSE status](https://img.shields.io/github/license/xyctruth/profiler)](https://github.com/xyctruth/profiler/LICENSE)
 
 > [English](./README-EN.md) / [中文](./README-ZH.md)
 
 ## Profiler is a continuous profiling tool that base go pprof and go trace
 
-- **Sample collection**
+- **Supported sample**
   - `trace` `fgprof` `profile` `mutex` `heap` `goroutine` `allocs` `block` `threadcreate`
-- **dynamic loading configuration**
-  - Collect samples of the target service according to the configuration file. The collection program will monitor the changes of the configuration file and apply the changed configuration file immediately
+- **Hot Reload**
+  - Collect samples of the target service according to the configuration file 
+  - The collection program will monitor the changes of the configuration file and apply the changed configuration file immediately
 - **Chart trend**
   - Provide charts to observe the trend of multiple service performance indicators and find the time point of performance problems
   - Each bubble is a sample file of Profile and Trace

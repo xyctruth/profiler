@@ -3,15 +3,18 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/xyctruth/profiler?x=xyctruth)](https://goreportcard.com/report/github.com/xyctruth/profiler)
 [![codecov](https://codecov.io/gh/xyctruth/profiler/branch/master/graph/badge.svg?token=YWNYJK9KQW)](https://codecov.io/gh/xyctruth/profiler)
 [![Build status](https://img.shields.io/github/workflow/status/xyctruth/profiler/Server-Build/master)](https://github.com/xyctruth/profiler/actions/workflows/server-build.yml)
+[![Release status](https://img.shields.io/github/v/release/xyctruth/profiler)](https://github.com/xyctruth/profiler/releases)
+[![LICENSE status](https://img.shields.io/github/license/xyctruth/profiler)](https://github.com/xyctruth/profiler/LICENSE)
 
 > [English](./README-EN.md) / [中文](./README-ZH.md)
 
 ## Profiler 是一个基于 go pprof 与 go trace 持续性能剖析工具
 
-- **样本采集**
+- **支持的样本**
     - `trace` `fgprof` `profile` `mutex` `heap` `goroutine` `allocs` `block` `threadcreate`
-- **配置动态加载**
-    - 根据配置文件收集目标服务的样本, 收集程序会监听配置文件的变化,即时应用变化后的配置文件
+- **配置热更新**
+    - 根据配置文件收集目标服务的样本
+    - 收集程序会监听配置文件的变化,即时应用变化后的配置文件
 - **图表趋势**
     - 提供图表观测多个服务性能指标的趋势，找出性能问题的时间点
     - 每一个气泡都是一份 Profile 与 Trace 的样本文件
