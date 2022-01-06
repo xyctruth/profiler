@@ -3,7 +3,7 @@
     v-model="value"
     :collapse-tags="true"
     :multiple="true"
-    placeholder="选择类型"
+    placeholder="Select Type"
     clearable="true"
     filterable>
     <el-option-group
