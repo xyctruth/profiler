@@ -92,16 +92,14 @@ func (s *store) SaveProfile(profileData []byte, ttl time.Duration) (uint64, erro
 	return id, err
 }
 
-func (s *store) SaveProfileMeta(metas []*storage.ProfileMeta, ttl time.Duration) error {
+func (s *store) SaveProfileMeta(targetName string, labels storage.TargetLabels, metas []*storage.ProfileMeta, ttl time.Duration) error {
 	return s.db.Update(func(txn *badger.Txn) error {
 		var err error
 		for _, meta := range metas {
 			if err = txn.SetEntry(newSampleTypeEntry(meta.SampleType, meta.ProfileType, ttl)); err != nil {
 				return err
 			}
-			if err = txn.SetEntry(newTargetEntry(meta.TargetName, ttl)); err != nil {
-				return err
-			}
+
 			var profileMetaEntry *badger.Entry
 			if profileMetaEntry, err = newProfileMetaEntry(meta, ttl); err != nil {
 				return err
@@ -110,6 +108,22 @@ func (s *store) SaveProfileMeta(metas []*storage.ProfileMeta, ttl time.Duration)
 				return err
 			}
 		}
+
+		var targetEntry *badger.Entry
+		if targetEntry, err = newTargetEntry(targetName, labels, ttl); err != nil {
+			return err
+		}
+		if err = txn.SetEntry(targetEntry); err != nil {
+			return err
+		}
+
+		labelsEntry := newLabelsEntry(labels, ttl)
+		for _, entry := range labelsEntry {
+			if err = txn.SetEntry(entry); err != nil {
+				return err
+			}
+		}
+
 		return nil
 	})
 }
@@ -177,7 +191,7 @@ func (s *store) ListSampleType() ([]string, error) {
 		for it.Seek(PrefixSampleType); it.Valid(); it.Next() {
 			item := it.Item()
 			k := item.Key()
-			sampleTypes = append(sampleTypes, deleteSampleTypeKey(k))
+			sampleTypes = append(sampleTypes, deletePrefixKey(k))
 		}
 
 		return nil
@@ -203,7 +217,7 @@ func (s *store) ListGroupSampleType() (map[string][]string, error) {
 				if _, ok := sampleTypes[string(v)]; !ok {
 					sampleTypes[string(v)] = make([]string, 0, 5)
 				}
-				sampleTypes[string(v)] = append(sampleTypes[string(v)], deleteSampleTypeKey(k))
+				sampleTypes[string(v)] = append(sampleTypes[string(v)], deletePrefixKey(k))
 				return nil
 			})
 
@@ -230,7 +244,27 @@ func (s *store) ListTarget() ([]string, error) {
 		for it.Seek(PrefixTarget); it.Valid(); it.Next() {
 			item := it.Item()
 			k := item.Key()
-			targets = append(targets, deleteTargetKey(k))
+			targets = append(targets, deletePrefixKey(k))
+		}
+		return nil
+	})
+
+	return targets, err
+}
+
+func (s *store) ListLabel() ([]string, error) {
+	targets := make([]string, 0)
+	err := s.db.View(func(txn *badger.Txn) error {
+		opts := badger.DefaultIteratorOptions
+		opts.PrefetchSize = 100
+		opts.Prefix = PrefixLabel
+		it := txn.NewIterator(opts)
+		defer it.Close()
+
+		for it.Seek(PrefixLabel); it.Valid(); it.Next() {
+			item := it.Item()
+			k := item.Key()
+			targets = append(targets, deletePrefixKey(k))
 		}
 		return nil
 	})

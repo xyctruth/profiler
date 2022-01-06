@@ -203,7 +203,7 @@ func (collector *Collector) analysis(profileType string, profileBytes []byte) er
 		metas = append(metas, meta)
 	}
 
-	err = collector.store.SaveProfileMeta(metas, collector.Expiration)
+	err = collector.store.SaveProfileMeta(collector.TargetName, collector.Labels, metas, collector.Expiration)
 	if err != nil {
 		return err
 	}
@@ -236,7 +236,7 @@ func (collector *Collector) analysisTrace(profileType string, profileBytes []byt
 	meta.TargetName = collector.TargetName
 	metas = append(metas, meta)
 
-	err = collector.store.SaveProfileMeta(metas, collector.Expiration)
+	err = collector.store.SaveProfileMeta(collector.TargetName, collector.Labels, metas, collector.Expiration)
 	if err != nil {
 		return err
 	}

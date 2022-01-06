@@ -16,7 +16,7 @@ type Store interface {
 	SaveProfile(data []byte, ttl time.Duration) (uint64, error)
 
 	// SaveProfileMeta Save profile meta data
-	SaveProfileMeta(metas []*ProfileMeta, ttl time.Duration) error
+	SaveProfileMeta(targetName string, labels TargetLabels, metas []*ProfileMeta, ttl time.Duration) error
 	// SaveProfileMeta Get profile meta data list
 	ListProfileMeta(sampleType string, targetFilter []string, startTime, endTime time.Time) ([]*ProfileMetaByTarget, error)
 
@@ -24,12 +24,30 @@ type Store interface {
 	ListSampleType() ([]string, error)
 	// ListGroupSampleType Get collected sample types list grouped by profile types (heap,goroutine...)
 	ListGroupSampleType() (map[string][]string, error)
-
-	// ListTarget List Get collection target list
+	// ListTarget  Get collection target list
 	ListTarget() ([]string, error)
+	// ListLabels  Get collection target labels list
+	ListLabel() ([]string, error)
 
 	// Release
 	Release()
+}
+
+type TargetLabels map[string]string
+
+func (labels *TargetLabels) Encode() ([]byte, error) {
+	b, err := msgpack.Marshal(labels)
+	if len(b) > (1 << 10) {
+		return nil, errors.New("meta size > (1 << 10) , badger WithValueThreshold is 1kb")
+	}
+	if err != nil {
+		return nil, err
+	}
+	return b, nil
+}
+
+func (labels *TargetLabels) Decode(v []byte) error {
+	return msgpack.Unmarshal(v, labels)
 }
 
 type ProfileMetaByTarget struct {
