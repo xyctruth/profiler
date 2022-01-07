@@ -85,7 +85,7 @@ collector:
       host: localhost:9000  # Target service host
       labels:
         namespace: f005
-        type: http
+        type: gateway
       profileConfigs:       # Use default configuration
 
     server2:
@@ -94,7 +94,7 @@ collector:
       host: localhost:9000
       labels:
         namespace: f004
-        type: grpc
+        type: svc
       profileConfigs:       # Override some default configuration fields
         trace:
           enable: false

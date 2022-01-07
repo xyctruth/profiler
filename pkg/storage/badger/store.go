@@ -2,7 +2,9 @@ package badger
 
 import (
 	"errors"
+	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/dgraph-io/badger/v3"
@@ -325,7 +327,7 @@ func (s *store) ListTarget() ([]string, error) {
 }
 
 func (s *store) ListLabel() ([]string, error) {
-	targets := make([]string, 0)
+	labels := make([]string, 0)
 	err := s.db.View(func(txn *badger.Txn) error {
 		opts := badger.DefaultIteratorOptions
 		opts.PrefetchSize = 100
@@ -337,12 +339,19 @@ func (s *store) ListLabel() ([]string, error) {
 			item := it.Item()
 			k := item.Key()
 
-			targets = append(targets, deletePrefixKey(k))
+			labels = append(labels, deletePrefixKey(k))
 		}
 		return nil
 	})
 
-	return targets, err
+	sort.Slice(labels, func(i, j int) bool {
+		if strings.HasPrefix(labels[j], "_") {
+			return true
+		}
+		return labels[i] < labels[j]
+	})
+
+	return labels, err
 }
 
 func (s *store) Release() {
