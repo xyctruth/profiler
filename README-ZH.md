@@ -83,12 +83,18 @@ collector:
       interval: 15s         # 抓取间隔
       expiration: 0         # 无过期时间
       host: localhost:9000  # 目标服务host
+      labels:
+        namespace: f005
+        type: gateway
       profileConfigs:       # 使用默认配置 
         
     server2:
       interval: 10s
       expiration: 168h      # 过期时间7天
       host: localhost:9000
+      labels:
+        namespace: f004
+        type: svc
       profileConfigs:       # 覆盖部分默认配置字段
         trace:
           enable: false
