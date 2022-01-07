@@ -3,7 +3,7 @@
     v-model="value"
     :multiple="true"
     :collapse-tags="true"
-    placeholder="选择服务"
+    placeholder="Select Target"
     clearable="true"
     filterable>
     <el-option
