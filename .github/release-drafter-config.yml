@@ -31,4 +31,4 @@ template: |
   $CHANGES
 
   ## 🐳 Docker Image
-  `xyctruth/profiler:v$RESOLVED_VERSION`
+  - `xyctruth/profiler:v$RESOLVED_VERSION`
