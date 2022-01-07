@@ -4,11 +4,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/xyctruth/profiler/pkg/storage"
-
 	"github.com/fsnotify/fsnotify"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"github.com/xyctruth/profiler/pkg/storage"
 	"github.com/xyctruth/profiler/pkg/utils"
 )
 

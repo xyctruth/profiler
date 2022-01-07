@@ -178,7 +178,7 @@ func TestProfileMeta(t *testing.T) {
 	require.Equal(t, nil, err)
 	require.Equal(t, 1, len(sampleTypes))
 
-	profileMetas, err := s.ListProfileMeta(sampleTypes[0], targets, nil, min, max)
+	profileMetas, err := s.ListProfileMeta(sampleTypes[0], nil, min, max)
 	require.Equal(t, nil, err)
 	require.Equal(t, 1, len(profileMetas))
 
@@ -198,7 +198,7 @@ func TestProfileMeta(t *testing.T) {
 		require.Equal(t, nil, err)
 		require.Equal(t, 0, len(ttlSampleTypes))
 
-		ttlProfileMetas, err := s.ListProfileMeta(sampleTypes[0], targets, nil, min, max)
+		ttlProfileMetas, err := s.ListProfileMeta(sampleTypes[0], nil, min, max)
 		require.Equal(t, nil, err)
 		require.Equal(t, 0, len(ttlProfileMetas))
 	}
@@ -234,44 +234,43 @@ func TestProfileMetaArray(t *testing.T) {
 	require.Equal(t, 4, len(sampleTypes))
 
 	{
-		profileMetas, err := s.ListProfileMeta("heap_inuse_space", targets, nil, min, max)
+		profileMetas, err := s.ListProfileMeta("heap_inuse_space", nil, min, max)
 		require.Equal(t, nil, err)
 		require.Equal(t, 2, len(profileMetas))
 
-		profileMetas, err = s.ListProfileMeta("heap_inuse_space", nil, nil, min, max)
+		profileMetas, err = s.ListProfileMeta("heap_inuse_space", nil, min, max)
 		require.Equal(t, nil, err)
 		require.Equal(t, 2, len(profileMetas))
 
-		profileMetas, err = s.ListProfileMeta("heap_inuse_space", []string{"server2"}, nil, min, max)
+		profileMetas, err = s.ListProfileMeta("heap_inuse_space", []storage.Label{{
+			Key:   "_target",
+			Value: "server2",
+		}}, min, max)
 		require.Equal(t, nil, err)
 		require.Equal(t, 1, len(profileMetas))
 
-		profileMetas, err = s.ListProfileMeta("heap_inuse_objects", nil, nil, min, max)
+		profileMetas, err = s.ListProfileMeta("heap_inuse_objects", nil, min, max)
 		require.Equal(t, nil, err)
 		require.Equal(t, 1, len(profileMetas))
 
-		profileMetas, err = s.ListProfileMeta("heap_inuse_objects1", nil, nil, min, max)
+		profileMetas, err = s.ListProfileMeta("heap_inuse_objects1", nil, min, max)
 		require.Equal(t, nil, err)
 		require.Equal(t, 0, len(profileMetas))
 
-		profileMetas, err = s.ListProfileMeta("heap_inuse_space", targets, []storage.Label{{
+		profileMetas, err = s.ListProfileMeta("heap_inuse_space", []storage.Label{{
 			Key:   "env",
 			Value: "test",
 		}}, min, max)
 		require.Equal(t, nil, err)
 		require.Equal(t, 1, len(profileMetas))
-		require.Equal(t, 1, len(profileMetas[0].ProfileMetas))
-		require.Equal(t, "server2", profileMetas[0].TargetName)
 
-		profileMetas, err = s.ListProfileMeta("heap_inuse_space", targets, []storage.Label{{
+		profileMetas, err = s.ListProfileMeta("heap_inuse_space", []storage.Label{{
 			Key:   "env",
 			Value: "test1",
 		}}, min, max)
 		require.Equal(t, 1, len(profileMetas))
-		require.Equal(t, 1, len(profileMetas[0].ProfileMetas))
-		require.Equal(t, "server3", profileMetas[0].TargetName)
 
-		profileMetas, err = s.ListProfileMeta("heap_inuse_space", []string{"server3"}, []storage.Label{{
+		profileMetas, err = s.ListProfileMeta("heap_inuse_space", []storage.Label{{
 			Key:   "env",
 			Value: "test1",
 		}, {
@@ -279,23 +278,15 @@ func TestProfileMetaArray(t *testing.T) {
 			Value: "f004",
 		}}, min, max)
 		require.Equal(t, 1, len(profileMetas))
-		require.Equal(t, 1, len(profileMetas[0].ProfileMetas))
-		require.Equal(t, "server3", profileMetas[0].TargetName)
 
-		profileMetas, err = s.ListProfileMeta("heap_inuse_space", []string{"server2"}, []storage.Label{{
-			Key:   "env",
-			Value: "test1",
-		}}, min, max)
-		require.Equal(t, 0, len(profileMetas))
-
-		profileMetas, err = s.ListProfileMeta("heap_inuse_space", []string{"server3"}, []storage.Label{{
+		profileMetas, err = s.ListProfileMeta("heap_inuse_space", []storage.Label{{
 			Key:   "env",
 			Value: "test1",
 		}, {
 			Key:   "namespace",
 			Value: "f003",
 		}}, min, max)
-		require.Equal(t, 0, len(profileMetas))
+		require.Equal(t, 1, len(profileMetas))
 	}
 
 	// Waiting for the overdue
@@ -315,9 +306,14 @@ func TestProfileMetaArray(t *testing.T) {
 		require.Equal(t, nil, err)
 		require.Equal(t, 0, len(ttlSampleTypes))
 
-		ttlProfileMetas, err := s.ListProfileMeta(sampleTypes[0], targets, nil, min, max)
+		ttlLabels, err := s.ListLabel()
+		require.Equal(t, nil, err)
+		require.Equal(t, 0, len(ttlLabels))
+
+		ttlProfileMetas, err := s.ListProfileMeta(sampleTypes[0], nil, min, max)
 		require.Equal(t, nil, err)
 		require.Equal(t, 0, len(ttlProfileMetas))
+
 	}
 	s.Release()
 }

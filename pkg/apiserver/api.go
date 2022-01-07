@@ -147,8 +147,7 @@ func (s *APIServer) listProfileMeta(c *gin.Context) {
 	}
 
 	req := struct {
-		Targets []string        `json:"targets[]" form:"targets[]"`
-		Labels  []storage.Label `json:"labels[]" form:"labels[]"`
+		Labels []storage.Label `json:"labels[]" form:"labels[]"`
 	}{}
 
 	if err := c.ShouldBind(&req); err != nil {
@@ -156,8 +155,7 @@ func (s *APIServer) listProfileMeta(c *gin.Context) {
 		return
 	}
 
-	req.Targets = utils.RemoveDuplicateElement(req.Targets)
-	metas, err := s.store.ListProfileMeta(sampleType, req.Targets, req.Labels, startTime, endTime)
+	metas, err := s.store.ListProfileMeta(sampleType, req.Labels, startTime, endTime)
 
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())

@@ -5,11 +5,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/xyctruth/profiler/pkg/utils"
-
 	"github.com/dgraph-io/badger/v3"
 	log "github.com/sirupsen/logrus"
 	"github.com/xyctruth/profiler/pkg/storage"
+	"github.com/xyctruth/profiler/pkg/utils"
 )
 
 type store struct {
@@ -153,33 +152,25 @@ func (s *store) SaveProfileMeta(metas []*storage.ProfileMeta, ttl time.Duration)
 	return err
 }
 
-func (s *store) ListProfileMeta(sampleType string, targets []string, labelFilter []storage.Label, startTime, endTime time.Time) ([]*storage.ProfileMetaByTarget, error) {
+func (s *store) ListProfileMeta(sampleType string, labelFilter []storage.Label, startTime, endTime time.Time) ([]*storage.ProfileMetaByTarget, error) {
 	var err error
-
-	targetFilter := make([]storage.Label, 0)
-	if len(targets) == 0 {
-		if targets, err = s.ListTarget(); err != nil {
-			return nil, err
-		}
-	}
-	for _, target := range targets {
-		targetFilter = append(targetFilter, storage.Label{
-			Key:   TargetLabel,
-			Value: target,
-		})
-	}
-
-	ids, err := s.searchProfileMeta(sampleType, targetFilter, startTime, endTime, utils.Union)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(labelFilter) > 0 {
-		labelFilterIds, err := s.searchProfileMeta(sampleType, labelFilter, startTime, endTime, utils.Union)
+	if labelFilter == nil {
+		labelFilter = make([]storage.Label, 0)
+		targets, err := s.ListTarget()
 		if err != nil {
 			return nil, err
 		}
-		ids = utils.Intersect(ids, labelFilterIds)
+		for _, target := range targets {
+			labelFilter = append(labelFilter, storage.Label{
+				Key:   TargetLabel,
+				Value: target,
+			})
+		}
+	}
+
+	ids, err := s.searchProfileMeta(sampleType, labelFilter, startTime, endTime, utils.Union)
+	if err != nil {
+		return nil, err
 	}
 
 	targetMap := make(map[string][]*storage.ProfileMeta)

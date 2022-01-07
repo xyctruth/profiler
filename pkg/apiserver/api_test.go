@@ -97,7 +97,7 @@ func initProfileData(s storage.Store, t *testing.T) (string, string, string, str
 
 	traceBytes, err := ioutil.ReadFile("./testdata/trace.gz")
 	require.Equal(t, nil, err)
-	traceID, err := s.SaveProfile(traceBytes, time.Second*10)
+	traceID, err := s.SaveProfile(traceBytes, time.Second*3)
 	require.Equal(t, nil, err)
 	return invalidId, invalidId2, id, traceID
 }
@@ -206,21 +206,6 @@ func TestListProfileMeta(t *testing.T) {
 		WithQuery("start_time", startTime).WithQuery("end_time", endTime).
 		Expect().
 		Status(http.StatusOK).JSON().Array().Length().Equal(2)
-
-	e.GET("/api/profile_meta/heap_inuse_space").
-		WithQuery("start_time", startTime).WithQuery("end_time", endTime).WithQuery("targets", "server2").
-		Expect().
-		Status(http.StatusOK).JSON().Array().Length().Equal(1)
-
-	e.GET("/api/profile_meta/heap_inuse_space").
-		WithQuery("start_time", startTime).WithQuery("end_time", endTime).WithQuery("targets", "notfound").
-		Expect().
-		Status(http.StatusOK).JSON().Array().Length().Equal(0)
-
-	e.GET("/api/profile_meta/heap_inuse_space").
-		WithQuery("start_time", startTime).WithQuery("end_time", endTime).WithQuery("targets", "notfound").
-		Expect().
-		Status(http.StatusOK).JSON().Array().Length().Equal(0)
 }
 
 func TestGetProfile(t *testing.T) {
