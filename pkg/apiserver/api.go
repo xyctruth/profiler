@@ -44,7 +44,7 @@ func NewAPIServer(opt Options) *APIServer {
 		c.String(200, "I'm fine")
 	})
 	router.Use(HandleCors).GET("/api/targets", apiServer.listTarget)
-	router.Use(HandleCors).GET("/api/labels", apiServer.listLabel)
+	router.Use(HandleCors).GET("/api/group_labels", apiServer.listGroupLabel)
 	router.Use(HandleCors).GET("/api/sample_types", apiServer.listSampleTypes)
 	router.Use(HandleCors).GET("/api/group_sample_types", apiServer.listGroupSampleTypes)
 	router.Use(HandleCors).GET("/api/profile_meta/:sample_type", apiServer.listProfileMeta)
@@ -99,13 +99,28 @@ func (s *APIServer) listTarget(c *gin.Context) {
 	c.JSON(http.StatusOK, jobs)
 }
 
-func (s *APIServer) listLabel(c *gin.Context) {
-	jobs, err := s.store.ListLabel()
+func (s *APIServer) listGroupLabel(c *gin.Context) {
+	labels, err := s.store.ListLabel()
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
-	c.JSON(http.StatusOK, jobs)
+
+	customLabels := make([]string, 0, 5)
+	generateLabels := make([]string, 0, 5)
+
+	for _, label := range labels {
+		if strings.HasPrefix(label, "_") {
+			generateLabels = append(generateLabels, label)
+		} else {
+			customLabels = append(customLabels, label)
+		}
+	}
+
+	c.JSON(http.StatusOK, map[string][]string{
+		"custom":   customLabels,
+		"generate": generateLabels,
+	})
 }
 
 func (s *APIServer) listSampleTypes(c *gin.Context) {

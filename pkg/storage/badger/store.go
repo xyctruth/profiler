@@ -2,9 +2,7 @@ package badger
 
 import (
 	"errors"
-	"sort"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/dgraph-io/badger/v3"
@@ -342,13 +340,6 @@ func (s *store) ListLabel() ([]string, error) {
 			labels = append(labels, deletePrefixKey(k))
 		}
 		return nil
-	})
-
-	sort.Slice(labels, func(i, j int) bool {
-		if strings.HasPrefix(labels[j], "_") {
-			return true
-		}
-		return labels[i] < labels[j]
 	})
 
 	return labels, err

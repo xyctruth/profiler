@@ -5,13 +5,19 @@
       placeholder="Select Label"
       clearable="true"
       filterable>
-    <el-option
-        v-for="(item,index) in options"
-        :key="index"
-        :label="item"
-        :value="item"
+    <el-option-group
+        v-for="group in options"
+        :key="group.label"
+        :label="group.label"
     >
-    </el-option>
+      <el-option
+          v-for="(item,index) in group.options"
+          :key="index"
+          :label="item"
+          :value="item"
+      >
+      </el-option>
+    </el-option-group>
   </el-select>
 </template>
 
@@ -35,10 +41,20 @@ if (query.labels){
 
 onMounted(() => {
   axios({
-    url: "/api/labels",
+    url: "/api/group_labels",
   })
       .then((res) => {
-        options.value = res
+        const types = ["custom","generate"]
+        var data = []
+        for (const key of types) {
+          if (res[key]) {
+            data.push({
+              label: key,
+              options: res[key]
+            })
+          }
+        }
+        options.value = data
       })
       .catch((err) => {
         console.log(err);
