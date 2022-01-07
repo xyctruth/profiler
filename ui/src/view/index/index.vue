@@ -13,11 +13,15 @@
                 <el-col :xs="24" :sm="24" :md="5" :lg="5" :xl="5">
                   <selectTypes style="width: 100%" v-model:selectTypes="types"></selectTypes>
                 </el-col>
-                <el-col :xs="24" :sm="24" :md="5" :lg="5" :xl="5">
-                  <selectProject style="width: 100%"
-                                 v-model:selectProjects="projects"></selectProject>
+<!--                <el-col :xs="24" :sm="24" :md="5" :lg="5" :xl="5">-->
+<!--                  <selectTarget style="width: 100%"-->
+<!--                                 v-model:selectTargets="targets"></selectTarget>-->
+<!--                </el-col>-->
+                <el-col :xs="24" :sm="24" :md="13" :lg="13" :xl="13">
+                  <selectLabel style="width: 100%"
+                                v-model:selectLabels="labels"></selectLabel>
                 </el-col>
-                <el-col :xs="24" :sm="24" :md={span:4,offset:10} :lg={span:4,offset:10} :xl={span:4,offset:10} >
+                <el-col :xs="24" :sm="24" :md={span:4,offset:2} :lg={span:4,offset:2} :xl={span:4,offset:2} >
                   <selectTimeRange class="time-range-container" v-model:timeRange="timeRange"
                                    style="width: 100%"></selectTimeRange>
                 </el-col>
@@ -53,8 +57,9 @@
                     style="min-width: 1200px;"
                     :index="index"
                     :type="item"
-                    :projects="projects"
-                    :timeRange="timeRange"></chart>
+                    :targets="targets"
+                    :timeRange="timeRange"
+                    :labels="labels"></chart>
               </el-card>
             </div>
           </el-col>
@@ -87,13 +92,15 @@
 <script setup>
 import {ref} from 'vue'
 import selectTypes from './components/selectTypes.vue'
-import selectProject from './components/selectProject.vue'
+import selectTarget from './components/selectTarget.vue'
+import selectLabel from './components/selectLabel.vue'
 import selectTimeRange from './components/selectTimeRange.vue'
 import chart from './components/chart.vue'
 
 console.log('local')
 const types = ref([])
-const projects = ref([])
+const targets = ref([])
+const labels = ref([])
 const timeRange = ref([])
 const jump = (item) => {
   document.getElementById(item).scrollIntoView()

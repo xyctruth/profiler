@@ -39,7 +39,13 @@
         return {}
       }
     },
-    projects: {
+    targets: {
+      type: Array,
+      default: () => {
+        return {}
+      }
+    },
+    labels: {
       type: Array,
       default: () => {
         return {}
@@ -190,21 +196,31 @@
     })
   })
 
-  watch(() => [props.type, props.projects, props.timeRange], () => {
+  watch(() => [props.type, props.targets,props.labels, props.timeRange], () => {
     if (props.type) {
       let sampleType = props.type
-      let targetList = props.projects
+      let targetList = props.targets
+      let labelList = props.labels
       let startTime = props.timeRange[0] ? `&start_time=${props.timeRange[0]}` : ""
       let endTime = props.timeRange[1] ? `&end_time=${props.timeRange[1]}` : ""
-      let targetFilter = targetList.reduce((result, item) => {
-        return result + `&targets=${item}`
-      }, "")
+
+
+      var labels = labelList.map(function (item) {
+        var arr = item.split('=')
+        return {Key:arr[0],Value:arr[1]}
+      })
+
 
       let loading = ElLoading.service({
         text: "加载中..."
       })
+
       axios({
-        url: `/api/profile_meta/${sampleType}?${startTime}${endTime}${targetFilter}`
+        url: `/api/profile_meta/${sampleType}?${startTime}${endTime}`,
+        params: {
+          "labels": labels,
+          "targets":targetList,
+        }
       })
         .then(targets => {
           setChart({data: targets, title: sampleType})

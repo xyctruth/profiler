@@ -128,6 +128,12 @@ func (s *store) SaveProfileMeta(metas []*storage.ProfileMeta, ttl time.Duration)
 				return err
 			}
 
+			// 添加默认target Index
+			meta.Labels = append(meta.Labels, storage.Label{
+				Key:   TargetLabel,
+				Value: meta.TargetName,
+			})
+
 			labelEnters := newLabelEntry(meta.Labels, ttl)
 			for _, entry := range labelEnters {
 				if err = txn.SetEntry(entry); err != nil {
@@ -135,11 +141,6 @@ func (s *store) SaveProfileMeta(metas []*storage.ProfileMeta, ttl time.Duration)
 				}
 			}
 
-			// 添加默认target Index
-			meta.Labels = append(meta.Labels, storage.Label{
-				Key:   TargetLabel,
-				Value: meta.TargetName,
-			})
 			indexEnters := newIndexEntry(meta.SampleType, meta.Labels, idStr, now, ttl)
 			for _, entry := range indexEnters {
 				if err = txn.SetEntry(entry); err != nil {
@@ -174,7 +175,7 @@ func (s *store) ListProfileMeta(sampleType string, targets []string, labelFilter
 	}
 
 	if len(labelFilter) > 0 {
-		labelFilterIds, err := s.searchProfileMeta(sampleType, labelFilter, startTime, endTime, utils.Intersect)
+		labelFilterIds, err := s.searchProfileMeta(sampleType, labelFilter, startTime, endTime, utils.Union)
 		if err != nil {
 			return nil, err
 		}

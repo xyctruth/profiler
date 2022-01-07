@@ -83,12 +83,18 @@ collector:
       interval: 15s         # Crawl time
       expiration: 0         # No expiration time
       host: localhost:9000  # Target service host
+      labels:
+        namespace: f005
+        type: http
       profileConfigs:       # Use default configuration
 
     server2:
       interval: 10s
       expiration: 168h      # Expiration time seven days
       host: localhost:9000
+      labels:
+        namespace: f004
+        type: grpc
       profileConfigs:       # Override some default configuration fields
         trace:
           enable: false

@@ -44,6 +44,7 @@ func NewAPIServer(opt Options) *APIServer {
 		c.String(200, "I'm fine")
 	})
 	router.Use(HandleCors).GET("/api/targets", apiServer.listTarget)
+	router.Use(HandleCors).GET("/api/labels", apiServer.listLabel)
 	router.Use(HandleCors).GET("/api/sample_types", apiServer.listSampleTypes)
 	router.Use(HandleCors).GET("/api/group_sample_types", apiServer.listGroupSampleTypes)
 	router.Use(HandleCors).GET("/api/profile_meta/:sample_type", apiServer.listProfileMeta)
@@ -98,6 +99,15 @@ func (s *APIServer) listTarget(c *gin.Context) {
 	c.JSON(http.StatusOK, jobs)
 }
 
+func (s *APIServer) listLabel(c *gin.Context) {
+	jobs, err := s.store.ListLabel()
+	if err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, jobs)
+}
+
 func (s *APIServer) listSampleTypes(c *gin.Context) {
 	jobs, err := s.store.ListSampleType()
 	if err != nil {
@@ -137,8 +147,8 @@ func (s *APIServer) listProfileMeta(c *gin.Context) {
 	}
 
 	req := struct {
-		Targets []string        `json:"targets" form:"targets"`
-		Labels  []storage.Label `json:"labels" form:"labels"`
+		Targets []string        `json:"targets[]" form:"targets[]"`
+		Labels  []storage.Label `json:"labels[]" form:"labels[]"`
 	}{}
 
 	if err := c.ShouldBind(&req); err != nil {
