@@ -8,28 +8,47 @@ import (
 )
 
 type Store interface {
-	// GetProfile Get profile binaries by profile id
+	// GetProfile Get profile binaries by profile id, return profile binaries
 	GetProfile(id string) ([]byte, error)
 	// SaveProfile Save profile，return profile id
 	// data binaries file
 	// ttl profile expiration time
-	SaveProfile(data []byte, ttl time.Duration) (uint64, error)
+	SaveProfile(data []byte, ttl time.Duration) (string, error)
 
 	// SaveProfileMeta Save profile meta data
 	SaveProfileMeta(metas []*ProfileMeta, ttl time.Duration) error
 	// SaveProfileMeta Get profile meta data list
-	ListProfileMeta(sampleType string, targetFilter []string, startTime, endTime time.Time) ([]*ProfileMetaByTarget, error)
+	ListProfileMeta(sampleType string, labelFilter []Label, startTime, endTime time.Time) ([]*ProfileMetaByTarget, error)
 
 	// ListSampleType Get collected sample types list (heap_alloc_objects ,heap_alloc_space ,heap_inuse_objects ,heap_inuse_space...)
 	ListSampleType() ([]string, error)
 	// ListGroupSampleType Get collected sample types list grouped by profile types (heap,goroutine...)
 	ListGroupSampleType() (map[string][]string, error)
-
-	// ListTarget List Get collection target list
+	// ListTarget  Get collection target list
 	ListTarget() ([]string, error)
+	// ListLabels  Get collection target labels list
+	ListLabel() ([]string, error)
 
 	// Release
 	Release()
+}
+
+type TargetLabels map[string]string
+
+func (t TargetLabels) ToArray() []Label {
+	labels := make([]Label, 0, len(t))
+	for k, v := range t {
+		labels = append(labels, Label{
+			Key:   k,
+			Value: v,
+		})
+	}
+	return labels
+}
+
+type Label struct {
+	Key   string
+	Value string
 }
 
 type ProfileMetaByTarget struct {
@@ -38,14 +57,15 @@ type ProfileMetaByTarget struct {
 }
 
 type ProfileMeta struct {
-	ProfileID      uint64
+	ProfileID      string
+	ProfileType    string
+	SampleType     string
+	TargetName     string
+	SampleTypeUnit string
 	Value          int64
 	Timestamp      int64
 	Duration       int64
-	SampleTypeUnit string
-	ProfileType    string
-	TargetName     string
-	SampleType     string
+	Labels         []Label
 }
 
 func (meta *ProfileMeta) Encode() ([]byte, error) {

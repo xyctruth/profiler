@@ -21,6 +21,9 @@ collector:
       interval: 2s
       expiration: 0  # no expiration time. unit day
       host: localhost:9000
+      labels:
+        env: test
+        haha: 1
       profileConfigs: # default scrape (profile, heap, allocs, black, mutex, fgprof)
         profile:
           path: /debug/pprof/profile?seconds=1
@@ -171,13 +174,16 @@ func TestLoadConfig(t *testing.T) {
 		require.Equal(t, time.Duration(0), serverConfig.Expiration)
 		require.Equal(t, "localhost:9000", serverConfig.Host)
 		require.Equal(t, 3, len(serverConfig.ProfileConfigs))
+		require.Equal(t, 2, len(serverConfig.Labels))
+		require.Equal(t, "test", serverConfig.Labels["env"])
+		require.Equal(t, "1", serverConfig.Labels["haha"])
 
 		serverConfig, ok = config.TargetConfigs["server2"]
 		require.Equal(t, ok, true)
 		require.Equal(t, 30000*time.Hour, serverConfig.Expiration)
 		require.Equal(t, 4, len(serverConfig.ProfileConfigs))
 	})
-	require.Equal(t, err, nil)
+	require.Equal(t, nil, err)
 }
 
 func TestErrorLoadConfig(t *testing.T) {

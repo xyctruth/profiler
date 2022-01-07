@@ -20,37 +20,37 @@ import (
 	"github.com/xyctruth/profiler/pkg/storage/badger"
 )
 
-func initProfileData(s storage.Store, t *testing.T) (uint64, uint64, uint64) {
+func initProfileData(s storage.Store, t *testing.T) (string, string, string) {
 	invalidId, err := s.SaveProfile([]byte{}, time.Second*10)
 	require.Equal(t, nil, err)
-	require.Equal(t, uint64(0), invalidId)
+	require.Equal(t, "0", invalidId)
 
 	invalidId2, err := s.SaveProfile([]byte("haha"), time.Second*10)
 	require.Equal(t, nil, err)
-	require.Equal(t, uint64(1), invalidId2)
+	require.Equal(t, "1", invalidId2)
 
 	profileBytes, err := ioutil.ReadFile("../testdata/profile.gz")
 	require.Equal(t, nil, err)
 	id, err := s.SaveProfile(profileBytes, time.Second*10)
 	require.Equal(t, nil, err)
-	require.Equal(t, uint64(2), id)
+	require.Equal(t, "2", id)
 	return invalidId, invalidId2, id
 }
 
-func initTraceData(s storage.Store, t *testing.T) (uint64, uint64, uint64) {
+func initTraceData(s storage.Store, t *testing.T) (string, string, string) {
 	invalidId, err := s.SaveProfile([]byte{}, time.Second*10)
 	require.Equal(t, nil, err)
-	require.Equal(t, uint64(0), invalidId)
+	require.Equal(t, "0", invalidId)
 
 	invalidId2, err := s.SaveProfile([]byte("haha"), time.Second*10)
 	require.Equal(t, nil, err)
-	require.Equal(t, uint64(1), invalidId2)
+	require.Equal(t, "1", invalidId2)
 
 	traceBytes, err := ioutil.ReadFile("../testdata/trace.gz")
 	require.Equal(t, nil, err)
 	id, err := s.SaveProfile(traceBytes, time.Second*10)
 	require.Equal(t, nil, err)
-	require.Equal(t, uint64(2), id)
+	require.Equal(t, "2", id)
 	return invalidId, invalidId2, id
 }
 
@@ -84,41 +84,41 @@ func testPProfUI(e *httpexpect.Expect, store storage.Store, t *testing.T, pprofS
 		Expect().
 		Status(http.StatusNotFound).Text().Equal("Profile not found\n")
 
-	e.GET(fmt.Sprintf("/api/pprof/ui/%d", invalidId)).
+	e.GET(fmt.Sprintf("/api/pprof/ui/%s", invalidId)).
 		Expect().
 		Status(http.StatusInternalServerError).Text().Equal("failed to fetch any source profiles\n")
 
-	e.GET(fmt.Sprintf("/api/pprof/ui/%d", invalidId2)).
+	e.GET(fmt.Sprintf("/api/pprof/ui/%s", invalidId2)).
 		Expect().
 		Status(http.StatusInternalServerError).Text().Equal("failed to fetch any source profiles\n")
 
-	e.GET(fmt.Sprintf("/api/pprof/ui/%d", id)).
+	e.GET(fmt.Sprintf("/api/pprof/ui/%s", id)).
 		Expect().
 		Status(http.StatusOK).Header("Content-Type").Equal("text/html")
 
-	e.GET(fmt.Sprintf("/api/pprof/ui/%d", id)).WithQuery("si", "alloc_objects").
+	e.GET(fmt.Sprintf("/api/pprof/ui/%s", id)).WithQuery("si", "alloc_objects").
 		Expect().
 		Status(http.StatusOK).Header("Content-Type").Equal("text/html")
 
-	e.GET(fmt.Sprintf("/api/pprof/ui/%d/", id)).WithQuery("si", "alloc_space").
+	e.GET(fmt.Sprintf("/api/pprof/ui/%s/", id)).WithQuery("si", "alloc_space").
 		Expect().
 		Status(http.StatusOK).Header("Content-Type").Equal("text/html")
 
-	e.GET(fmt.Sprintf("/api/pprof/ui/%d/", id)).WithQuery("si", "ppp").
+	e.GET(fmt.Sprintf("/api/pprof/ui/%s/", id)).WithQuery("si", "ppp").
 		Expect().
 		Status(http.StatusBadRequest).Text().Equal("sample_index \"ppp\" must be one of: [alloc_objects alloc_space inuse_objects inuse_space]\n")
 
-	e.GET(fmt.Sprintf("/api/pprof/ui/%d/top", id)).WithQuery("si", "alloc_space").
+	e.GET(fmt.Sprintf("/api/pprof/ui/%s/top", id)).WithQuery("si", "alloc_space").
 		Expect().
 		Status(http.StatusOK).Header("Content-Type").Equal("text/html")
 
 	pprofServer.gc()
 
-	e.GET(fmt.Sprintf("/api/pprof/ui/%d/top", id)).WithQuery("si", "alloc_space").
+	e.GET(fmt.Sprintf("/api/pprof/ui/%s/top", id)).WithQuery("si", "alloc_space").
 		Expect().
 		Status(http.StatusOK).Header("Content-Type").Equal("text/html")
 
-	e.GET(fmt.Sprintf("/api/pprof/ui/%d/toperror", id)).WithQuery("si", "alloc_space").
+	e.GET(fmt.Sprintf("/api/pprof/ui/%s/toperror", id)).WithQuery("si", "alloc_space").
 		Expect().
 		Status(http.StatusOK).Header("Content-Type").Equal("text/html")
 
@@ -154,25 +154,25 @@ func testTraceUI(e *httpexpect.Expect, store storage.Store, t *testing.T, server
 		Expect().
 		Status(http.StatusNotFound).Text().Equal("Profile not found\n")
 
-	e.GET(fmt.Sprintf("/api/trace/ui/%d", invalidId)).
+	e.GET(fmt.Sprintf("/api/trace/ui/%s", invalidId)).
 		Expect().
 		Status(http.StatusInternalServerError).Text().Equal("EOF\n")
 
-	e.GET(fmt.Sprintf("/api/trace/ui/%d", invalidId2)).
+	e.GET(fmt.Sprintf("/api/trace/ui/%s", invalidId2)).
 		Expect().
 		Status(http.StatusInternalServerError).Text().Equal("unexpected EOF\n")
 
-	e.GET(fmt.Sprintf("/api/trace/ui/%d", id)).
+	e.GET(fmt.Sprintf("/api/trace/ui/%s", id)).
 		Expect().
 		Status(http.StatusOK).Header("Content-Type").Equal("text/html; charset=utf-8")
 
-	e.GET(fmt.Sprintf("/api/trace/ui/%d", id)).
+	e.GET(fmt.Sprintf("/api/trace/ui/%s", id)).
 		Expect().
 		Status(http.StatusOK).Header("Content-Type").Equal("text/html; charset=utf-8")
 
 	server.gc()
 
-	e.GET(fmt.Sprintf("/api/trace/ui/%d", id)).
+	e.GET(fmt.Sprintf("/api/trace/ui/%s", id)).
 		Expect().
 		Status(http.StatusOK).Header("Content-Type").Equal("text/html; charset=utf-8")
 

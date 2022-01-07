@@ -98,4 +98,7 @@ func TestCollectorRun(t *testing.T) {
 
 	sampleTypes, err := store.ListSampleType()
 	require.Equal(t, 19, len(sampleTypes))
+
+	labels, err := store.ListLabel()
+	require.Equal(t, 3, len(labels))
 }

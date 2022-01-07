@@ -9,7 +9,7 @@ import (
 
 func TestEncode(t *testing.T) {
 	profileMeta := &ProfileMeta{
-		ProfileID:      1,
+		ProfileID:      "1",
 		Timestamp:      time.Now().UnixNano() / time.Millisecond.Nanoseconds(),
 		Duration:       time.Now().UnixNano(),
 		SampleTypeUnit: "count",

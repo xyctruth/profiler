@@ -2,17 +2,20 @@ package badger
 
 import (
 	"errors"
+	"strconv"
 	"time"
 
 	"github.com/dgraph-io/badger/v3"
 	log "github.com/sirupsen/logrus"
 	"github.com/xyctruth/profiler/pkg/storage"
+	"github.com/xyctruth/profiler/pkg/utils"
 )
 
 type store struct {
-	db  *badger.DB
-	opt Options
-	seq *badger.Sequence
+	db         *badger.DB
+	opt        Options
+	profileSeq *badger.Sequence
+	metaSeq    *badger.Sequence
 }
 
 func NewStore(opt Options) storage.Store {
@@ -30,7 +33,12 @@ func NewStore(opt Options) storage.Store {
 		db:  db,
 		opt: opt,
 	}
-	s.seq, err = s.db.GetSequence(Sequence, 1000)
+	s.profileSeq, err = s.db.GetSequence(ProfileSequence, 1000)
+	if err != nil {
+		panic(err)
+	}
+
+	s.metaSeq, err = s.db.GetSequence(MetaSequence, 1000)
 	if err != nil {
 		panic(err)
 	}
@@ -79,90 +87,168 @@ func (s *store) GetProfile(id string) ([]byte, error) {
 	return date, err
 }
 
-func (s *store) SaveProfile(profileData []byte, ttl time.Duration) (uint64, error) {
-	id, err := s.seq.Next()
+func (s *store) SaveProfile(profileData []byte, ttl time.Duration) (string, error) {
+	id, err := s.profileSeq.Next()
 	if err != nil {
-		return 0, err
+		return "", err
 	}
-
+	idStr := strconv.FormatUint(id, 10)
 	err = s.db.Update(func(txn *badger.Txn) error {
-		return txn.SetEntry(newProfileEntry(id, profileData, ttl))
+		return txn.SetEntry(newProfileEntry(idStr, profileData, ttl))
 	})
 
-	return id, err
+	return idStr, err
 }
 
 func (s *store) SaveProfileMeta(metas []*storage.ProfileMeta, ttl time.Duration) error {
-	return s.db.Update(func(txn *badger.Txn) error {
-		var err error
+	err := s.db.Update(func(txn *badger.Txn) error {
+
+		now := time.Now()
 		for _, meta := range metas {
-			if err = txn.SetEntry(newSampleTypeEntry(meta.SampleType, meta.ProfileType, ttl)); err != nil {
+			id, err := s.metaSeq.Next()
+			if err != nil {
 				return err
 			}
-			if err = txn.SetEntry(newTargetKeyEntry(meta.TargetName, ttl)); err != nil {
-				return err
-			}
+			idStr := strconv.FormatUint(id, 10)
+
 			var profileMetaEntry *badger.Entry
-			if profileMetaEntry, err = newProfileMetaEntry(meta, ttl); err != nil {
+			if profileMetaEntry, err = newProfileMetaEntry(idStr, meta, ttl); err != nil {
 				return err
 			}
 			if err = txn.SetEntry(profileMetaEntry); err != nil {
 				return err
 			}
+
+			if err = txn.SetEntry(newSampleTypeEntry(meta.SampleType, meta.ProfileType, ttl)); err != nil {
+				return err
+			}
+
+			if err = txn.SetEntry(newTargetEntry(meta.TargetName, ttl)); err != nil {
+				return err
+			}
+
+			// 添加默认target Index
+			meta.Labels = append(meta.Labels, storage.Label{
+				Key:   TargetLabel,
+				Value: meta.TargetName,
+			})
+
+			labelEnters := newLabelEntry(meta.Labels, ttl)
+			for _, entry := range labelEnters {
+				if err = txn.SetEntry(entry); err != nil {
+					return err
+				}
+			}
+
+			indexEnters := newIndexEntry(meta.SampleType, meta.Labels, idStr, now, ttl)
+			for _, entry := range indexEnters {
+				if err = txn.SetEntry(entry); err != nil {
+					return err
+				}
+			}
 		}
 		return nil
 	})
+	return err
 }
 
-func (s *store) ListProfileMeta(sampleType string, targetFilter []string, startTime, endTime time.Time) ([]*storage.ProfileMetaByTarget, error) {
-	targets := make([]*storage.ProfileMetaByTarget, 0)
+func (s *store) ListProfileMeta(sampleType string, labelFilter []storage.Label, startTime, endTime time.Time) ([]*storage.ProfileMetaByTarget, error) {
 	var err error
-	if len(targetFilter) == 0 {
-		if targetFilter, err = s.ListTarget(); err != nil {
+	if labelFilter == nil {
+		labelFilter = make([]storage.Label, 0)
+		targets, err := s.ListTarget()
+		if err != nil {
 			return nil, err
 		}
+		for _, target := range targets {
+			labelFilter = append(labelFilter, storage.Label{
+				Key:   TargetLabel,
+				Value: target,
+			})
+		}
 	}
-	err = s.db.View(func(txn *badger.Txn) error {
-		for _, targetName := range targetFilter {
-			target := &storage.ProfileMetaByTarget{TargetName: targetName, ProfileMetas: make([]*storage.ProfileMeta, 0)}
 
-			min := buildProfileMetaKey(sampleType, targetName, startTime)
-			max := buildProfileMetaKey(sampleType, targetName, endTime)
+	ids, err := s.searchProfileMeta(sampleType, labelFilter, startTime, endTime, utils.Union)
+	if err != nil {
+		return nil, err
+	}
+
+	targetMap := make(map[string][]*storage.ProfileMeta)
+	err = s.db.View(func(txn *badger.Txn) error {
+		for _, id := range ids {
+
+			key := buildProfileMetaKey(id)
+			item, err := txn.Get(key)
+			if err != nil {
+				return err
+			}
+
+			err = item.Value(func(v []byte) error {
+				meta := &storage.ProfileMeta{}
+				if err = meta.Decode(v); err != nil {
+					return err
+				}
+
+				if metas, ok := targetMap[meta.TargetName]; ok {
+					metas = append(metas, meta)
+					targetMap[meta.TargetName] = metas
+				} else {
+					metas = make([]*storage.ProfileMeta, 0)
+					metas = append(metas, meta)
+					targetMap[meta.TargetName] = metas
+				}
+				return nil
+			})
+			if err != nil {
+				return err
+			}
+
+		}
+		return nil
+	})
+
+	res := make([]*storage.ProfileMetaByTarget, 0)
+	for targetName, metas := range targetMap {
+		res = append(res, &storage.ProfileMetaByTarget{TargetName: targetName, ProfileMetas: metas})
+	}
+
+	return res, err
+}
+
+func (s *store) searchProfileMeta(sampleType string, labels []storage.Label, startTime, endTime time.Time, merger func(slice1, slice2 []string) []string) ([]string, error) {
+	ids := make([]string, 0)
+	err := s.db.View(func(txn *badger.Txn) error {
+		for _, label := range labels {
+			idsByLabel := make([]string, 0)
+
+			min := buildIndexKey(sampleType, label.Key, label.Value, &startTime, nil)
+			max := buildIndexKey(sampleType, label.Key, label.Value, &endTime, nil)
 
 			opts := badger.DefaultIteratorOptions
-			opts.PrefetchSize = 100
-			opts.Prefix = buildBaseProfileMetaKey(sampleType, targetName)
+			opts.PrefetchSize = 1000
+			opts.Prefix = buildIndexKey(sampleType, label.Key, label.Value, nil, nil)
 			it := txn.NewIterator(opts)
 			defer it.Close()
 
 			for it.Seek(min); it.Valid(); it.Next() {
 				item := it.Item()
 				k := item.Key()
+				id := string(k[len(min):])
+				idsByLabel = append(idsByLabel, id)
 				if !storage.CompareKey(k, max) {
 					break
 				}
-
-				err = item.Value(func(v []byte) error {
-					meta := &storage.ProfileMeta{}
-					if err = meta.Decode(v); err != nil {
-						return err
-					}
-					target.ProfileMetas = append(target.ProfileMetas, meta)
-					return nil
-				})
-
-				if err != nil {
-					return err
-				}
+			}
+			if len(ids) == 0 {
+				ids = idsByLabel
+			} else {
+				ids = merger(ids, idsByLabel)
 			}
 
-			if len(target.ProfileMetas) > 0 {
-				targets = append(targets, target)
-			}
 		}
 		return nil
 	})
-	return targets, err
+	return ids, err
 }
 
 func (s *store) ListSampleType() ([]string, error) {
@@ -177,7 +263,7 @@ func (s *store) ListSampleType() ([]string, error) {
 		for it.Seek(PrefixSampleType); it.Valid(); it.Next() {
 			item := it.Item()
 			k := item.Key()
-			sampleTypes = append(sampleTypes, deleteSampleTypeKey(k))
+			sampleTypes = append(sampleTypes, deletePrefixKey(k))
 		}
 
 		return nil
@@ -203,7 +289,7 @@ func (s *store) ListGroupSampleType() (map[string][]string, error) {
 				if _, ok := sampleTypes[string(v)]; !ok {
 					sampleTypes[string(v)] = make([]string, 0, 5)
 				}
-				sampleTypes[string(v)] = append(sampleTypes[string(v)], deleteSampleTypeKey(k))
+				sampleTypes[string(v)] = append(sampleTypes[string(v)], deletePrefixKey(k))
 				return nil
 			})
 
@@ -230,7 +316,28 @@ func (s *store) ListTarget() ([]string, error) {
 		for it.Seek(PrefixTarget); it.Valid(); it.Next() {
 			item := it.Item()
 			k := item.Key()
-			targets = append(targets, deleteTargetKey(k))
+			targets = append(targets, deletePrefixKey(k))
+		}
+		return nil
+	})
+
+	return targets, err
+}
+
+func (s *store) ListLabel() ([]string, error) {
+	targets := make([]string, 0)
+	err := s.db.View(func(txn *badger.Txn) error {
+		opts := badger.DefaultIteratorOptions
+		opts.PrefetchSize = 100
+		opts.Prefix = PrefixLabel
+		it := txn.NewIterator(opts)
+		defer it.Close()
+
+		for it.Seek(PrefixLabel); it.Valid(); it.Next() {
+			item := it.Item()
+			k := item.Key()
+
+			targets = append(targets, deletePrefixKey(k))
 		}
 		return nil
 	})
@@ -239,7 +346,12 @@ func (s *store) ListTarget() ([]string, error) {
 }
 
 func (s *store) Release() {
-	if err := s.seq.Release(); err != nil {
+	if err := s.profileSeq.Release(); err != nil {
+		log.WithError(err).Error("store release")
+		return
+	}
+
+	if err := s.metaSeq.Release(); err != nil {
 		log.WithError(err).Error("store release")
 		return
 	}

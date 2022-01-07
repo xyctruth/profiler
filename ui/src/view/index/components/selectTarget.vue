@@ -3,7 +3,7 @@
     v-model="value"
     :multiple="true"
     :collapse-tags="true"
-    placeholder="选择服务"
+    placeholder="Select Target"
     clearable="true"
     filterable>
     <el-option
@@ -23,7 +23,7 @@ import {ref, onMounted, defineEmits, watch} from 'vue'
 
   const options = ref([])
   const value = ref([])
-  const emit = defineEmits(['update:selectProjects'])
+  const emit = defineEmits(['update:selectTargets'])
 
   let query = router.currentRoute.value.query
   if (query.targets){
@@ -52,7 +52,7 @@ watch(value, (value) => {
   let newQuery = JSON.parse(JSON.stringify(query));
   newQuery.targets = value;
   router.push({path, query: newQuery});
-  emit("update:selectProjects",  value)
+  emit("update:selectTargets",  value)
 }, {
   immediate: true
 })
