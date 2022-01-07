@@ -17,7 +17,11 @@ var (
 	PrefixSampleType  = []byte{0x83}
 	PrefixTarget      = []byte{0x84}
 	PrefixLabel       = []byte{0x85}
+	PrefixIndex       = []byte{0x86}
 )
+
+// 内置label
+const TargetLabel = "_target"
 
 func deletePrefixKey(key []byte) string {
 	return string(key[1:])
@@ -47,8 +51,16 @@ func buildTargetKey(target string) []byte {
 	return buf.Bytes()
 }
 
-func buildLabelKey(sampleType, key, val string, createAt *time.Time, id *string) []byte {
+func buildLabelKey(key, val string) []byte {
 	buf := bytes.NewBuffer(PrefixLabel)
+	buf.Write([]byte(key))
+	buf.Write([]byte("="))
+	buf.Write([]byte(val))
+	return buf.Bytes()
+}
+
+func buildIndexKey(sampleType, key, val string, createAt *time.Time, id *string) []byte {
+	buf := bytes.NewBuffer(PrefixIndex)
 	buf.Write([]byte(sampleType))
 	buf.Write([]byte(key))
 	buf.Write([]byte("="))
@@ -99,13 +111,28 @@ func newTargetEntry(target string, ttl time.Duration) *badger.Entry {
 	return entry
 }
 
-func newLabelsEntry(sampleType string, labels []storage.Label, id string, createAt time.Time, ttl time.Duration) []*badger.Entry {
+func newLabelEntry(labels []storage.Label, ttl time.Duration) []*badger.Entry {
 	entries := make([]*badger.Entry, 0, len(labels))
 	if len(labels) == 0 {
 		return entries
 	}
 	for _, l := range labels {
-		entry := badger.NewEntry(buildLabelKey(sampleType, l.Key, l.Value, &createAt, &id), nil)
+		entry := badger.NewEntry(buildLabelKey(l.Key, l.Value), nil)
+		if ttl > 0 {
+			entry = entry.WithTTL(ttl)
+		}
+		entries = append(entries, entry)
+	}
+	return entries
+}
+
+func newIndexEntry(sampleType string, labels []storage.Label, id string, createAt time.Time, ttl time.Duration) []*badger.Entry {
+	entries := make([]*badger.Entry, 0, len(labels))
+	if len(labels) == 0 {
+		return entries
+	}
+	for _, l := range labels {
+		entry := badger.NewEntry(buildIndexKey(sampleType, l.Key, l.Value, &createAt, &id), nil)
 		if ttl > 0 {
 			entry = entry.WithTTL(ttl)
 		}

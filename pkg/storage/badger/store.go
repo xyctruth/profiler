@@ -5,6 +5,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/xyctruth/profiler/pkg/utils"
+
 	"github.com/dgraph-io/badger/v3"
 	log "github.com/sirupsen/logrus"
 	"github.com/xyctruth/profiler/pkg/storage"
@@ -126,13 +128,20 @@ func (s *store) SaveProfileMeta(metas []*storage.ProfileMeta, ttl time.Duration)
 				return err
 			}
 
+			labelEnters := newLabelEntry(meta.Labels, ttl)
+			for _, entry := range labelEnters {
+				if err = txn.SetEntry(entry); err != nil {
+					return err
+				}
+			}
+
+			// 添加默认target Index
 			meta.Labels = append(meta.Labels, storage.Label{
-				Key:   "_target",
+				Key:   TargetLabel,
 				Value: meta.TargetName,
 			})
-
-			labelsEntry := newLabelsEntry(meta.SampleType, meta.Labels, idStr, now, ttl)
-			for _, entry := range labelsEntry {
+			indexEnters := newIndexEntry(meta.SampleType, meta.Labels, idStr, now, ttl)
+			for _, entry := range indexEnters {
 				if err = txn.SetEntry(entry); err != nil {
 					return err
 				}
@@ -143,53 +152,38 @@ func (s *store) SaveProfileMeta(metas []*storage.ProfileMeta, ttl time.Duration)
 	return err
 }
 
-func (s *store) ListProfileMeta(sampleType string, targetFilter []string, startTime, endTime time.Time) ([]*storage.ProfileMetaByTarget, error) {
-	labels := make([]storage.Label, 0)
-
-	targets := make([]*storage.ProfileMetaByTarget, 0)
+func (s *store) ListProfileMeta(sampleType string, targets []string, labelFilter []storage.Label, startTime, endTime time.Time) ([]*storage.ProfileMetaByTarget, error) {
 	var err error
-	if len(targetFilter) == 0 {
-		if targetFilter, err = s.ListTarget(); err != nil {
+
+	targetFilter := make([]storage.Label, 0)
+	if len(targets) == 0 {
+		if targets, err = s.ListTarget(); err != nil {
 			return nil, err
 		}
 	}
-
-	for _, target := range targetFilter {
-		labels = append(labels, storage.Label{
-			Key:   "_target",
+	for _, target := range targets {
+		targetFilter = append(targetFilter, storage.Label{
+			Key:   TargetLabel,
 			Value: target,
 		})
 	}
 
-	ids := make(map[string]struct{})
-	err = s.db.View(func(txn *badger.Txn) error {
-		for _, label := range labels {
+	ids, err := s.searchProfileMeta(sampleType, targetFilter, startTime, endTime, utils.Union)
+	if err != nil {
+		return nil, err
+	}
 
-			min := buildLabelKey(sampleType, label.Key, label.Value, &startTime, nil)
-			max := buildLabelKey(sampleType, label.Key, label.Value, &endTime, nil)
-
-			opts := badger.DefaultIteratorOptions
-			opts.PrefetchSize = 1000
-			opts.Prefix = buildLabelKey(sampleType, label.Key, label.Value, nil, nil)
-			it := txn.NewIterator(opts)
-			defer it.Close()
-
-			for it.Seek(min); it.Valid(); it.Next() {
-				item := it.Item()
-				k := item.Key()
-				id := string(k[len(min):])
-				ids[id] = struct{}{}
-				if !storage.CompareKey(k, max) {
-					break
-				}
-			}
+	if len(labelFilter) > 0 {
+		labelFilterIds, err := s.searchProfileMeta(sampleType, labelFilter, startTime, endTime, utils.Intersect)
+		if err != nil {
+			return nil, err
 		}
-		return nil
-	})
+		ids = utils.Intersect(ids, labelFilterIds)
+	}
 
 	targetMap := make(map[string][]*storage.ProfileMeta)
 	err = s.db.View(func(txn *badger.Txn) error {
-		for id := range ids {
+		for _, id := range ids {
 
 			key := buildProfileMetaKey(id)
 			item, err := txn.Get(key)
@@ -221,11 +215,48 @@ func (s *store) ListProfileMeta(sampleType string, targetFilter []string, startT
 		return nil
 	})
 
+	res := make([]*storage.ProfileMetaByTarget, 0)
 	for targetName, metas := range targetMap {
-		targets = append(targets, &storage.ProfileMetaByTarget{TargetName: targetName, ProfileMetas: metas})
+		res = append(res, &storage.ProfileMetaByTarget{TargetName: targetName, ProfileMetas: metas})
 	}
 
-	return targets, err
+	return res, err
+}
+
+func (s *store) searchProfileMeta(sampleType string, labels []storage.Label, startTime, endTime time.Time, merger func(slice1, slice2 []string) []string) ([]string, error) {
+	ids := make([]string, 0)
+	err := s.db.View(func(txn *badger.Txn) error {
+		for _, label := range labels {
+			idsByLabel := make([]string, 0)
+
+			min := buildIndexKey(sampleType, label.Key, label.Value, &startTime, nil)
+			max := buildIndexKey(sampleType, label.Key, label.Value, &endTime, nil)
+
+			opts := badger.DefaultIteratorOptions
+			opts.PrefetchSize = 1000
+			opts.Prefix = buildIndexKey(sampleType, label.Key, label.Value, nil, nil)
+			it := txn.NewIterator(opts)
+			defer it.Close()
+
+			for it.Seek(min); it.Valid(); it.Next() {
+				item := it.Item()
+				k := item.Key()
+				id := string(k[len(min):])
+				idsByLabel = append(idsByLabel, id)
+				if !storage.CompareKey(k, max) {
+					break
+				}
+			}
+			if len(ids) == 0 {
+				ids = idsByLabel
+			} else {
+				ids = merger(ids, idsByLabel)
+			}
+
+		}
+		return nil
+	})
+	return ids, err
 }
 
 func (s *store) ListSampleType() ([]string, error) {
@@ -313,6 +344,7 @@ func (s *store) ListLabel() ([]string, error) {
 		for it.Seek(PrefixLabel); it.Valid(); it.Next() {
 			item := it.Item()
 			k := item.Key()
+
 			targets = append(targets, deletePrefixKey(k))
 		}
 		return nil

@@ -3,7 +3,6 @@ package badger
 import (
 	"io/ioutil"
 	"os"
-	"strconv"
 	"testing"
 	"time"
 
@@ -14,7 +13,7 @@ import (
 
 var (
 	profileMeta = &storage.ProfileMeta{
-		ProfileID:      1,
+		ProfileID:      "1",
 		Timestamp:      time.Now().UnixNano() / time.Millisecond.Nanoseconds(),
 		Duration:       time.Now().UnixNano(),
 		SampleTypeUnit: "count",
@@ -25,7 +24,7 @@ var (
 	}
 
 	traceMeta = &storage.ProfileMeta{
-		ProfileID:   1,
+		ProfileID:   "1",
 		Timestamp:   time.Now().UnixNano() / time.Millisecond.Nanoseconds(),
 		Duration:    time.Now().UnixNano(),
 		SampleType:  "trace",
@@ -34,7 +33,7 @@ var (
 	}
 	profileMetas = []*storage.ProfileMeta{
 		{
-			ProfileID:      1,
+			ProfileID:      "1",
 			Timestamp:      time.Now().UnixNano() / time.Millisecond.Nanoseconds(),
 			Duration:       time.Now().UnixNano(),
 			SampleTypeUnit: "count",
@@ -42,9 +41,13 @@ var (
 			ProfileType:    "heap",
 			TargetName:     "profiler-server",
 			Value:          100,
+			Labels: []storage.Label{{
+				Key:   "env",
+				Value: "test",
+			}},
 		},
 		{
-			ProfileID:      2,
+			ProfileID:      "2",
 			Timestamp:      time.Now().UnixNano() / time.Millisecond.Nanoseconds(),
 			Duration:       time.Now().UnixNano(),
 			SampleTypeUnit: "bytes",
@@ -52,9 +55,13 @@ var (
 			ProfileType:    "heap",
 			TargetName:     "profiler-server",
 			Value:          200,
+			Labels: []storage.Label{{
+				Key:   "env",
+				Value: "test",
+			}},
 		},
 		{
-			ProfileID:      3,
+			ProfileID:      "3",
 			Timestamp:      time.Now().UnixNano() / time.Millisecond.Nanoseconds(),
 			Duration:       time.Now().UnixNano(),
 			SampleTypeUnit: "count",
@@ -62,9 +69,13 @@ var (
 			ProfileType:    "heap",
 			TargetName:     "server2",
 			Value:          300,
+			Labels: []storage.Label{{
+				Key:   "env",
+				Value: "test",
+			}},
 		},
 		{
-			ProfileID:      4,
+			ProfileID:      "4",
 			Timestamp:      time.Now().UnixNano() / time.Millisecond.Nanoseconds(),
 			Duration:       time.Now().UnixNano(),
 			SampleTypeUnit: "bytes",
@@ -72,9 +83,13 @@ var (
 			ProfileType:    "heap",
 			TargetName:     "server2",
 			Value:          400,
+			Labels: []storage.Label{{
+				Key:   "env",
+				Value: "test",
+			}},
 		},
 		{
-			ProfileID:      5,
+			ProfileID:      "5",
 			Timestamp:      time.Now().UnixNano() / time.Millisecond.Nanoseconds(),
 			Duration:       time.Now().UnixNano(),
 			SampleTypeUnit: "bytes",
@@ -82,6 +97,14 @@ var (
 			ProfileType:    "heap",
 			TargetName:     "server3",
 			Value:          400,
+			Labels: []storage.Label{{
+				Key:   "env",
+				Value: "test1",
+			},
+				{
+					Key:   "namespace",
+					Value: "f004",
+				}},
 		},
 	}
 )
@@ -117,12 +140,12 @@ func TestProfile(t *testing.T) {
 	require.Equal(t, nil, err)
 	require.NotEqual(t, 0, id)
 
-	_, err = s.GetProfile(strconv.FormatUint(id, 10))
+	_, err = s.GetProfile(id)
 	require.Equal(t, nil, err)
 
 	// Waiting for the overdue
 	time.Sleep(1 * time.Second)
-	_, err = s.GetProfile(strconv.FormatUint(id, 10))
+	_, err = s.GetProfile(id)
 	require.NotEqual(t, nil, err)
 }
 
@@ -155,7 +178,7 @@ func TestProfileMeta(t *testing.T) {
 	require.Equal(t, nil, err)
 	require.Equal(t, 1, len(sampleTypes))
 
-	profileMetas, err := s.ListProfileMeta(sampleTypes[0], targets, min, max)
+	profileMetas, err := s.ListProfileMeta(sampleTypes[0], targets, nil, min, max)
 	require.Equal(t, nil, err)
 	require.Equal(t, 1, len(profileMetas))
 
@@ -175,7 +198,7 @@ func TestProfileMeta(t *testing.T) {
 		require.Equal(t, nil, err)
 		require.Equal(t, 0, len(ttlSampleTypes))
 
-		ttlProfileMetas, err := s.ListProfileMeta(sampleTypes[0], targets, min, max)
+		ttlProfileMetas, err := s.ListProfileMeta(sampleTypes[0], targets, nil, min, max)
 		require.Equal(t, nil, err)
 		require.Equal(t, 0, len(ttlProfileMetas))
 	}
@@ -211,24 +234,67 @@ func TestProfileMetaArray(t *testing.T) {
 	require.Equal(t, 4, len(sampleTypes))
 
 	{
-		profileMetas, err := s.ListProfileMeta("heap_inuse_space", targets, min, max)
+		profileMetas, err := s.ListProfileMeta("heap_inuse_space", targets, nil, min, max)
 		require.Equal(t, nil, err)
 		require.Equal(t, 2, len(profileMetas))
 
-		profileMetas, err = s.ListProfileMeta("heap_inuse_space", nil, min, max)
+		profileMetas, err = s.ListProfileMeta("heap_inuse_space", nil, nil, min, max)
 		require.Equal(t, nil, err)
 		require.Equal(t, 2, len(profileMetas))
 
-		profileMetas, err = s.ListProfileMeta("heap_inuse_space", []string{"server2"}, min, max)
+		profileMetas, err = s.ListProfileMeta("heap_inuse_space", []string{"server2"}, nil, min, max)
 		require.Equal(t, nil, err)
 		require.Equal(t, 1, len(profileMetas))
 
-		profileMetas, err = s.ListProfileMeta("heap_inuse_objects", nil, min, max)
+		profileMetas, err = s.ListProfileMeta("heap_inuse_objects", nil, nil, min, max)
 		require.Equal(t, nil, err)
 		require.Equal(t, 1, len(profileMetas))
 
-		profileMetas, err = s.ListProfileMeta("heap_inuse_objects1", nil, min, max)
+		profileMetas, err = s.ListProfileMeta("heap_inuse_objects1", nil, nil, min, max)
 		require.Equal(t, nil, err)
+		require.Equal(t, 0, len(profileMetas))
+
+		profileMetas, err = s.ListProfileMeta("heap_inuse_space", targets, []storage.Label{{
+			Key:   "env",
+			Value: "test",
+		}}, min, max)
+		require.Equal(t, nil, err)
+		require.Equal(t, 1, len(profileMetas))
+		require.Equal(t, 1, len(profileMetas[0].ProfileMetas))
+		require.Equal(t, "server2", profileMetas[0].TargetName)
+
+		profileMetas, err = s.ListProfileMeta("heap_inuse_space", targets, []storage.Label{{
+			Key:   "env",
+			Value: "test1",
+		}}, min, max)
+		require.Equal(t, 1, len(profileMetas))
+		require.Equal(t, 1, len(profileMetas[0].ProfileMetas))
+		require.Equal(t, "server3", profileMetas[0].TargetName)
+
+		profileMetas, err = s.ListProfileMeta("heap_inuse_space", []string{"server3"}, []storage.Label{{
+			Key:   "env",
+			Value: "test1",
+		}, {
+			Key:   "namespace",
+			Value: "f004",
+		}}, min, max)
+		require.Equal(t, 1, len(profileMetas))
+		require.Equal(t, 1, len(profileMetas[0].ProfileMetas))
+		require.Equal(t, "server3", profileMetas[0].TargetName)
+
+		profileMetas, err = s.ListProfileMeta("heap_inuse_space", []string{"server2"}, []storage.Label{{
+			Key:   "env",
+			Value: "test1",
+		}}, min, max)
+		require.Equal(t, 0, len(profileMetas))
+
+		profileMetas, err = s.ListProfileMeta("heap_inuse_space", []string{"server3"}, []storage.Label{{
+			Key:   "env",
+			Value: "test1",
+		}, {
+			Key:   "namespace",
+			Value: "f003",
+		}}, min, max)
 		require.Equal(t, 0, len(profileMetas))
 	}
 
@@ -249,7 +315,7 @@ func TestProfileMetaArray(t *testing.T) {
 		require.Equal(t, nil, err)
 		require.Equal(t, 0, len(ttlSampleTypes))
 
-		ttlProfileMetas, err := s.ListProfileMeta(sampleTypes[0], targets, min, max)
+		ttlProfileMetas, err := s.ListProfileMeta(sampleTypes[0], targets, nil, min, max)
 		require.Equal(t, nil, err)
 		require.Equal(t, 0, len(ttlProfileMetas))
 	}

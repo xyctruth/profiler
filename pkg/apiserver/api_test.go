@@ -21,7 +21,7 @@ import (
 var (
 	profileMetas = []*storage.ProfileMeta{
 		{
-			ProfileID:      1,
+			ProfileID:      "1",
 			Timestamp:      time.Now().UnixNano() / time.Millisecond.Nanoseconds(),
 			Duration:       time.Now().UnixNano(),
 			SampleTypeUnit: "count",
@@ -31,7 +31,7 @@ var (
 			Value:          100,
 		},
 		{
-			ProfileID:      2,
+			ProfileID:      "2",
 			Timestamp:      time.Now().UnixNano() / time.Millisecond.Nanoseconds(),
 			Duration:       time.Now().UnixNano(),
 			SampleTypeUnit: "bytes",
@@ -41,7 +41,7 @@ var (
 			Value:          200,
 		},
 		{
-			ProfileID:      3,
+			ProfileID:      "3",
 			Timestamp:      time.Now().UnixNano() / time.Millisecond.Nanoseconds(),
 			Duration:       time.Now().UnixNano(),
 			SampleTypeUnit: "count",
@@ -51,7 +51,7 @@ var (
 			Value:          300,
 		},
 		{
-			ProfileID:      4,
+			ProfileID:      "4",
 			Timestamp:      time.Now().UnixNano() / time.Millisecond.Nanoseconds(),
 			Duration:       time.Now().UnixNano(),
 			SampleTypeUnit: "bytes",
@@ -61,7 +61,7 @@ var (
 			Value:          400,
 		},
 		{
-			ProfileID:      5,
+			ProfileID:      "5",
 			Timestamp:      time.Now().UnixNano() / time.Millisecond.Nanoseconds(),
 			Duration:       time.Now().UnixNano(),
 			SampleTypeUnit: "bytes",
@@ -83,26 +83,22 @@ func initMateData(s storage.Store, t *testing.T) {
 	require.Equal(t, nil, err)
 }
 
-func initProfileData(s storage.Store, t *testing.T) (uint64, uint64, uint64, uint64) {
+func initProfileData(s storage.Store, t *testing.T) (string, string, string, string) {
 	invalidId, err := s.SaveProfile([]byte{}, time.Second*10)
 	require.Equal(t, nil, err)
-	require.Equal(t, uint64(0), invalidId)
 
 	invalidId2, err := s.SaveProfile([]byte("haha"), time.Second*10)
 	require.Equal(t, nil, err)
-	require.Equal(t, uint64(1), invalidId2)
 
 	profileBytes, err := ioutil.ReadFile("./testdata/profile.gz")
 	require.Equal(t, nil, err)
 	id, err := s.SaveProfile(profileBytes, time.Second*10)
 	require.Equal(t, nil, err)
-	require.Equal(t, uint64(2), id)
 
 	traceBytes, err := ioutil.ReadFile("./testdata/trace.gz")
 	require.Equal(t, nil, err)
 	traceID, err := s.SaveProfile(traceBytes, time.Second*10)
 	require.Equal(t, nil, err)
-	require.Equal(t, uint64(3), traceID)
 	return invalidId, invalidId2, id, traceID
 }
 
@@ -220,6 +216,11 @@ func TestListProfileMeta(t *testing.T) {
 		WithQuery("start_time", startTime).WithQuery("end_time", endTime).WithQuery("targets", "notfound").
 		Expect().
 		Status(http.StatusOK).JSON().Array().Length().Equal(0)
+
+	e.GET("/api/profile_meta/heap_inuse_space").
+		WithQuery("start_time", startTime).WithQuery("end_time", endTime).WithQuery("targets", "notfound").
+		Expect().
+		Status(http.StatusOK).JSON().Array().Length().Equal(0)
 }
 
 func TestGetProfile(t *testing.T) {
@@ -236,7 +237,7 @@ func TestGetProfile(t *testing.T) {
 		Expect().
 		Status(http.StatusNotFound)
 
-	e.GET(fmt.Sprintf("/api/profile/%d", id)).
+	e.GET(fmt.Sprintf("/api/profile/%s", id)).
 		Expect().
 		Status(http.StatusOK).Header("Content-Type").Equal("application/vnd.google.protobuf+gzip")
 
@@ -244,7 +245,7 @@ func TestGetProfile(t *testing.T) {
 		Expect().
 		Status(http.StatusNotFound)
 
-	e.GET(fmt.Sprintf("/api/trace/%d", traceID)).
+	e.GET(fmt.Sprintf("/api/trace/%s", traceID)).
 		Expect().
 		Status(http.StatusOK).Header("Content-Type").Equal("application/octet-stream")
 }
