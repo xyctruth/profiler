@@ -18,26 +18,26 @@ func TestCompareKey(t *testing.T) {
 	}{
 		{
 			name: "less",
-			key1: BuildKey(now),
-			key2: BuildKey(now.Add(1 * time.Second)),
+			key1: BuildTimeKey(now),
+			key2: BuildTimeKey(now.Add(1 * time.Second)),
 			want: true,
 		},
 		{
 			name: "equal",
-			key1: BuildKey(now),
-			key2: BuildKey(now),
+			key1: BuildTimeKey(now),
+			key2: BuildTimeKey(now),
 			want: true,
 		},
 		{
 			name: "equal millisecond diff",
-			key1: BuildKey(now),
-			key2: BuildKey(now.Add(1 * time.Millisecond)),
+			key1: BuildTimeKey(now),
+			key2: BuildTimeKey(now.Add(1 * time.Millisecond)),
 			want: true,
 		},
 		{
 			name: "greater",
-			key1: BuildKey(now),
-			key2: BuildKey(now.Add(-1 * time.Second)),
+			key1: BuildTimeKey(now),
+			key2: BuildTimeKey(now.Add(-1 * time.Second)),
 			want: false,
 		},
 	}

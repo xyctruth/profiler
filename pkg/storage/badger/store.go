@@ -102,8 +102,8 @@ func (s *store) SaveProfile(profileData []byte, ttl time.Duration) (string, erro
 func (s *store) SaveProfileMeta(metas []*storage.ProfileMeta, ttl time.Duration) error {
 	err := s.db.Update(func(txn *badger.Txn) error {
 
+		now := time.Now()
 		for _, meta := range metas {
-
 			id, err := s.metaSeq.Next()
 			if err != nil {
 				return err
@@ -126,7 +126,12 @@ func (s *store) SaveProfileMeta(metas []*storage.ProfileMeta, ttl time.Duration)
 				return err
 			}
 
-			labelsEntry := newLabelsEntry(meta.Labels, id, ttl)
+			meta.Labels = append(meta.Labels, storage.Label{
+				Key:   "_target",
+				Value: meta.TargetName,
+			})
+
+			labelsEntry := newLabelsEntry(meta.SampleType, meta.Labels, idStr, now, ttl)
 			for _, entry := range labelsEntry {
 				if err = txn.SetEntry(entry); err != nil {
 					return err
@@ -139,6 +144,8 @@ func (s *store) SaveProfileMeta(metas []*storage.ProfileMeta, ttl time.Duration)
 }
 
 func (s *store) ListProfileMeta(sampleType string, targetFilter []string, startTime, endTime time.Time) ([]*storage.ProfileMetaByTarget, error) {
+	labels := make([]storage.Label, 0)
+
 	targets := make([]*storage.ProfileMetaByTarget, 0)
 	var err error
 	if len(targetFilter) == 0 {
@@ -146,46 +153,78 @@ func (s *store) ListProfileMeta(sampleType string, targetFilter []string, startT
 			return nil, err
 		}
 	}
-	err = s.db.View(func(txn *badger.Txn) error {
-		for _, targetName := range targetFilter {
-			target := &storage.ProfileMetaByTarget{TargetName: targetName, ProfileMetas: make([]*storage.ProfileMeta, 0)}
 
-			min := buildProfileMetaKey(sampleType, targetName, startTime)
-			max := buildProfileMetaKey(sampleType, targetName, endTime)
+	for _, target := range targetFilter {
+		labels = append(labels, storage.Label{
+			Key:   "_target",
+			Value: target,
+		})
+	}
+
+	ids := make(map[string]struct{})
+	err = s.db.View(func(txn *badger.Txn) error {
+		for _, label := range labels {
+
+			min := buildLabelKey(sampleType, label.Key, label.Value, &startTime, nil)
+			max := buildLabelKey(sampleType, label.Key, label.Value, &endTime, nil)
 
 			opts := badger.DefaultIteratorOptions
-			opts.PrefetchSize = 100
-			opts.Prefix = buildBaseProfileMetaKey(sampleType, targetName)
+			opts.PrefetchSize = 1000
+			opts.Prefix = buildLabelKey(sampleType, label.Key, label.Value, nil, nil)
 			it := txn.NewIterator(opts)
 			defer it.Close()
 
 			for it.Seek(min); it.Valid(); it.Next() {
 				item := it.Item()
 				k := item.Key()
+				id := string(k[len(min):])
+				ids[id] = struct{}{}
 				if !storage.CompareKey(k, max) {
 					break
 				}
-
-				err = item.Value(func(v []byte) error {
-					meta := &storage.ProfileMeta{}
-					if err = meta.Decode(v); err != nil {
-						return err
-					}
-					target.ProfileMetas = append(target.ProfileMetas, meta)
-					return nil
-				})
-
-				if err != nil {
-					return err
-				}
-			}
-
-			if len(target.ProfileMetas) > 0 {
-				targets = append(targets, target)
 			}
 		}
 		return nil
 	})
+
+	targetMap := make(map[string][]*storage.ProfileMeta)
+	err = s.db.View(func(txn *badger.Txn) error {
+		for id := range ids {
+
+			key := buildProfileMetaKey(id)
+			item, err := txn.Get(key)
+			if err != nil {
+				return err
+			}
+
+			err = item.Value(func(v []byte) error {
+				meta := &storage.ProfileMeta{}
+				if err = meta.Decode(v); err != nil {
+					return err
+				}
+
+				if metas, ok := targetMap[meta.TargetName]; ok {
+					metas = append(metas, meta)
+					targetMap[meta.TargetName] = metas
+				} else {
+					metas = make([]*storage.ProfileMeta, 0)
+					metas = append(metas, meta)
+					targetMap[meta.TargetName] = metas
+				}
+				return nil
+			})
+			if err != nil {
+				return err
+			}
+
+		}
+		return nil
+	})
+
+	for targetName, metas := range targetMap {
+		targets = append(targets, &storage.ProfileMetaByTarget{TargetName: targetName, ProfileMetas: metas})
+	}
+
 	return targets, err
 }
 

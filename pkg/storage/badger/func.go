@@ -29,13 +29,6 @@ func buildProfileKey(id string) []byte {
 	return buf.Bytes()
 }
 
-func buildBaseProfileMetaKey(sampleType string, target string) []byte {
-	buf := bytes.NewBuffer(PrefixProfileMeta)
-	buf.Write([]byte(sampleType))
-	buf.Write([]byte(target))
-	return buf.Bytes()
-}
-
 func buildProfileMetaKey(id string) []byte {
 	buf := bytes.NewBuffer(PrefixProfileMeta)
 	buf.Write([]byte(id))
@@ -54,12 +47,19 @@ func buildTargetKey(target string) []byte {
 	return buf.Bytes()
 }
 
-func buildLabelKey(key, val, id string) []byte {
+func buildLabelKey(sampleType, key, val string, createAt *time.Time, id *string) []byte {
 	buf := bytes.NewBuffer(PrefixLabel)
+	buf.Write([]byte(sampleType))
 	buf.Write([]byte(key))
 	buf.Write([]byte("="))
 	buf.Write([]byte(val))
-	buf.Write([]byte(id))
+
+	if createAt != nil {
+		buf.Write(storage.BuildTimeKey(*createAt))
+	}
+	if id != nil {
+		buf.Write([]byte(*id))
+	}
 	return buf.Bytes()
 }
 
@@ -99,13 +99,13 @@ func newTargetEntry(target string, ttl time.Duration) *badger.Entry {
 	return entry
 }
 
-func newLabelsEntry(labels map[string]string, id string, ttl time.Duration) []*badger.Entry {
+func newLabelsEntry(sampleType string, labels []storage.Label, id string, createAt time.Time, ttl time.Duration) []*badger.Entry {
 	entries := make([]*badger.Entry, 0, len(labels))
 	if len(labels) == 0 {
 		return entries
 	}
-	for key, val := range labels {
-		entry := badger.NewEntry(buildLabelKey(key, val, id), nil)
+	for _, l := range labels {
+		entry := badger.NewEntry(buildLabelKey(sampleType, l.Key, l.Value, &createAt, &id), nil)
 		if ttl > 0 {
 			entry = entry.WithTTL(ttl)
 		}

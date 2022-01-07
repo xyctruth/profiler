@@ -35,19 +35,20 @@ type Store interface {
 
 type TargetLabels map[string]string
 
-func (labels *TargetLabels) Encode() ([]byte, error) {
-	b, err := msgpack.Marshal(labels)
-	if len(b) > (1 << 10) {
-		return nil, errors.New("meta size > (1 << 10) , badger WithValueThreshold is 1kb")
+func (t TargetLabels) ToArray() []Label {
+	labels := make([]Label, 0, len(t))
+	for k, v := range t {
+		labels = append(labels, Label{
+			Key:   k,
+			Value: v,
+		})
 	}
-	if err != nil {
-		return nil, err
-	}
-	return b, nil
+	return labels
 }
 
-func (labels *TargetLabels) Decode(v []byte) error {
-	return msgpack.Unmarshal(v, labels)
+type Label struct {
+	Key   string
+	Value string
 }
 
 type ProfileMetaByTarget struct {
@@ -64,7 +65,7 @@ type ProfileMeta struct {
 	Value          int64
 	Timestamp      int64
 	Duration       int64
-	Labels         TargetLabels
+	Labels         []Label
 }
 
 func (meta *ProfileMeta) Encode() ([]byte, error) {

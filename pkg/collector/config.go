@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/xyctruth/profiler/pkg/storage"
+
 	"github.com/fsnotify/fsnotify"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -98,7 +100,7 @@ type TargetConfig struct {
 	Interval       time.Duration            `yaml:"interval"`
 	Expiration     time.Duration            `yaml:"expiration"`
 	Host           string                   `yaml:"host"`
-	Labels         map[string]string        `yaml:"labels"`
+	Labels         storage.TargetLabels     `yaml:"labels"`
 }
 
 type ProfileConfig struct {
