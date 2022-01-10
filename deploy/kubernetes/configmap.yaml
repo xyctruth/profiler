@@ -11,6 +11,8 @@ data:
           interval: 5m
           expiration: 168h
           host: localhost:9000
+
+        # f007dev--------------------------------------------------------------------
         admin-gateway-f006dev:
           interval: 5m
           expiration: 168h
@@ -18,6 +20,36 @@ data:
           labels:
             namespace: f006dev
             type: gateway
+        app-businesses-gateway-f006dev:
+          interval: 5m
+          expiration: 168h
+          host: app-businesses-gateway.f006dev:9000
+          labels:
+            namespace: f006dev
+            type: gateway
+        app-gateway-f006dev:
+          interval: 5m
+          expiration: 168h
+          host: app-gateway.f006dev:9000
+          labels:
+            namespace: f006dev
+            type: gateway
+        app-gymnasiums-gateway-f006dev:
+          interval: 5m
+          expiration: 168h
+          host: app-gymnasiums-gateway.f006dev:9000
+          labels:
+            namespace: f006dev
+            type: gateway
+        app-supplychain-gateway-f006dev:
+          interval: 5m
+          expiration: 168h
+          host: app-supplychain-gateway.f006dev:9000
+          labels:
+            namespace: f006dev
+            type: gateway
+
+
         app-awards-svc-f006dev:
           interval: 5m
           expiration: 168h
@@ -32,13 +64,6 @@ data:
           labels:
             namespace: f006dev
             type: svc
-        app-businesses-gateway-f006dev:
-          interval: 5m
-          expiration: 168h
-          host: app-businesses-gateway.f006dev:9000
-          labels:
-            namespace: f006dev
-            type: gateway
         app-channel-b-svc-f006dev:
           interval: 5m
           expiration: 168h
@@ -74,13 +99,6 @@ data:
           labels:
             namespace: f006dev
             type: svc
-        app-gateway-f006dev:
-          interval: 5m
-          expiration: 168h
-          host: app-gateway.f006dev:9000
-          labels:
-            namespace: f006dev
-            type: gateway
         app-gymnasiums-b-svc-f006dev:
           interval: 5m
           expiration: 168h
@@ -88,20 +106,101 @@ data:
           labels:
             namespace: f006dev
             type: svc
-        app-gymnasiums-gateway-f006dev:
-          interval: 5m
-          expiration: 168h
-          host: app-gymnasiums-gateway.f006dev:9000
-          labels:
-            namespace: f006dev
-            type: gateway
-        app-knowledge-svc-f006dev:
+        app-knowledge-svc:
           interval: 5m
           expiration: 168h
           host: app-knowledge-svc.f006dev:9000
           labels:
             namespace: f006dev
             type: svc
+        app-lotteries-svc-f006dev:
+          interval: 5m
+          expiration: 168h
+          host: app-lotteries-svc.f006dev:9000
+          labels:
+            namespace: f006dev
+            type: svc
+        app-media-c-svc-f006dev:
+          interval: 5m
+          expiration: 168h
+          host: app-media-c-svc.f006dev:9000
+          labels:
+            namespace: f006dev
+            type: svc
+        app-media-m-svc-f006dev:
+          interval: 5m
+          expiration: 168h
+          host: app-media-m-svc.f006dev:9000
+          labels:
+            namespace: f006dev
+            type: svc
+        app-split-svc-f006dev:
+          interval: 5m
+          expiration: 168h
+          host: app-split-svc.f006dev:9000
+          labels:
+            namespace: f006dev
+            type: svc
+        app-supplychain-b-svc-f006dev:
+          interval: 5m
+          expiration: 168h
+          host: app-supplychain-b-svc.f006dev:9000
+          labels:
+            namespace: f006dev
+            type: svc
+        app-supplychain-c-svc-f006dev:
+          interval: 5m
+          expiration: 168h
+          host: app-supplychain-c-svc.f006dev:9000
+          labels:
+            namespace: f006dev
+            type: svc
+        app-vip-svc-f006dev:
+          interval: 5m
+          expiration: 168h
+          host: app-vip-svc.f006dev:9000
+          labels:
+            namespace: f006dev
+            type: svc
+        basic-common-svc-f006dev:
+          interval: 5m
+          expiration: 168h
+          host: basic-common-svc.f006dev:9000
+          labels:
+            namespace: f006dev
+            type: svc
+        basic-notification-svc-f006dev:
+          interval: 5m
+          expiration: 168h
+          host: basic-notification-svc.f006dev:9000
+          labels:
+            namespace: f006dev
+            type: svc
+        basic-pay-svc-f006dev:
+          interval: 5m
+          expiration: 168h
+          host: basic-pay-svc.f006dev:9000
+          labels:
+            namespace: f006dev
+            type: svc
+        basic-tag-svc-f006dev:
+          interval: 5m
+          expiration: 168h
+          host: basic-tag-svc.f006dev:9000
+          labels:
+            namespace: f006dev
+            type: svc
+        basic-user-svc-f006dev:
+          interval: 5m
+          expiration: 168h
+          host: basic-user-svc.f006dev:9000
+          labels:
+            namespace: f006dev
+            type: svc
+
+
+        # f007dev--------------------------------------------------------------------
+
         admin-gateway-f007dev:
           interval: 5m
           expiration: 168h
@@ -109,6 +208,36 @@ data:
           labels:
             namespace: f007dev
             type: gateway
+        app-businesses-gateway-f007dev:
+          interval: 5m
+          expiration: 168h
+          host: app-businesses-gateway.f007dev:9000
+          labels:
+            namespace: f007dev
+            type: gateway
+        app-gateway-f007dev:
+          interval: 5m
+          expiration: 168h
+          host: app-gateway.f007dev:9000
+          labels:
+            namespace: f007dev
+            type: gateway
+        app-gymnasiums-gateway-f007dev:
+          interval: 5m
+          expiration: 168h
+          host: app-gymnasiums-gateway.f007dev:9000
+          labels:
+            namespace: f007dev
+            type: gateway
+        app-supplychain-gateway-f007dev:
+          interval: 5m
+          expiration: 168h
+          host: app-supplychain-gateway.f007dev:9000
+          labels:
+            namespace: f007dev
+            type: gateway
+
+
         app-awards-svc-f007dev:
           interval: 5m
           expiration: 168h
@@ -123,13 +252,6 @@ data:
           labels:
             namespace: f007dev
             type: svc
-        app-businesses-gateway-f007dev:
-          interval: 5m
-          expiration: 168h
-          host: app-businesses-gateway.f007dev:9000
-          labels:
-            namespace: f007dev
-            type: gateway
         app-channel-b-svc-f007dev:
           interval: 5m
           expiration: 168h
@@ -165,13 +287,6 @@ data:
           labels:
             namespace: f007dev
             type: svc
-        app-gateway-f007dev:
-          interval: 5m
-          expiration: 168h
-          host: app-gateway.f007dev:9000
-          labels:
-            namespace: f007dev
-            type: gateway
         app-gymnasiums-b-svc-f007dev:
           interval: 5m
           expiration: 168h
@@ -179,17 +294,94 @@ data:
           labels:
             namespace: f007dev
             type: svc
-        app-gymnasiums-gateway-f007dev:
-          interval: 5m
-          expiration: 168h
-          host: app-gymnasiums-gateway.f007dev:9000
-          labels:
-            namespace: f007dev
-            type: gateway
-        app-knowledge-svc-f007dev:
+        app-knowledge-svc:
           interval: 5m
           expiration: 168h
           host: app-knowledge-svc.f007dev:9000
+          labels:
+            namespace: f007dev
+            type: svc
+        app-lotteries-svc-f007dev:
+          interval: 5m
+          expiration: 168h
+          host: app-lotteries-svc.f007dev:9000
+          labels:
+            namespace: f007dev
+            type: svc
+        app-media-c-svc-f007dev:
+          interval: 5m
+          expiration: 168h
+          host: app-media-c-svc.f007dev:9000
+          labels:
+            namespace: f007dev
+            type: svc
+        app-media-m-svc-f007dev:
+          interval: 5m
+          expiration: 168h
+          host: app-media-m-svc.f007dev:9000
+          labels:
+            namespace: f007dev
+            type: svc
+        app-split-svc-f007dev:
+          interval: 5m
+          expiration: 168h
+          host: app-split-svc.f007dev:9000
+          labels:
+            namespace: f007dev
+            type: svc
+        app-supplychain-b-svc-f007dev:
+          interval: 5m
+          expiration: 168h
+          host: app-supplychain-b-svc.f007dev:9000
+          labels:
+            namespace: f007dev
+            type: svc
+        app-supplychain-c-svc-f007dev:
+          interval: 5m
+          expiration: 168h
+          host: app-supplychain-c-svc.f007dev:9000
+          labels:
+            namespace: f007dev
+            type: svc
+        app-vip-svc-f007dev:
+          interval: 5m
+          expiration: 168h
+          host: app-vip-svc.f007dev:9000
+          labels:
+            namespace: f007dev
+            type: svc
+        basic-common-svc-f007dev:
+          interval: 5m
+          expiration: 168h
+          host: basic-common-svc.f007dev:9000
+          labels:
+            namespace: f007dev
+            type: svc
+        basic-notification-svc-f007dev:
+          interval: 5m
+          expiration: 168h
+          host: basic-notification-svc.f007dev:9000
+          labels:
+            namespace: f007dev
+            type: svc
+        basic-pay-svc-f007dev:
+          interval: 5m
+          expiration: 168h
+          host: basic-pay-svc.f007dev:9000
+          labels:
+            namespace: f007dev
+            type: svc
+        basic-tag-svc-f007dev:
+          interval: 5m
+          expiration: 168h
+          host: basic-tag-svc.f007dev:9000
+          labels:
+            namespace: f007dev
+            type: svc
+        basic-user-svc-f007dev:
+          interval: 5m
+          expiration: 168h
+          host: basic-user-svc.f007dev:9000
           labels:
             namespace: f007dev
             type: svc

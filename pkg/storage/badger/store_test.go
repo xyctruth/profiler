@@ -167,13 +167,6 @@ func TestProfileMeta(t *testing.T) {
 	require.Equal(t, nil, err)
 	require.Equal(t, 1, len(targets))
 
-	groupTargets, err := s.ListGroupSampleType()
-	require.Equal(t, nil, err)
-	require.Equal(t, 1, len(groupTargets))
-	for _, tg := range groupTargets {
-		require.Equal(t, 1, len(tg))
-	}
-
 	sampleTypes, err := s.ListSampleType()
 	require.Equal(t, nil, err)
 	require.Equal(t, 1, len(sampleTypes))
@@ -190,7 +183,7 @@ func TestProfileMeta(t *testing.T) {
 		require.Equal(t, nil, err)
 		require.Equal(t, 0, len(ttlTargets))
 
-		ttlGroupTargets, err := s.ListGroupSampleType()
+		ttlGroupTargets, err := s.ListSampleType()
 		require.Equal(t, nil, err)
 		require.Equal(t, 0, len(ttlGroupTargets))
 
@@ -221,13 +214,6 @@ func TestProfileMetaArray(t *testing.T) {
 	targets, err := s.ListTarget()
 	require.Equal(t, nil, err)
 	require.Equal(t, 3, len(targets))
-
-	groupTargets, err := s.ListGroupSampleType()
-	require.Equal(t, nil, err)
-	require.Equal(t, 1, len(groupTargets))
-	for _, tg := range groupTargets {
-		require.Equal(t, 4, len(tg))
-	}
 
 	sampleTypes, err := s.ListSampleType()
 	require.Equal(t, nil, err)
@@ -298,7 +284,7 @@ func TestProfileMetaArray(t *testing.T) {
 		require.Equal(t, nil, err)
 		require.Equal(t, 0, len(ttlTargets))
 
-		ttlGroupTargets, err := s.ListGroupSampleType()
+		ttlGroupTargets, err := s.ListSampleType()
 		require.Equal(t, nil, err)
 		require.Equal(t, 0, len(ttlGroupTargets))
 
