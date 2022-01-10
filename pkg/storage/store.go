@@ -25,7 +25,7 @@ type Store interface {
 	// ListTarget  Get collection target list
 	ListTarget() ([]string, error)
 	// ListLabels  Get collection target labels list
-	ListLabel() ([]string, error)
+	ListLabel() ([]Label, error)
 
 	// Release
 	Release()
