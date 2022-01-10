@@ -205,7 +205,7 @@ func TestListProfileMeta(t *testing.T) {
 	e.GET("/api/profile_meta/heap_inuse_space").
 		WithQuery("start_time", startTime).WithQuery("end_time", endTime).
 		Expect().
-		Status(http.StatusOK).JSON().Array().Length().Equal(2)
+		Status(http.StatusOK).JSON().Array().Length().Equal(0)
 }
 
 func TestGetProfile(t *testing.T) {

@@ -157,6 +157,11 @@ func TestProfileMeta(t *testing.T) {
 	defer s.Release()
 	require.NotEqual(t, nil, s)
 
+	labelFilter := []storage.Label{{
+		Key:   "_target",
+		Value: "profiler-server",
+	}}
+
 	err = s.SaveProfileMeta([]*storage.ProfileMeta{profileMeta}, time.Second*2)
 	require.Equal(t, nil, err)
 
@@ -171,7 +176,7 @@ func TestProfileMeta(t *testing.T) {
 	require.Equal(t, nil, err)
 	require.Equal(t, 1, len(sampleTypes))
 
-	profileMetas, err := s.ListProfileMeta(sampleTypes[0], nil, min, max)
+	profileMetas, err := s.ListProfileMeta(sampleTypes[0], labelFilter, min, max)
 	require.Equal(t, nil, err)
 	require.Equal(t, 1, len(profileMetas))
 
@@ -191,7 +196,7 @@ func TestProfileMeta(t *testing.T) {
 		require.Equal(t, nil, err)
 		require.Equal(t, 0, len(ttlSampleTypes))
 
-		ttlProfileMetas, err := s.ListProfileMeta(sampleTypes[0], nil, min, max)
+		ttlProfileMetas, err := s.ListProfileMeta(sampleTypes[0], labelFilter, min, max)
 		require.Equal(t, nil, err)
 		require.Equal(t, 0, len(ttlProfileMetas))
 	}
@@ -219,12 +224,23 @@ func TestProfileMetaArray(t *testing.T) {
 	require.Equal(t, nil, err)
 	require.Equal(t, 4, len(sampleTypes))
 
+	labelFilter := []storage.Label{{
+		Key:   "_target",
+		Value: "profiler-server",
+	}, {
+		Key:   "_target",
+		Value: "server2",
+	}, {
+		Key:   "_target",
+		Value: "server3",
+	}}
+
 	{
-		profileMetas, err := s.ListProfileMeta("heap_inuse_space", nil, min, max)
+		profileMetas, err := s.ListProfileMeta("heap_inuse_space", labelFilter, min, max)
 		require.Equal(t, nil, err)
 		require.Equal(t, 2, len(profileMetas))
 
-		profileMetas, err = s.ListProfileMeta("heap_inuse_space", nil, min, max)
+		profileMetas, err = s.ListProfileMeta("heap_inuse_space", labelFilter, min, max)
 		require.Equal(t, nil, err)
 		require.Equal(t, 2, len(profileMetas))
 
@@ -235,11 +251,11 @@ func TestProfileMetaArray(t *testing.T) {
 		require.Equal(t, nil, err)
 		require.Equal(t, 1, len(profileMetas))
 
-		profileMetas, err = s.ListProfileMeta("heap_inuse_objects", nil, min, max)
+		profileMetas, err = s.ListProfileMeta("heap_inuse_objects", labelFilter, min, max)
 		require.Equal(t, nil, err)
 		require.Equal(t, 1, len(profileMetas))
 
-		profileMetas, err = s.ListProfileMeta("heap_inuse_objects1", nil, min, max)
+		profileMetas, err = s.ListProfileMeta("heap_inuse_objects1", labelFilter, min, max)
 		require.Equal(t, nil, err)
 		require.Equal(t, 0, len(profileMetas))
 
@@ -296,7 +312,7 @@ func TestProfileMetaArray(t *testing.T) {
 		require.Equal(t, nil, err)
 		require.Equal(t, 0, len(ttlLabels))
 
-		ttlProfileMetas, err := s.ListProfileMeta(sampleTypes[0], nil, min, max)
+		ttlProfileMetas, err := s.ListProfileMeta(sampleTypes[0], labelFilter, min, max)
 		require.Equal(t, nil, err)
 		require.Equal(t, 0, len(ttlProfileMetas))
 
