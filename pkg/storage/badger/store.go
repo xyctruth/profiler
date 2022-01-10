@@ -119,7 +119,7 @@ func (s *store) SaveProfileMeta(metas []*storage.ProfileMeta, ttl time.Duration)
 				return err
 			}
 
-			if err = txn.SetEntry(newSampleTypeEntry(meta.SampleType, meta.ProfileType, ttl)); err != nil {
+			if err = txn.SetEntry(newSampleTypeEntry(meta.SampleType, ttl)); err != nil {
 				return err
 			}
 
@@ -266,37 +266,6 @@ func (s *store) ListSampleType() ([]string, error) {
 			sampleTypes = append(sampleTypes, deletePrefixKey(k))
 		}
 
-		return nil
-	})
-
-	return sampleTypes, err
-}
-
-func (s *store) ListGroupSampleType() (map[string][]string, error) {
-	sampleTypes := make(map[string][]string)
-
-	err := s.db.View(func(txn *badger.Txn) error {
-		opts := badger.DefaultIteratorOptions
-		opts.PrefetchSize = 100
-		opts.Prefix = PrefixSampleType
-		it := txn.NewIterator(opts)
-		defer it.Close()
-
-		for it.Seek(PrefixSampleType); it.Valid(); it.Next() {
-			item := it.Item()
-			k := item.Key()
-			err := item.Value(func(v []byte) error {
-				if _, ok := sampleTypes[string(v)]; !ok {
-					sampleTypes[string(v)] = make([]string, 0, 5)
-				}
-				sampleTypes[string(v)] = append(sampleTypes[string(v)], deletePrefixKey(k))
-				return nil
-			})
-
-			if err != nil {
-				return err
-			}
-		}
 		return nil
 	})
 
