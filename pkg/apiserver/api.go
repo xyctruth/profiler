@@ -124,21 +124,31 @@ func (s *APIServer) listGroupLabel(c *gin.Context) {
 }
 
 func (s *APIServer) listSampleTypes(c *gin.Context) {
-	jobs, err := s.store.ListSampleType()
+	sampleTypes, err := s.store.ListSampleType()
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
-	c.JSON(http.StatusOK, jobs)
+	c.JSON(http.StatusOK, sampleTypes)
 }
 
 func (s *APIServer) listGroupSampleTypes(c *gin.Context) {
-	jobs, err := s.store.ListGroupSampleType()
+	sampleTypes, err := s.store.ListSampleType()
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
-	c.JSON(http.StatusOK, jobs)
+
+	groupSampleTypes := make(map[string][]string)
+	for _, sampleType := range sampleTypes {
+		gSampleType := strings.Split(sampleType, "_")[0]
+		if _, ok := groupSampleTypes[gSampleType]; !ok {
+			groupSampleTypes[gSampleType] = make([]string, 0, 5)
+		}
+		groupSampleTypes[gSampleType] = append(groupSampleTypes[gSampleType], sampleType)
+	}
+
+	c.JSON(http.StatusOK, groupSampleTypes)
 }
 
 func (s *APIServer) listProfileMeta(c *gin.Context) {

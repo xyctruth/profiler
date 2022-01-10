@@ -22,8 +22,6 @@ type Store interface {
 
 	// ListSampleType Get collected sample types list (heap_alloc_objects ,heap_alloc_space ,heap_inuse_objects ,heap_inuse_space...)
 	ListSampleType() ([]string, error)
-	// ListGroupSampleType Get collected sample types list grouped by profile types (heap,goroutine...)
-	ListGroupSampleType() (map[string][]string, error)
 	// ListTarget  Get collection target list
 	ListTarget() ([]string, error)
 	// ListLabels  Get collection target labels list

@@ -95,8 +95,8 @@ func newProfileMetaEntry(id string, meta *storage.ProfileMeta, ttl time.Duration
 	return entry, nil
 }
 
-func newSampleTypeEntry(sampleType string, profileType string, ttl time.Duration) *badger.Entry {
-	entry := badger.NewEntry(buildSampleTypeKey(sampleType), []byte(profileType))
+func newSampleTypeEntry(sampleType string, ttl time.Duration) *badger.Entry {
+	entry := badger.NewEntry(buildSampleTypeKey(sampleType), nil)
 	if ttl > 0 {
 		entry = entry.WithTTL(ttl)
 	}
