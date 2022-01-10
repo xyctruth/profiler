@@ -4,7 +4,7 @@
     :collapse-tags="true"
     :multiple="true"
     placeholder="Select Type"
-    clearable="true"
+    :clearable="true"
     filterable>
     <el-option-group
       v-for="group in options"
@@ -23,7 +23,7 @@
 </template>
 
 <script setup>
-import {ref, onMounted, defineEmits, watch} from 'vue'
+  import {ref, onMounted, defineEmits, watch} from 'vue'
   import axios from "@/utils/request";
   import router from "@/router/index.js";
 

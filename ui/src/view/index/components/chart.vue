@@ -204,10 +204,14 @@
       let startTime = props.timeRange[0] ? `&start_time=${props.timeRange[0]}` : ""
       let endTime = props.timeRange[1] ? `&end_time=${props.timeRange[1]}` : ""
 
-
-      var labels = labelList.map(function (item) {
-        var arr = item.split('=')
-        return {Key:arr[0],Value:arr[1]}
+      var labels = labelList.filter(function (item) {
+        if (item) {
+          return true;
+        } else {
+          return false
+        }
+      }).map(function (item) {
+          return {Key:item[0],Value:item[1]}
       })
 
 

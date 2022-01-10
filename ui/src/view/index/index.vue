@@ -13,13 +13,8 @@
                 <el-col :xs="24" :sm="24" :md="5" :lg="5" :xl="5">
                   <selectTypes style="width: 100%" v-model:selectTypes="types"></selectTypes>
                 </el-col>
-<!--                <el-col :xs="24" :sm="24" :md="5" :lg="5" :xl="5">-->
-<!--                  <selectTarget style="width: 100%"-->
-<!--                                 v-model:selectTargets="targets"></selectTarget>-->
-<!--                </el-col>-->
                 <el-col :xs="24" :sm="24" :md="13" :lg="13" :xl="13">
-                  <selectLabel style="width: 100%"
-                                v-model:selectLabels="labels"></selectLabel>
+                  <selectLabels style="width: 100%" v-model:selectLabels="labels"></selectLabels>
                 </el-col>
                 <el-col :xs="24" :sm="24" :md={span:4,offset:2} :lg={span:4,offset:2} :xl={span:4,offset:2} >
                   <selectTimeRange class="time-range-container" v-model:timeRange="timeRange"
@@ -92,12 +87,10 @@
 <script setup>
 import {ref} from 'vue'
 import selectTypes from './components/selectTypes.vue'
-import selectTarget from './components/selectTarget.vue'
-import selectLabel from './components/selectLabel.vue'
+import selectLabels from './components/selectLabels.vue'
 import selectTimeRange from './components/selectTimeRange.vue'
 import chart from './components/chart.vue'
 
-console.log('local')
 const types = ref([])
 const targets = ref([])
 const labels = ref([])

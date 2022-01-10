@@ -106,21 +106,15 @@ func (s *APIServer) listGroupLabel(c *gin.Context) {
 		return
 	}
 
-	customLabels := make([]string, 0, 5)
-	generateLabels := make([]string, 0, 5)
-
+	groupLabels := make(map[string][]storage.Label)
 	for _, label := range labels {
-		if strings.HasPrefix(label, "_") {
-			generateLabels = append(generateLabels, label)
-		} else {
-			customLabels = append(customLabels, label)
+		if _, ok := groupLabels[label.Key]; !ok {
+			groupLabels[label.Key] = make([]storage.Label, 0, 5)
 		}
+		groupLabels[label.Key] = append(groupLabels[label.Key], label)
 	}
 
-	c.JSON(http.StatusOK, map[string][]string{
-		"custom":   customLabels,
-		"generate": generateLabels,
-	})
+	c.JSON(http.StatusOK, groupLabels)
 }
 
 func (s *APIServer) listSampleTypes(c *gin.Context) {
