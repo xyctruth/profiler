@@ -10,15 +10,15 @@
 
 ## Profiler is a continuous profiling tool that base go pprof and go trace
 
-- **Supported sample**
+- **Supported Sample**
   - `trace` `fgprof` `profile` `mutex` `heap` `goroutine` `allocs` `block` `threadcreate`
 - **Hot Reload**
   - Collect samples of the target service according to the configuration file 
   - The collection program will monitor the changes of the configuration file and apply the changed configuration file immediately
-- **Chart trend**
+- **Chart Trend**
   - Provide charts to observe the trend of multiple service performance indicators and find the time point of performance problems
   - Each bubble is a sample file of Profile and Trace
-- **Detailed analysis**
+- **Detailed Analysis**
   - Click the bubbles in the charts to jump to the detailed page of Profile and Trace for further detailed analysis
   
 ### [Demo](https://profiling.jia-huang.com)
@@ -42,29 +42,38 @@
   </tr>
 </table>
 
-## Get started quickly
+## Local 
 
-### Local start
+Run server on port 8080
 ```bash
-# run server :8080
 go run server/main.go 
-
-# run ui :80
-cd ui 
-npm install --registry=https://registry.npm.taobao.org 
-npm run dev --base_api_url=http://localhost:8080 
 ```
 
-### In Docker
+Run ui on port 80
+```bash
+cd ui
+npm install --registry=https://registry.npm.taobao.org
+npm run dev --base_api_url=http://localhost:8080
+```
+
+## Docker
 
 ```bash
-# No persistence
 docker run -d -p 80:80 --name profiler xyctruth/profiler:latest
+```
 
-# Persistence
-mkdir -vp ~/profiler/config/
-cp ./collector.yaml ~/profiler/config/
-docker run -d -p 80:80 -v ~/profiler/data/:/profiler/data/ -v ~/profiler/config/:/profiler/config/ --name profiler xyctruth/profiler:latest
+### Using custom `collector.yaml`
+
+```bash
+mkdir ~/profiler-config/
+cp ./collector.yaml ~/profiler-config/
+docker run -d -p 80:80 -v ~/profiler-config/:/profiler/config/ --name profiler xyctruth/profiler:latest
+```
+
+### Persistent data
+
+```bash
+docker run -d -p 80:80 -v ~/profiler-data/:/profiler/data/ --name profiler xyctruth/profiler:latest
 ```
 
 ## Collector configuration
@@ -80,7 +89,7 @@ collector:
   targetConfigs:
 
     profiler-server:        # Target name
-      interval: 15s         # Crawl time
+      interval: 15s         # Scrape interval
       expiration: 0         # No expiration time
       host: localhost:9000  # Target service host
       labels:

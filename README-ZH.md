@@ -42,30 +42,40 @@
   </tr>
 </table>
 
-## 快速入门
+## Local
 
-### 本地启动
+Run server on port 8080
 ```bash
-# run server :8080
 go run server/main.go 
-
-# run ui :80
-cd ui 
-npm install --registry=https://registry.npm.taobao.org 
-npm run dev --base_api_url=http://localhost:8080 
 ```
 
-### In Docker
+Run ui on port 80
+```bash
+cd ui
+npm install --registry=https://registry.npm.taobao.org
+npm run dev --base_api_url=http://localhost:8080
+```
+
+## Docker
 
 ```bash
-# 无持久化
 docker run -d -p 80:80 --name profiler xyctruth/profiler:latest
-
-# 持久化
-mkdir -vp ~/profiler/config/
-cp ./collector.yaml ~/profiler/config/
-docker run -d -p 80:80 -v ~/profiler/data/:/profiler/data/ -v ~/profiler/config/:/profiler/config/ --name profiler xyctruth/profiler:latest
 ```
+
+### 使用自定义的 `collector.yaml`
+
+```bash
+mkdir ~/profiler-config/
+cp ./collector.yaml ~/profiler-config/
+docker run -d -p 80:80 -v ~/profiler-config/:/profiler/config/ --name profiler xyctruth/profiler:latest
+```
+
+### 持久化数据
+
+```bash
+docker run -d -p 80:80 -v ~/profiler-data/:/profiler/data/ --name profiler xyctruth/profiler:latest
+```
+
 
 ## Collector 集配置
 
