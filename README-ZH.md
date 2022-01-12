@@ -62,7 +62,7 @@ npm run dev --base_api_url=http://localhost:8080
 docker run -d -p 80:80 --name profiler xyctruth/profiler:latest
 ```
 
-使用自定义的 `collector.yaml`
+使用自定义的配置文件
 
 ```bash
 mkdir ~/profiler-config/
@@ -70,7 +70,7 @@ cp ./collector.yaml ~/profiler-config/
 docker run -d -p 80:80 -v ~/profiler-config/:/profiler/config/ --name profiler xyctruth/profiler:latest
 ```
 
-持久化数据
+使用持久化数据
 
 ```bash
 docker run -d -p 80:80 -v ~/profiler-data/:/profiler/data/ --name profiler xyctruth/profiler:latest
@@ -83,7 +83,7 @@ docker run -d -p 80:80 -v ~/profiler-data/:/profiler/data/ --name profiler xyctr
 
 配置文件可以在线更新，收集程序会监听配置文件的变化，即时应用变化后的配置文件。
 
-### `collector.yaml`
+`collector.yaml`
 
 ```yaml
 collector:
@@ -118,7 +118,7 @@ collector:
 
 ```
 
-### `profileConfigs` 默认配置
+`profileConfigs` 默认配置
 
 ```yaml
 profileConfigs:
