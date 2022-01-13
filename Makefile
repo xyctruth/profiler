@@ -29,8 +29,3 @@ fmt:
 lint:
 	golangci-lint run
 
-.PHONY: pkg
-pkg:
-	docker pull xyctruth/profiler:latest
-	docker tag xyctruth/profiler:latest xyctruth/profiler:v0.0.25
-	docker push xyctruth/profiler:v0.0.25

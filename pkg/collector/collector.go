@@ -102,7 +102,7 @@ func (collector *Collector) scrape() {
 	collector.mu.RLock()
 	defer collector.mu.RUnlock()
 
-	collector.log.Info("collector scrape start")
+	collector.log.Info("collector start scrape")
 	for profileType, profileConfig := range collector.ProfileConfigs {
 		if *profileConfig.Enable {
 			collector.wg.Add(1)
