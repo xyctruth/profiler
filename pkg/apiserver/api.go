@@ -166,7 +166,7 @@ func (s *APIServer) listProfileMeta(c *gin.Context) {
 	}
 
 	req := struct {
-		Labels []storage.Label `json:"labels[]" form:"labels[]"`
+		Filters []storage.LabelFilter `json:"labels[]" form:"labels[]"`
 	}{}
 
 	if err := c.ShouldBind(&req); err != nil {
@@ -174,7 +174,7 @@ func (s *APIServer) listProfileMeta(c *gin.Context) {
 		return
 	}
 
-	metas, err := s.store.ListProfileMeta(sampleType, req.Labels, startTime, endTime)
+	metas, err := s.store.ListProfileMeta(sampleType, req.Filters, startTime, endTime)
 
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())
