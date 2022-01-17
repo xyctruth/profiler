@@ -174,7 +174,7 @@ func (s *APIServer) listProfileMeta(c *gin.Context) {
 		return
 	}
 
-	metas, err := s.store.ListProfileMeta(sampleType, req.Filters, startTime, endTime)
+	metas, err := s.store.ListProfileMeta(sampleType, startTime, endTime, req.Filters...)
 
 	if err != nil {
 		c.String(http.StatusInternalServerError, err.Error())

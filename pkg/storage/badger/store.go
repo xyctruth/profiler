@@ -152,7 +152,7 @@ func (s *store) SaveProfileMeta(metas []*storage.ProfileMeta, ttl time.Duration)
 	return err
 }
 
-func (s *store) ListProfileMeta(sampleType string, filters []storage.LabelFilter, startTime, endTime time.Time) ([]*storage.ProfileMetaByTarget, error) {
+func (s *store) ListProfileMeta(sampleType string, startTime, endTime time.Time, filters ...storage.LabelFilter) ([]*storage.ProfileMetaByTarget, error) {
 	var err error
 
 	ids, err := s.searchProfileMeta(sampleType, filters, startTime, endTime)

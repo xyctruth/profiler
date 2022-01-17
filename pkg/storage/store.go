@@ -20,7 +20,7 @@ type Store interface {
 	SaveProfileMeta(metas []*ProfileMeta, ttl time.Duration) error
 
 	// ListProfileMeta Get profile mete data list
-	ListProfileMeta(sampleType string, filters []LabelFilter, startTime, endTime time.Time) ([]*ProfileMetaByTarget, error)
+	ListProfileMeta(sampleType string, startTime, endTime time.Time, filters ...LabelFilter) ([]*ProfileMetaByTarget, error)
 
 	// ListSampleType Get collected sample types list (heap_alloc_objects ,heap_alloc_space ,heap_inuse_objects ,heap_inuse_space...)
 	ListSampleType() ([]string, error)
