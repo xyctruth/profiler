@@ -9,7 +9,6 @@ import (
 	"github.com/dgraph-io/badger/v3"
 	log "github.com/sirupsen/logrus"
 	"github.com/xyctruth/profiler/pkg/storage"
-	"github.com/xyctruth/profiler/pkg/utils"
 )
 
 type store struct {
@@ -153,10 +152,10 @@ func (s *store) SaveProfileMeta(metas []*storage.ProfileMeta, ttl time.Duration)
 	return err
 }
 
-func (s *store) ListProfileMeta(sampleType string, labelFilter []storage.Label, startTime, endTime time.Time) ([]*storage.ProfileMetaByTarget, error) {
+func (s *store) ListProfileMeta(sampleType string, startTime, endTime time.Time, filters ...storage.LabelFilter) ([]*storage.ProfileMetaByTarget, error) {
 	var err error
 
-	ids, err := s.searchProfileMeta(sampleType, labelFilter, startTime, endTime, utils.Union)
+	ids, err := s.searchProfileMeta(sampleType, filters, startTime, endTime)
 	if err != nil {
 		return nil, err
 	}
@@ -203,36 +202,38 @@ func (s *store) ListProfileMeta(sampleType string, labelFilter []storage.Label, 
 	return res, err
 }
 
-func (s *store) searchProfileMeta(sampleType string, labels []storage.Label, startTime, endTime time.Time, merger func(slice1, slice2 []string) []string) ([]string, error) {
+func (s *store) searchProfileMeta(sampleType string, filters []storage.LabelFilter, startTime, endTime time.Time) ([]string, error) {
 	ids := make([]string, 0)
 	err := s.db.View(func(txn *badger.Txn) error {
-		for _, label := range labels {
-			idsByLabel := make([]string, 0)
+		for _, filter := range filters {
+			func() {
 
-			min := buildIndexKey(sampleType, label.Key, label.Value, &startTime, nil)
-			max := buildIndexKey(sampleType, label.Key, label.Value, &endTime, nil)
+				idsByLabel := make([]string, 0)
 
-			opts := badger.DefaultIteratorOptions
-			opts.PrefetchSize = 1000
-			opts.Prefix = buildIndexKey(sampleType, label.Key, label.Value, nil, nil)
-			it := txn.NewIterator(opts)
-			defer it.Close()
+				min := buildIndexKey(sampleType, filter.Key, filter.Value, &startTime, nil)
+				max := buildIndexKey(sampleType, filter.Key, filter.Value, &endTime, nil)
 
-			for it.Seek(min); it.Valid(); it.Next() {
-				item := it.Item()
-				k := item.Key()
-				id := string(k[len(min):])
-				idsByLabel = append(idsByLabel, id)
-				if !storage.CompareKey(k, max) {
-					break
+				opts := badger.DefaultIteratorOptions
+				opts.PrefetchSize = 1000
+				opts.Prefix = buildIndexKey(sampleType, filter.Key, filter.Value, nil, nil)
+				it := txn.NewIterator(opts)
+				defer it.Close()
+
+				for it.Seek(min); it.Valid(); it.Next() {
+					item := it.Item()
+					k := item.Key()
+					id := string(k[len(min):])
+					idsByLabel = append(idsByLabel, id)
+					if !storage.CompareKey(k, max) {
+						break
+					}
 				}
-			}
-			if len(ids) == 0 {
-				ids = idsByLabel
-			} else {
-				ids = merger(ids, idsByLabel)
-			}
-
+				if len(ids) == 0 {
+					ids = idsByLabel
+				} else {
+					ids = filter.Policy(ids, idsByLabel)
+				}
+			}()
 		}
 		return nil
 	})

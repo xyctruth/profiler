@@ -11,47 +11,6 @@ import (
 	"github.com/xyctruth/profiler/pkg/utils"
 )
 
-func defaultProfileConfigs() map[string]ProfileConfig {
-	return map[string]ProfileConfig{
-		"profile": {
-			Path:   "/debug/pprof/profile?seconds=10",
-			Enable: utils.BoolPtr(true),
-		},
-		"fgprof": {
-			Path:   "/debug/fgprof?seconds=10",
-			Enable: utils.BoolPtr(true),
-		},
-		"trace": {
-			Path:   "/debug/pprof/trace?seconds=10",
-			Enable: utils.BoolPtr(true),
-		},
-		"mutex": {
-			Path:   "/debug/pprof/mutex",
-			Enable: utils.BoolPtr(true),
-		},
-		"heap": {
-			Path:   "/debug/pprof/heap",
-			Enable: utils.BoolPtr(true),
-		},
-		"goroutine": {
-			Path:   "/debug/pprof/goroutine",
-			Enable: utils.BoolPtr(true),
-		},
-		"allocs": {
-			Path:   "/debug/pprof/allocs",
-			Enable: utils.BoolPtr(true),
-		},
-		"block": {
-			Path:   "/debug/pprof/block",
-			Enable: utils.BoolPtr(true),
-		},
-		"threadcreate": {
-			Path:   "/debug/pprof/threadcreate",
-			Enable: utils.BoolPtr(true),
-		},
-	}
-}
-
 // LoadConfig watch configPath change, callback fn
 func LoadConfig(configPath string, fn func(CollectorConfig)) error {
 	var err error
@@ -99,12 +58,67 @@ type TargetConfig struct {
 	Interval       time.Duration            `yaml:"interval"`
 	Expiration     time.Duration            `yaml:"expiration"`
 	Host           string                   `yaml:"host"`
-	Labels         storage.TargetLabels     `yaml:"labels"`
+	Labels         LabelConfig              `yaml:"labels"`
+}
+
+type LabelConfig map[string]string
+
+func (t LabelConfig) ToArray() []storage.Label {
+	labels := make([]storage.Label, 0, len(t))
+	for k, v := range t {
+		labels = append(labels, storage.Label{
+			Key:   k,
+			Value: v,
+		})
+	}
+	return labels
 }
 
 type ProfileConfig struct {
 	Path   string `yaml:"path"`
 	Enable *bool  `yaml:"enable"`
+}
+
+// defaultProfileConfigs The default fetching profile config
+func defaultProfileConfigs() map[string]ProfileConfig {
+	return map[string]ProfileConfig{
+		"profile": {
+			Path:   "/debug/pprof/profile?seconds=10",
+			Enable: utils.BoolPtr(true),
+		},
+		"fgprof": {
+			Path:   "/debug/fgprof?seconds=10",
+			Enable: utils.BoolPtr(true),
+		},
+		"trace": {
+			Path:   "/debug/pprof/trace?seconds=10",
+			Enable: utils.BoolPtr(true),
+		},
+		"mutex": {
+			Path:   "/debug/pprof/mutex",
+			Enable: utils.BoolPtr(true),
+		},
+		"heap": {
+			Path:   "/debug/pprof/heap",
+			Enable: utils.BoolPtr(true),
+		},
+		"goroutine": {
+			Path:   "/debug/pprof/goroutine",
+			Enable: utils.BoolPtr(true),
+		},
+		"allocs": {
+			Path:   "/debug/pprof/allocs",
+			Enable: utils.BoolPtr(true),
+		},
+		"block": {
+			Path:   "/debug/pprof/block",
+			Enable: utils.BoolPtr(true),
+		},
+		"threadcreate": {
+			Path:   "/debug/pprof/threadcreate",
+			Enable: utils.BoolPtr(true),
+		},
+	}
 }
 
 func buildProfileConfigs(profileConfig map[string]ProfileConfig) map[string]ProfileConfig {
