@@ -8,7 +8,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "axios": "^0.24.0",
+    "axios": "^0.25.0",
     "chart.js": "^3.6.2",
     "chartjs-plugin-autocolors": "0.0.4",
     "echarts": "^5.2.2",
