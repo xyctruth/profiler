@@ -6,7 +6,8 @@
       :props="props"
       :clearable="true"
       separator="="
-      filterable>
+      filterable
+      :collapse-tags="true">
   </el-cascader>
 </template>
 
