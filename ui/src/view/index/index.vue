@@ -13,10 +13,10 @@
                 <el-col :xs="24" :sm="24" :md="5" :lg="5" :xl="5">
                   <selectTypes style="width: 100%" v-model:selectTypes="types"></selectTypes>
                 </el-col>
-                <el-col :xs="24" :sm="24" :md="13" :lg="13" :xl="13">
+                <el-col :xs="24" :sm="24" :md="8" :lg="8" :xl="8">
                   <selectLabels style="width: 100%" v-model:selectLabels="labels"></selectLabels>
                 </el-col>
-                <el-col :xs="24" :sm="24" :md={span:4,offset:2} :lg={span:4,offset:2} :xl={span:4,offset:2} >
+                <el-col :xs="24" :sm="24" :md={span:4,offset:7} :lg={span:4,offset:7} :xl={span:4,offset:7} >
                   <selectTimeRange class="time-range-container" v-model:timeRange="timeRange"
                                    style="width: 100%"></selectTimeRange>
                 </el-col>
