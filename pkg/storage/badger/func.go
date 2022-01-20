@@ -28,50 +28,67 @@ func deletePrefixKey(key []byte) string {
 }
 
 func buildProfileKey(id string) []byte {
-	buf := bytes.NewBuffer(PrefixProfiles)
-	buf.Write([]byte(id))
+	var buf bytes.Buffer
+	buf.Grow(len(PrefixProfiles) + len(id))
+	buf.Write(PrefixProfiles)
+	buf.WriteString(id)
 	return buf.Bytes()
 }
 
 func buildProfileMetaKey(id string) []byte {
-	buf := bytes.NewBuffer(PrefixProfileMeta)
-	buf.Write([]byte(id))
+	var buf bytes.Buffer
+	buf.Grow(len(PrefixProfileMeta) + len(id))
+	buf.Write(PrefixProfileMeta)
+	buf.WriteString(id)
 	return buf.Bytes()
 }
 
 func buildSampleTypeKey(sampleType string) []byte {
-	buf := bytes.NewBuffer(PrefixSampleType)
-	buf.Write([]byte(sampleType))
+	var buf bytes.Buffer
+	buf.Grow(len(PrefixSampleType) + len(sampleType))
+	buf.Write(PrefixSampleType)
+	buf.WriteString(sampleType)
 	return buf.Bytes()
 }
 
 func buildTargetKey(target string) []byte {
-	buf := bytes.NewBuffer(PrefixTarget)
-	buf.Write([]byte(target))
+	var buf bytes.Buffer
+	buf.Grow(len(PrefixTarget) + len(target))
+	buf.Write(PrefixTarget)
+	buf.WriteString(target)
 	return buf.Bytes()
 }
 
 func buildLabelKey(key, val string) []byte {
-	buf := bytes.NewBuffer(PrefixLabel)
-	buf.Write([]byte(key))
-	buf.Write([]byte("="))
-	buf.Write([]byte(val))
+	var buf bytes.Buffer
+	buf.Grow(len(PrefixLabel) + len(key) + len("=") + len(val))
+	buf.Write(PrefixLabel)
+	buf.WriteString(key)
+	buf.WriteString("=")
+	buf.WriteString(val)
 	return buf.Bytes()
 }
 
 func buildIndexKey(sampleType, key, val string, createAt *time.Time, id *string) []byte {
-	buf := bytes.NewBuffer(PrefixIndex)
-	buf.Write([]byte(sampleType))
-	buf.Write([]byte(key))
-	buf.Write([]byte("="))
-	buf.Write([]byte(val))
-
+	var createAtBytes, idBytes []byte
 	if createAt != nil {
-		buf.Write(storage.BuildTimeKey(*createAt))
+		createAtBytes = storage.BuildTimeKey(*createAt)
 	}
 	if id != nil {
-		buf.Write([]byte(*id))
+		idBytes = []byte(*id)
 	}
+
+	var buf bytes.Buffer
+	buf.Grow(len(PrefixIndex) + len(sampleType) + len(key) + len("=") + len(val) + len(createAtBytes) + len(idBytes))
+
+	buf.Write(PrefixIndex)
+	buf.WriteString(sampleType)
+	buf.WriteString(key)
+	buf.WriteString("=")
+	buf.WriteString(val)
+	buf.Write(createAtBytes)
+	buf.Write(idBytes)
+
 	return buf.Bytes()
 }
 
