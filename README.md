@@ -8,20 +8,20 @@
 
 > [English](./README-EN.md) / [中文](./README-ZH.md)
 
-## Profiler is a continuous profiling tool that base go pprof and go trace
+**Profiler is a continuous profiling tool that base go pprof and go trace**
 
 - **Supported Sample**
   - `trace` `fgprof` `profile` `mutex` `heap` `goroutine` `allocs` `block` `threadcreate`
 - **Hot Reload**
-  - Collect samples of the target service according to the configuration file 
+  - Collect samples of the target service according to the configuration file
   - The collection program will monitor the changes of the configuration file and apply the changed configuration file immediately
 - **Chart Trend**
   - Provide charts to observe the trend of multiple service performance indicators and find the time point of performance problems
   - Each bubble is a sample file of Profile and Trace
 - **Detailed Analysis**
   - Click the bubbles in the charts to jump to the detailed page of Profile and Trace for further detailed analysis
-  
-### [Demo](https://profiling.jia-huang.com)
+
+## [Demo](https://profiling.jia-huang.com)
 
 <table>
   <tr>
@@ -42,7 +42,9 @@
   </tr>
 </table>
 
-## Local 
+# Getting Started
+
+## Local
 
 Run server on port 8080
 ```bash

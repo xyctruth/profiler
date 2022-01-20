@@ -8,7 +8,7 @@
 
 > [English](./README-EN.md) / [中文](./README-ZH.md)
 
-## Profiler 是一个基于 go pprof 与 go trace 持续性能剖析工具
+**Profiler 是一个基于 go pprof 与 go trace 持续性能剖析工具**
 
 - **支持的样本**
     - `trace` `fgprof` `profile` `mutex` `heap` `goroutine` `allocs` `block` `threadcreate`
@@ -21,7 +21,7 @@
 - **详细分析**
     - 点击图表中的气泡跳转到 Profile 与 Trace 的详细页面进行进一步详细的分析
 
-### [Demo](https://profiling.jia-huang.com)
+## [Demo](https://profiling.jia-huang.com)
 
 <table>
   <tr>
@@ -41,6 +41,8 @@
      <td><img src="https://xtruth.oss-cn-shenzhen.aliyuncs.com/profiler-trace1.png"/></td>
   </tr>
 </table>
+
+# Getting Started
 
 ## Local
 

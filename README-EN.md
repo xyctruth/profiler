@@ -4,11 +4,11 @@
 [![codecov](https://codecov.io/gh/xyctruth/profiler/branch/master/graph/badge.svg?token=YWNYJK9KQW)](https://codecov.io/gh/xyctruth/profiler)
 [![Build status](https://img.shields.io/github/workflow/status/xyctruth/profiler/Server-Build/master)](https://github.com/xyctruth/profiler/actions/workflows/server-build.yml)
 [![Release status](https://img.shields.io/github/v/release/xyctruth/profiler)](https://github.com/xyctruth/profiler/releases)
-[![LICENSE status](https://img.shields.io/github/license/xyctruth/profiler)](https://github.com/xyctruth/profiler/LICENSE)
+[![LICENSE status](https://img.shields.io/github/license/xyctruth/profiler)](https://github.com/xyctruth/profiler/blob/master/LICENSE)
 
 > [English](./README-EN.md) / [中文](./README-ZH.md)
 
-## Profiler is a continuous profiling tool that base go pprof and go trace
+**Profiler is a continuous profiling tool that base go pprof and go trace**
 
 - **Supported Sample**
   - `trace` `fgprof` `profile` `mutex` `heap` `goroutine` `allocs` `block` `threadcreate`
@@ -21,7 +21,7 @@
 - **Detailed Analysis**
   - Click the bubbles in the charts to jump to the detailed page of Profile and Trace for further detailed analysis
 
-### [Demo](https://profiling.jia-huang.com)
+## [Demo](https://profiling.jia-huang.com)
 
 <table>
   <tr>
@@ -41,6 +41,8 @@
      <td><img src="https://xtruth.oss-cn-shenzhen.aliyuncs.com/profiler-trace1.png"/></td>
   </tr>
 </table>
+
+# Getting Started
 
 ## Local
 
