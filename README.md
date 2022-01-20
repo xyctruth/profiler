@@ -8,6 +8,8 @@
 
 > [English](./README-EN.md) / [中文](./README-ZH.md)
 
+## Introduction
+
 **Profiler is a continuous profiling tool that base go pprof and go trace**
 
 - **Supported Sample**

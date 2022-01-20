@@ -8,6 +8,8 @@
 
 > [English](./README-EN.md) / [中文](./README-ZH.md)
 
+## Introduction
+
 **Profiler 是一个基于 go pprof 与 go trace 持续性能剖析工具**
 
 - **支持的样本**
@@ -79,7 +81,7 @@ docker run -d -p 80:80 -v ~/profiler-data/:/profiler/data/ --name profiler xyctr
 ```
 
 
-## Collector 集配置
+## Collector 配置
 
 需要被收集分析的 `golang` 程序,需要提供 `net/http/pprof` 端点，并配置在 `./collector.yaml` 配置文件中。
 
