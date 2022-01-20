@@ -8,7 +8,7 @@
 
 > [English](./README-EN.md) / [中文](./README-ZH.md)
 
-## Introduction
+# 简介
 
 **Profiler 是一个基于 go pprof 与 go trace 持续性能剖析工具**
 
@@ -23,7 +23,7 @@
 - **详细分析**
     - 点击图表中的气泡跳转到 Profile 与 Trace 的详细页面进行进一步详细的分析
 
-## [Demo](https://profiling.jia-huang.com)
+## [演示](https://profiling.jia-huang.com)
 
 <table>
   <tr>
@@ -44,23 +44,23 @@
   </tr>
 </table>
 
-# Getting Started
+# 入门
 
-## Local
+## 本地
 
-Run server on port 8080
+启动服务端 端口为:8080
 ```bash
 go run server/main.go 
 ```
 
-Run ui on port 80
+启动前端 端口为:80
 ```bash
 cd ui
 npm install --registry=https://registry.npm.taobao.org
 npm run dev --base_api_url=http://localhost:8080
 ```
 
-## Docker
+## 容器
 
 ```bash
 docker run -d -p 80:80 --name profiler xyctruth/profiler:latest
@@ -81,7 +81,7 @@ docker run -d -p 80:80 -v ~/profiler-data/:/profiler/data/ --name profiler xyctr
 ```
 
 
-## Collector 配置
+## 收集配置
 
 需要被收集分析的 `golang` 程序,需要提供 `net/http/pprof` 端点，并配置在 `./collector.yaml` 配置文件中。
 
