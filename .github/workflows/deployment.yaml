@@ -1,0 +1,31 @@
+name: Deployment
+
+concurrency: development
+
+on:
+  workflow_dispatch:
+    inputs:
+      images:
+        description: 'profiler images'
+        default: 'xyctruth/profiler:latest'
+        required: true
+        type: string
+
+
+jobs:
+  deployment:
+    runs-on: ubuntu-latest
+    environment: development
+    steps:
+      - uses: actions/checkout@master
+      - name: deploy to cluster
+        uses: steebchen/kubectl@v2.0.0
+        with: # defaults to latest kubectl binary version
+          config: ${{ secrets.KUBE_CONFIG_DATA }}
+          command: set image --record deployment/profiler profiler=xyctruth/profiler:${{ inputs.images }}
+      - name: verify deployment
+        uses: steebchen/kubectl@v2.0.0
+        with:
+          config: ${{ secrets.KUBE_CONFIG_DATA }}
+          version: v1.21.0 # specify kubectl binary version explicitly
+          command: rollout status deployment/profiler -n profiler-system
