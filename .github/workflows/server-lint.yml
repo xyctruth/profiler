@@ -18,6 +18,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: go mod package cache
+        uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-1.17-${{ hashFiles('tests/go.mod') }}
+
       - name: Setup golangci-lint
         uses: golangci/golangci-lint-action@v2
         with:
