@@ -3,16 +3,11 @@ name: Deployment
 concurrency: development
 
 on:
-  workflow_dispatch:
-    inputs:
-      images:
-        description: 'profiler images'
-        default: 'xyctruth/profiler:latest'
-        required: true
-        type: string
-
+  release:
+    types: [published]
 
 jobs:
+
   deployment:
     runs-on: ubuntu-latest
     environment: development
@@ -22,7 +17,7 @@ jobs:
         uses: steebchen/kubectl@v2.0.0
         with: # defaults to latest kubectl binary version
           config: ${{ secrets.KUBE_CONFIG_DATA }}
-          command: set image --record deployment/profiler profiler=${{ github.event.inputs.images }}  -n profiler-system
+          command: set image --record deployment/profiler profiler=xyctruth/profiler:${{ github.event.release.tag_name }}  -n profiler-system
       - name: verify deployment
         uses: steebchen/kubectl@v2.0.0
         with:
