@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: profiler
-          image: xyctruth/profiler:latest
+          image: ghcr.io/xyctruth/profiler/profiler:latest
           imagePullPolicy: Always
           env:
           - name: CONFIG_PATH

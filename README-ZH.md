@@ -63,7 +63,7 @@ npm run dev --base_api_url=http://localhost:8080
 ## 容器
 
 ```bash
-docker run -d -p 80:80 --name profiler xyctruth/profiler:latest
+docker run -d -p 80:80 --name profiler ghcr.io/xyctruth/profiler/profiler:latest
 ```
 
 使用自定义的配置文件
@@ -71,13 +71,13 @@ docker run -d -p 80:80 --name profiler xyctruth/profiler:latest
 ```bash
 mkdir ~/profiler-config/
 cp ./collector.yaml ~/profiler-config/
-docker run -d -p 80:80 -v ~/profiler-config/:/profiler/config/ --name profiler xyctruth/profiler:latest
+docker run -d -p 80:80 -v ~/profiler-config/:/profiler/config/ --name profiler ghcr.io/xyctruth/profiler/profiler:latest
 ```
 
 使用持久化数据
 
 ```bash
-docker run -d -p 80:80 -v ~/profiler-data/:/profiler/data/ --name profiler xyctruth/profiler:latest
+docker run -d -p 80:80 -v ~/profiler-data/:/profiler/data/ --name profiler ghcr.io/xyctruth/profiler/profiler:latest
 ```
 
 
