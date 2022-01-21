@@ -32,12 +32,29 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: actions/checkout@v2
-      - name: Docker image
+      - name: Login ghcr.io
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Login docker.io
+        uses: docker/login-action@v1
+        with:
+          registry: docker.io
+          username: xyctruth
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - uses: docker/build-push-action@v2
+        name: Build and push
         if: ${{ github.event_name != 'pull_request' }}
-        run: |
-          docker build -t xyctruth/profiler:latest .
-          docker tag xyctruth/profiler:latest xyctruth/profiler:${{ steps.create_release.outputs.tag_name }}
-          docker login --username=xyctruth --password=${{ secrets.DOCKER_TOKEN }}
-          docker push xyctruth/profiler:latest
-          docker push xyctruth/profiler:${{ steps.create_release.outputs.tag_name }}
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          tags: |-
+            docker.io/xyctruth/profiler:latest
+            docker.io/xyctruth/profiler:${{ steps.create_release.outputs.tag_name }}
+            ghcr.io/${{ github.repository }}/profiler:latest
+            ghcr.io/${{ github.repository }}/profiler:${{ steps.create_release.outputs.tag_name }}
