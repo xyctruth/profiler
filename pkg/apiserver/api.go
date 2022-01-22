@@ -17,6 +17,7 @@ import (
 	"github.com/xyctruth/profiler/pkg/apiserver/ui/trace"
 	"github.com/xyctruth/profiler/pkg/storage"
 	"github.com/xyctruth/profiler/pkg/utils"
+	"github.com/xyctruth/profiler/version"
 )
 
 type APIServer struct {
@@ -42,6 +43,9 @@ func NewAPIServer(opt Options) *APIServer {
 	router := gin.Default()
 	router.GET("/api/healthz", func(c *gin.Context) {
 		c.String(200, "I'm fine")
+	})
+	router.GET("/api/version", func(c *gin.Context) {
+		c.JSON(200, gin.H{"version": version.Version, "gitRevision": version.GitRevision})
 	})
 	router.Use(HandleCors).GET("/api/targets", apiServer.listTarget)
 	router.Use(HandleCors).GET("/api/group_labels", apiServer.listGroupLabel)
