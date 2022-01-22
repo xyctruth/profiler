@@ -13,6 +13,7 @@ import (
 	"github.com/xyctruth/profiler/pkg/storage"
 	"github.com/xyctruth/profiler/pkg/storage/badger"
 	"github.com/xyctruth/profiler/pkg/utils"
+	"github.com/xyctruth/profiler/version"
 )
 
 var (
@@ -23,6 +24,8 @@ var (
 )
 
 func main() {
+	log.WithFields(log.Fields{"version": version.Version, "gitRevision": version.GitRevision}).Info("be starting")
+
 	flag.StringVar(&configPath, "config-path", "./collector.yaml", "Collector configuration file path")
 	flag.StringVar(&dataPath, "data-path", "./data", "Collector Data file path")
 	flag.DurationVar(&dataGCInternal, "data-gc-internal", 5*time.Minute, "Collector Data gc internal")

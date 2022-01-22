@@ -32,22 +32,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: actions/checkout@v2
-      - name: Docker image
-        if: ${{ github.event_name != 'pull_request' }}
-        run: |
-
-          docker build -t xyctruth/profiler:latest .
-
-          docker tag xyctruth/profiler:latest xyctruth/profiler:${{ steps.create_release.outputs.tag_name }}
-          docker login --username=xyctruth --password=${{ secrets.DOCKER_TOKEN }}
-          docker push xyctruth/profiler:latest
-          docker push xyctruth/profiler:${{ steps.create_release.outputs.tag_name }}
-
-          docker tag xyctruth/profiler:latest ghcr.io/${{ github.repository }}:latest
-          docker tag xyctruth/profiler:latest ghcr.io/${{ github.repository }}:${{ steps.create_release.outputs.tag_name }}
-          docker login ghcr.io --username ${{ github.actor }} --password=${{ secrets.GITHUB_TOKEN }}
-          docker push ghcr.io/${{ github.repository }}:latest
-          docker push ghcr.io/${{ github.repository }}:${{ steps.create_release.outputs.tag_name }}
-
 
