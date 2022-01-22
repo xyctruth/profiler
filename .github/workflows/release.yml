@@ -9,7 +9,7 @@ on:
   workflow_dispatch: {}
 
 jobs:
-  docker_push:
+  docker_build_push:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
@@ -43,7 +43,7 @@ jobs:
           password: ${{ secrets.DOCKER_TOKEN }}
 
       - uses: docker/build-push-action@v2
-        name: Build & Pushing vela-core for Dockerhub and GHCR
+        name: Build & Pushing
         with:
           context: .
           file: Dockerfile
