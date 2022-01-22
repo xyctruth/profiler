@@ -38,4 +38,4 @@ template: |
   $CHANGES
 
   ## Docker Image
-  - `docker pull ghcr.io/xyctruth/profiler/profiler:v$RESOLVED_VERSION`
+  - `docker pull xyctruth/profiler:v$RESOLVED_VERSION`

@@ -63,7 +63,7 @@ npm run dev --base_api_url=http://localhost:8080
 ## Docker
 
 ```bash
-docker run -d -p 80:80 --name profiler ghcr.io/xyctruth/profiler/profiler:latest
+docker run -d -p 80:80 --name profiler xyctruth/profiler:latest
 ```
 
 Using custom configuration file
@@ -71,13 +71,13 @@ Using custom configuration file
 ```bash
 mkdir ~/profiler-config/
 cp ./collector.yaml ~/profiler-config/
-docker run -d -p 80:80 -v ~/profiler-config/:/profiler/config/ --name profiler ghcr.io/xyctruth/profiler/profiler:latest
+docker run -d -p 80:80 -v ~/profiler-config/:/profiler/config/ --name profiler xyctruth/profiler:latest
 ```
 
 Using persistent data
 
 ```bash
-docker run -d -p 80:80 -v ~/profiler-data/:/profiler/data/ --name profiler ghcr.io/xyctruth/profiler/profiler:latest
+docker run -d -p 80:80 -v ~/profiler-data/:/profiler/data/ --name profiler xyctruth/profiler:latest
 ```
 
 ## Collector configuration

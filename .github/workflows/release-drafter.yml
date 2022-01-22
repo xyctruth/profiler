@@ -44,10 +44,10 @@ jobs:
           docker push xyctruth/profiler:latest
           docker push xyctruth/profiler:${{ steps.create_release.outputs.tag_name }}
 
-          docker tag xyctruth/profiler:latest ghcr.io/${{ github.repository }}/profiler:latest
-          docker tag xyctruth/profiler:latest ghcr.io/${{ github.repository }}/profiler:${{ steps.create_release.outputs.tag_name }}
+          docker tag xyctruth/profiler:latest ghcr.io/${{ github.repository }}:latest
+          docker tag xyctruth/profiler:latest ghcr.io/${{ github.repository }}:${{ steps.create_release.outputs.tag_name }}
           docker login ghcr.io --username ${{ github.actor }} --password=${{ secrets.GITHUB_TOKEN }}
-          docker push ghcr.io/${{ github.repository }}/profiler:latest
-          docker push ghcr.io/${{ github.repository }}/profiler:${{ steps.create_release.outputs.tag_name }}
+          docker push ghcr.io/${{ github.repository }}:latest
+          docker push ghcr.io/${{ github.repository }}:${{ steps.create_release.outputs.tag_name }}
 
 

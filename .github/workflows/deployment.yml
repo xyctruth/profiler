@@ -5,6 +5,12 @@ concurrency: development
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'profiler docker image version'
+        required: true
+        default: ''
 
 jobs:
 
@@ -13,11 +19,19 @@ jobs:
     environment: development
     steps:
       - uses: actions/checkout@master
+      - name: Get the version
+        id: get_version
+        run: |
+          VERSION=${{ github.event.release.tag_name }}
+          if [[ ${{ github.event.release.tag_name }} == "" ]]; then
+            VERSION=${{ github.event.inputs.version }}
+          fi
+          echo ::set-output name=VERSION::${VERSION}
       - name: deploy to cluster
         uses: steebchen/kubectl@v2.0.0
         with: # defaults to latest kubectl binary version
           config: ${{ secrets.KUBE_CONFIG_DATA }}
-          command: set image --record deployment/profiler profiler=ghcr.io/${{ github.repository }}/profiler:${{ github.event.release.tag_name }}  -n profiler-system
+          command: set image --record deployment/profiler profiler=xyctruth/profiler:${{ steps.get_version.outputs.VERSION }}  -n profiler-system
       - name: verify deployment
         uses: steebchen/kubectl@v2.0.0
         with:
