@@ -22,9 +22,14 @@ jobs:
       - name: Get the version
         id: get_version
         run: |
-          VERSION=${{ github.event.release.tag_name }}
-          if [[ ${{ github.event.release.tag_name }} == "" ]]; then
+          echo $GITHUB_EVENT_NAME
+
+          if [[ $GITHUB_EVENT_NAME == "workflow_dispatch" ]]; then
             VERSION=${{ github.event.inputs.version }}
+          fi
+
+          if [[ $GITHUB_EVENT_NAME == "release" ]]; then
+            VERSION=${{ github.event.release.tag_name }}
           fi
           echo ::set-output name=VERSION::${VERSION}
       - name: deploy to cluster
