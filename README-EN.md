@@ -14,9 +14,9 @@
 
 - **Supported Sample**
   - `trace` `fgprof` `profile` `mutex` `heap` `goroutine` `allocs` `block` `threadcreate`
-- **Hot Reload**
+- **Hot reloading configuration**
   - Collect samples of the target service according to the configuration file
-  - The collection program will monitor the changes of the configuration file and apply the changed configuration file immediately
+  - The collection program will watch the changes of the configuration file and apply the changed immediately
 - **Chart Trend**
   - Provide charts to observe the trend of multiple service performance indicators and find the time point of performance problems
   - Each bubble is a sample file of Profile and Trace
