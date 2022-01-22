@@ -231,89 +231,9 @@
     "memoize-one" "^6.0.0"
     "normalize-wheel-es" "^1.1.1"
 
-"esbuild-android-arm64@0.13.15":
-  "integrity" "sha512-m602nft/XXeO8YQPUDVoHfjyRVPdPgjyyXOxZ44MK/agewFFkPa8tUo6lAzSWh5Ui5PB4KR9UIFTSBKh/RrCmg=="
-  "resolved" "https://registry.npmmirror.com/esbuild-android-arm64/download/esbuild-android-arm64-0.13.15.tgz"
-  "version" "0.13.15"
-
 "esbuild-darwin-64@0.13.15":
   "integrity" "sha512-ihOQRGs2yyp7t5bArCwnvn2Atr6X4axqPpEdCFPVp7iUj4cVSdisgvEKdNR7yH3JDjW6aQDw40iQFoTqejqxvQ=="
   "resolved" "https://registry.npmmirror.com/esbuild-darwin-64/download/esbuild-darwin-64-0.13.15.tgz"
-  "version" "0.13.15"
-
-"esbuild-darwin-arm64@0.13.15":
-  "integrity" "sha512-i1FZssTVxUqNlJ6cBTj5YQj4imWy3m49RZRnHhLpefFIh0To05ow9DTrXROTE1urGTQCloFUXTX8QfGJy1P8dQ=="
-  "resolved" "https://registry.npmmirror.com/esbuild-darwin-arm64/download/esbuild-darwin-arm64-0.13.15.tgz"
-  "version" "0.13.15"
-
-"esbuild-freebsd-64@0.13.15":
-  "integrity" "sha512-G3dLBXUI6lC6Z09/x+WtXBXbOYQZ0E8TDBqvn7aMaOCzryJs8LyVXKY4CPnHFXZAbSwkCbqiPuSQ1+HhrNk7EA=="
-  "resolved" "https://registry.npmmirror.com/esbuild-freebsd-64/download/esbuild-freebsd-64-0.13.15.tgz"
-  "version" "0.13.15"
-
-"esbuild-freebsd-arm64@0.13.15":
-  "integrity" "sha512-KJx0fzEDf1uhNOZQStV4ujg30WlnwqUASaGSFPhznLM/bbheu9HhqZ6mJJZM32lkyfGJikw0jg7v3S0oAvtvQQ=="
-  "resolved" "https://registry.npmmirror.com/esbuild-freebsd-arm64/download/esbuild-freebsd-arm64-0.13.15.tgz"
-  "version" "0.13.15"
-
-"esbuild-linux-32@0.13.15":
-  "integrity" "sha512-ZvTBPk0YWCLMCXiFmD5EUtB30zIPvC5Itxz0mdTu/xZBbbHJftQgLWY49wEPSn2T/TxahYCRDWun5smRa0Tu+g=="
-  "resolved" "https://registry.npmmirror.com/esbuild-linux-32/download/esbuild-linux-32-0.13.15.tgz"
-  "version" "0.13.15"
-
-"esbuild-linux-64@0.13.15":
-  "integrity" "sha512-eCKzkNSLywNeQTRBxJRQ0jxRCl2YWdMB3+PkWFo2BBQYC5mISLIVIjThNtn6HUNqua1pnvgP5xX0nHbZbPj5oA=="
-  "resolved" "https://registry.npmmirror.com/esbuild-linux-64/download/esbuild-linux-64-0.13.15.tgz"
-  "version" "0.13.15"
-
-"esbuild-linux-arm@0.13.15":
-  "integrity" "sha512-wUHttDi/ol0tD8ZgUMDH8Ef7IbDX+/UsWJOXaAyTdkT7Yy9ZBqPg8bgB/Dn3CZ9SBpNieozrPRHm0BGww7W/jA=="
-  "resolved" "https://registry.npmmirror.com/esbuild-linux-arm/download/esbuild-linux-arm-0.13.15.tgz"
-  "version" "0.13.15"
-
-"esbuild-linux-arm64@0.13.15":
-  "integrity" "sha512-bYpuUlN6qYU9slzr/ltyLTR9YTBS7qUDymO8SV7kjeNext61OdmqFAzuVZom+OLW1HPHseBfJ/JfdSlx8oTUoA=="
-  "resolved" "https://registry.npmmirror.com/esbuild-linux-arm64/download/esbuild-linux-arm64-0.13.15.tgz"
-  "version" "0.13.15"
-
-"esbuild-linux-mips64le@0.13.15":
-  "integrity" "sha512-KlVjIG828uFPyJkO/8gKwy9RbXhCEUeFsCGOJBepUlpa7G8/SeZgncUEz/tOOUJTcWMTmFMtdd3GElGyAtbSWg=="
-  "resolved" "https://registry.npmmirror.com/esbuild-linux-mips64le/download/esbuild-linux-mips64le-0.13.15.tgz"
-  "version" "0.13.15"
-
-"esbuild-linux-ppc64le@0.13.15":
-  "integrity" "sha512-h6gYF+OsaqEuBjeesTBtUPw0bmiDu7eAeuc2OEH9S6mV9/jPhPdhOWzdeshb0BskRZxPhxPOjqZ+/OqLcxQwEQ=="
-  "resolved" "https://registry.npmmirror.com/esbuild-linux-ppc64le/download/esbuild-linux-ppc64le-0.13.15.tgz"
-  "version" "0.13.15"
-
-"esbuild-netbsd-64@0.13.15":
-  "integrity" "sha512-3+yE9emwoevLMyvu+iR3rsa+Xwhie7ZEHMGDQ6dkqP/ndFzRHkobHUKTe+NCApSqG5ce2z4rFu+NX/UHnxlh3w=="
-  "resolved" "https://registry.npmmirror.com/esbuild-netbsd-64/download/esbuild-netbsd-64-0.13.15.tgz"
-  "version" "0.13.15"
-
-"esbuild-openbsd-64@0.13.15":
-  "integrity" "sha512-wTfvtwYJYAFL1fSs8yHIdf5GEE4NkbtbXtjLWjM3Cw8mmQKqsg8kTiqJ9NJQe5NX/5Qlo7Xd9r1yKMMkHllp5g=="
-  "resolved" "https://registry.npmmirror.com/esbuild-openbsd-64/download/esbuild-openbsd-64-0.13.15.tgz"
-  "version" "0.13.15"
-
-"esbuild-sunos-64@0.13.15":
-  "integrity" "sha512-lbivT9Bx3t1iWWrSnGyBP9ODriEvWDRiweAs69vI+miJoeKwHWOComSRukttbuzjZ8r1q0mQJ8Z7yUsDJ3hKdw=="
-  "resolved" "https://registry.npmmirror.com/esbuild-sunos-64/download/esbuild-sunos-64-0.13.15.tgz"
-  "version" "0.13.15"
-
-"esbuild-windows-32@0.13.15":
-  "integrity" "sha512-fDMEf2g3SsJ599MBr50cY5ve5lP1wyVwTe6aLJsM01KtxyKkB4UT+fc5MXQFn3RLrAIAZOG+tHC+yXObpSn7Nw=="
-  "resolved" "https://registry.npmmirror.com/esbuild-windows-32/download/esbuild-windows-32-0.13.15.tgz"
-  "version" "0.13.15"
-
-"esbuild-windows-64@0.13.15":
-  "integrity" "sha512-9aMsPRGDWCd3bGjUIKG/ZOJPKsiztlxl/Q3C1XDswO6eNX/Jtwu4M+jb6YDH9hRSUflQWX0XKAfWzgy5Wk54JQ=="
-  "resolved" "https://registry.npmmirror.com/esbuild-windows-64/download/esbuild-windows-64-0.13.15.tgz"
-  "version" "0.13.15"
-
-"esbuild-windows-arm64@0.13.15":
-  "integrity" "sha512-zzvyCVVpbwQQATaf3IG8mu1IwGEiDxKkYUdA4FpoCHi1KtPa13jeScYDjlW0Qh+ebWzpKfR2ZwvqAQkSWNcKjA=="
-  "resolved" "https://registry.npmmirror.com/esbuild-windows-arm64/download/esbuild-windows-arm64-0.13.15.tgz"
   "version" "0.13.15"
 
 "esbuild@^0.13.12":
@@ -443,10 +363,10 @@
   "resolved" "https://registry.npm.taobao.org/moment/download/moment-2.29.1.tgz"
   "version" "2.29.1"
 
-"nanoid@^3.1.30":
-  "integrity" "sha1-Y/k8xUjSoRPcXfvGO/oJ4rm2Q2I="
-  "resolved" "https://registry.npmmirror.com/nanoid/download/nanoid-3.1.30.tgz?cache=0&sync_timestamp=1634166192601&other_urls=https%3A%2F%2Fregistry.npmmirror.com%2Fnanoid%2Fdownload%2Fnanoid-3.1.30.tgz"
-  "version" "3.1.30"
+"nanoid@^3.1.30", "nanoid@3.1.31":
+  "integrity" "sha512-ZivnJm0o9bb13p2Ot5CpgC2rQdzB9Uxm/mFZweqm5eMViqOJe3PV6LU2E30SiLgheesmcPrjquqraoolONSA0A=="
+  "resolved" "https://registry.npmjs.org/nanoid/-/nanoid-3.1.31.tgz"
+  "version" "3.1.31"
 
 "normalize-path@^3.0.0", "normalize-path@~3.0.0":
   "integrity" "sha1-Dc1p/yOhybEf0JeDFmRKA4ghamU="
