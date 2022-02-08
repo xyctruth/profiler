@@ -169,7 +169,7 @@ func TestProfileMeta(t *testing.T) {
 	require.Equal(t, nil, err)
 
 	min := time.Now().Add(-1 * time.Hour)
-	max := time.Now()
+	max := time.Now().Add(time.Second)
 
 	targets, err := s.ListTarget()
 	require.Equal(t, nil, err)
@@ -217,7 +217,7 @@ func TestProfileMetaArray(t *testing.T) {
 	require.Equal(t, nil, err)
 
 	min := time.Now().Add(-1 * time.Hour)
-	max := time.Now()
+	max := time.Now().Add(time.Second)
 
 	targets, err := s.ListTarget()
 	require.Equal(t, nil, err)
