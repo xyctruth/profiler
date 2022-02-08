@@ -222,11 +222,13 @@ func (s *store) searchProfileMeta(sampleType string, filters []storage.LabelFilt
 				for it.Seek(min); it.Valid(); it.Next() {
 					item := it.Item()
 					k := item.Key()
-					id := string(k[len(min):])
-					idsByLabel = append(idsByLabel, id)
+
 					if !storage.CompareKey(k, max) {
 						break
 					}
+
+					id := string(k[len(min):])
+					idsByLabel = append(idsByLabel, id)
 				}
 				if len(ids) == 0 {
 					ids = idsByLabel
