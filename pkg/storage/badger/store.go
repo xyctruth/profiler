@@ -155,6 +155,19 @@ func (s *store) SaveProfileMeta(metas []*storage.ProfileMeta, ttl time.Duration)
 func (s *store) ListProfileMeta(sampleType string, startTime, endTime time.Time, filters ...storage.LabelFilter) ([]*storage.ProfileMetaByTarget, error) {
 	var err error
 
+	// Default query all target label
+	if len(filters) == 0 {
+		labels, err := s.ListLabel()
+		if err != nil {
+			return nil, err
+		}
+		for _, label := range labels {
+			if label.Key == TargetLabel {
+				filters = append(filters, storage.LabelFilter{Label: label})
+			}
+		}
+	}
+
 	ids, err := s.searchProfileMeta(sampleType, filters, startTime, endTime)
 	if err != nil {
 		return nil, err
