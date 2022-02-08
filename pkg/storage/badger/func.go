@@ -20,7 +20,7 @@ var (
 	PrefixIndex       = []byte{0x86}
 )
 
-// 内置label
+// TargetLabel 内置label
 const TargetLabel = "_target"
 
 func deletePrefixKey(key []byte) string {
