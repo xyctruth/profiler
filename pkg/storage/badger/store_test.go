@@ -183,6 +183,10 @@ func TestProfileMeta(t *testing.T) {
 	require.Equal(t, nil, err)
 	require.Equal(t, 1, len(profileMetas))
 
+	profileMetasNoFilters, err := s.ListProfileMeta(sampleTypes[0], min, max)
+	require.Equal(t, nil, err)
+	require.Equal(t, 1, len(profileMetasNoFilters))
+
 	// Waiting for the overdue
 	time.Sleep(2 * time.Second)
 
