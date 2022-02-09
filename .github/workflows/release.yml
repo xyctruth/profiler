@@ -47,7 +47,7 @@ jobs:
           labels: |-
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
-          push: ${{ github.event_name != 'pull_request' }}
+          push: true
           build-args: |
             GITVERSION=git-${{ steps.vars.outputs.git_revision }}
             VERSION=${{ steps.get_version.outputs.VERSION }}
