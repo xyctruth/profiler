@@ -66,7 +66,8 @@ persistence:
 
 service:
   type: ClusterIP
-  port: 80
+  uiPort: 80
+  apiPort: 8080
 
 ingress:
   enabled: false

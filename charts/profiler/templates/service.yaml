@@ -8,10 +8,10 @@ spec:
   type: {{ .Values.service.type }}
   ports:
     - name: ui
-      port: 80
+      port: {{ .Values.service.uiPort }}
       targetPort: 80
     - name: api
-      port: 8080
+      port: {{ .Values.service.apiPort }}
       targetPort: 8080
   selector:
     {{- include "profiler.selectorLabels" . | nindent 4 }}

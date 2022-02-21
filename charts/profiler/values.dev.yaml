@@ -1,0 +1,272 @@
+# Default values for profiler.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Profiler configuration. Specify content for collector.yaml
+# ref: https://github.com/xyctruth/profiler/blob/master/collector.dev.yaml
+configuration: |-
+  collector:
+    targetConfigs:
+      profiler-server:
+        interval: 5m
+        expiration: 168h
+        host: localhost:9000
+  
+      # f008dev--------------------------------------------------------------------
+      admin-gateway-f008dev:
+        interval: 5m
+        expiration: 168h
+        host: admin-gateway.f008dev:9000
+        labels:
+          namespace: f008dev
+          type: gateway
+      app-businesses-gateway-f008dev:
+        interval: 5m
+        expiration: 168h
+        host: app-businesses-gateway.f008dev:9000
+        labels:
+          namespace: f008dev
+          type: gateway
+      app-gateway-f008dev:
+        interval: 5m
+        expiration: 168h
+        host: app-gateway.f008dev:9000
+        labels:
+          namespace: f008dev
+          type: gateway
+      app-gymnasiums-gateway-f008dev:
+        interval: 5m
+        expiration: 168h
+        host: app-gymnasiums-gateway.f008dev:9000
+        labels:
+          namespace: f008dev
+          type: gateway
+      app-supplychain-gateway-f008dev:
+        interval: 5m
+        expiration: 168h
+        host: app-supplychain-gateway.f008dev:9000
+        labels:
+          namespace: f008dev
+          type: gateway
+  
+  
+      app-awards-svc-f008dev:
+        interval: 5m
+        expiration: 168h
+        host: app-awards-svc.f008dev:9000
+        labels:
+          namespace: f008dev
+          type: svc
+      app-businesses-b-svc-f008dev:
+        interval: 5m
+        expiration: 168h
+        host: app-businesses-b-svc.f008dev:9000
+        labels:
+          namespace: f008dev
+          type: svc
+      app-channel-b-svc-f008dev:
+        interval: 5m
+        expiration: 168h
+        host: app-channel-b-svc.f008dev:9000
+        labels:
+          namespace: f008dev
+          type: svc
+      app-coupon-b-svc-f008dev:
+        interval: 5m
+        expiration: 168h
+        host: app-coupon-b-svc.f008dev:9000
+        labels:
+          namespace: f008dev
+          type: svc
+      app-coupon-c-svc-f008dev:
+        interval: 5m
+        expiration: 168h
+        host: app-coupon-c-svc.f008dev:9000
+        labels:
+          namespace: f008dev
+          type: svc
+      app-fitness-b-svc-f008dev:
+        interval: 5m
+        expiration: 168h
+        host: app-fitness-b-svc.f008dev:9000
+        labels:
+          namespace: f008dev
+          type: svc
+      app-fitness-c-svc-f008dev:
+        interval: 5m
+        expiration: 168h
+        host: app-fitness-c-svc.f008dev:9000
+        labels:
+          namespace: f008dev
+          type: svc
+      app-gymnasiums-b-svc-f008dev:
+        interval: 5m
+        expiration: 168h
+        host: app-gymnasiums-b-svc.f008dev:9000
+        labels:
+          namespace: f008dev
+          type: svc
+      app-knowledge-svc:
+        interval: 5m
+        expiration: 168h
+        host: app-knowledge-svc.f008dev:9000
+        labels:
+          namespace: f008dev
+          type: svc
+      app-lotteries-svc-f008dev:
+        interval: 5m
+        expiration: 168h
+        host: app-lotteries-svc.f008dev:9000
+        labels:
+          namespace: f008dev
+          type: svc
+      app-media-c-svc-f008dev:
+        interval: 5m
+        expiration: 168h
+        host: app-media-c-svc.f008dev:9000
+        labels:
+          namespace: f008dev
+          type: svc
+      app-media-m-svc-f008dev:
+        interval: 5m
+        expiration: 168h
+        host: app-media-m-svc.f008dev:9000
+        labels:
+          namespace: f008dev
+          type: svc
+      app-split-svc-f008dev:
+        interval: 5m
+        expiration: 168h
+        host: app-split-svc.f008dev:9000
+        labels:
+          namespace: f008dev
+          type: svc
+      app-supplychain-b-svc-f008dev:
+        interval: 5m
+        expiration: 168h
+        host: app-supplychain-b-svc.f008dev:9000
+        labels:
+          namespace: f008dev
+          type: svc
+      app-supplychain-c-svc-f008dev:
+        interval: 5m
+        expiration: 168h
+        host: app-supplychain-c-svc.f008dev:9000
+        labels:
+          namespace: f008dev
+          type: svc
+      app-vip-svc-f008dev:
+        interval: 5m
+        expiration: 168h
+        host: app-vip-svc.f008dev:9000
+        labels:
+          namespace: f008dev
+          type: svc
+      basic-common-svc-f008dev:
+        interval: 5m
+        expiration: 168h
+        host: basic-common-svc.f008dev:9000
+        labels:
+          namespace: f008dev
+          type: svc
+      basic-notification-svc-f008dev:
+        interval: 5m
+        expiration: 168h
+        host: basic-notification-svc.f008dev:9000
+        labels:
+          namespace: f008dev
+          type: svc
+      basic-pay-svc-f008dev:
+        interval: 5m
+        expiration: 168h
+        host: basic-pay-svc.f008dev:9000
+        labels:
+          namespace: f008dev
+          type: svc
+      basic-tag-svc-f008dev:
+        interval: 5m
+        expiration: 168h
+        host: basic-tag-svc.f008dev:9000
+        labels:
+          namespace: f008dev
+          type: svc
+      basic-user-svc-f008dev:
+        interval: 5m
+        expiration: 168h
+        host: basic-user-svc.f008dev:9000
+        labels:
+          namespace: f008dev
+          type: svc
+ 
+
+image:
+  repository: xyctruth/profiler
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "v0.2.5"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+podAnnotations: {}
+podSecurityContext: {}
+  # fsGroup: 2000
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+resources:
+  limits:
+    cpu: "400m"
+    memory: "500Mi"
+  requests:
+    cpu: "100m"
+    memory: "200Mi"
+
+persistence:
+  ## If true, use a Persistent Volume Claim, If false, use emptyDir
+  ##
+  enabled: true
+
+  storageClass: "alicloud-disk-essd"
+  ## Persistent Volume Claim annotations
+  ##
+  annotations:
+  ## Persistent Volume Access Mode
+  ##
+  accessModes:
+    - ReadWriteOnce
+  ## Persistent Volume size
+  ##
+  size: 40Gi
+  ##
+
+service:
+  type: ClusterIP
+  uiPort: 80
+  apiPort: 8080
+
+ingress:
+  enabled: true
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: profiler.jia-huang.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+
