@@ -54,3 +54,13 @@ jobs:
           tags: |-
             docker.io/xyctruth/profiler:${{ steps.get_version.outputs.VERSION }}
             ghcr.io/xyctruth/profiler:${{ steps.get_version.outputs.VERSION }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Run chart-releaser
+        uses: helm/chart-releaser-action@v1.1.0
+        env:
+          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
