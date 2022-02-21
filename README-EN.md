@@ -80,6 +80,16 @@ Using persistent data
 docker run -d -p 80:80 -v ~/profiler-data/:/profiler/data/ --name profiler xyctruth/profiler:latest
 ```
 
+## Helm
+
+Install the Profiler chart:
+
+```bash
+helm install --create-namespace -n profiler-system profiler ./charts/profiler
+```
+
+More on [Helm docs](https://github.com/xyctruth/profiler/blob/master/charts/profiler/README.EN.md) 
+
 ## Collector configuration
 
 The `golang` program that needs to be collected and analyzed needs to provide the `net/http/pprof` endpoint and configure it in the `./collector.yaml` configuration file.
