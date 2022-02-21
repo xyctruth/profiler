@@ -23,7 +23,7 @@
 - **Detailed Analysis**
   - Click the bubbles in the charts to jump to the detailed page of Profile and Trace for further detailed analysis
 
-## [Demo](https://profiling.jia-huang.com)
+## [Demo](http://ptest.jia-huang.com)
 
 <table>
   <tr>
