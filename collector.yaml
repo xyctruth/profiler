@@ -6,6 +6,6 @@ collector:
       expiration: 0  # no expiration time
       host: localhost:9000
       labels:
-        namespace: f005
-        type: gateway
+        namespace: profiler-system
+        type: system
       profileConfigs: # default scrape  (profile, fgprof, mutex, heap, goroutine, allocs, block, threadcreate, trace)

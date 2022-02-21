@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "profiler.fullname" . }}
+  labels:
+    {{- include "profiler.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "profiler.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "profiler.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: CONFIG_PATH
+              value: /profiler/config/collector.yaml
+            - name: DATA_PATH
+              value: /profiler/data/
+          ports:
+            - name: http-ui
+              containerPort: 80
+              protocol: TCP
+            - name: http-api
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /api/healthz
+              port: 80
+            initialDelaySeconds: 180
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /api/healthz
+              port: 80
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: profiler-data
+              mountPath: /profiler/data
+              readOnly: false
+            - name: profiler-config
+              mountPath: /profiler/config
+      volumes:
+        - name: profiler-config
+          configMap:
+            name: {{ include "profiler.fullname" . }}-conf
+        - name: profiler-data
+          {{- if and .Values.persistence.enabled  }}
+          persistentVolumeClaim:
+            claimName: {{ include "profiler.fullname" . }}-data
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

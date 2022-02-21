@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "profiler.fullname" . }}-conf
+  labels:
+    {{- include "profiler.labels" . | nindent 4 }}
+data:
+  collector.yaml: |-
+    {{- .Values.configuration | nindent 4 }}

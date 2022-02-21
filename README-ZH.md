@@ -60,7 +60,7 @@ npm install --registry=https://registry.npm.taobao.org
 npm run dev --base_api_url=http://localhost:8080
 ```
 
-## 容器
+## Docker
 
 ```bash
 docker run -d -p 80:80 --name profiler xyctruth/profiler:latest
@@ -80,6 +80,15 @@ docker run -d -p 80:80 -v ~/profiler-config/:/profiler/config/ --name profiler x
 docker run -d -p 80:80 -v ~/profiler-data/:/profiler/data/ --name profiler xyctruth/profiler:latest
 ```
 
+## Helm
+
+安装 Profiler chart:
+
+```bash
+helm install --create-namespace -n profiler-system profiler ./charts/profiler
+```
+
+更多说明在 [Helm docs](https://github.com/xyctruth/profiler/blob/master/charts/profiler/README.ZH.md) 中
 
 ## 收集配置
 
