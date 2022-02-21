@@ -75,7 +75,7 @@ ingress:
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   hosts:
-    - host: ptest.jia-huang.com
+    - host: your-domain.com
       paths:
         - path: /
           pathType: Prefix
