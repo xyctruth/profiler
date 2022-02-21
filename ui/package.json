@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "dev": "vite",
-    "start": "npm run dev --base_api_url=https://api.profiling.jia-huang.com",
+    "test": "npm run dev --base_api_url=http://profiler.jia-huang.com",
     "build": "vite build",
     "preview": "vite preview"
   },
