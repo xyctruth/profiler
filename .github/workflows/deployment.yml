@@ -34,7 +34,7 @@ jobs:
       - uses: actions/checkout@v1
       # TODO 修改为使用 Helm 部署应用程序
       - name: 'Deploy'
-        uses: 'deliverybot/helm@v1'
+        uses: 'glopezep/helm@v1.7.1'
         with:
           release: 'profiler-dev'
           namespace: 'profiler-system'
