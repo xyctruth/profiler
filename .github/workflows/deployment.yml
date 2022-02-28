@@ -31,6 +31,7 @@ jobs:
             VERSION=${{ github.event.release.tag_name }}
           fi
           echo ::set-output name=VERSION::${VERSION}
+      # TODO 修改为使用 Helm 部署应用程序
       - name: deploy to cluster
         uses: steebchen/kubectl@v2.0.0
         with: # defaults to latest kubectl binary version
