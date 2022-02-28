@@ -1,5 +1,5 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: {{ include "profiler.fullname" . }}
   labels:
@@ -9,6 +9,9 @@ spec:
   selector:
     matchLabels:
       {{- include "profiler.selectorLabels" . | nindent 6 }}
+  serviceName: "{{ template "profiler.fullname" . }}"
+  updateStrategy:
+    type: RollingUpdate
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -57,22 +60,14 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
-            - name: profiler-data
+            {{- if .Values.persistence.existingClaim }}
+            - name: {{ .Values.persistence.existingClaim }}
+            {{- else }}
+            - name: data
+            {{- end }}
               mountPath: /profiler/data
-              readOnly: false
             - name: profiler-config
               mountPath: /profiler/config
-      volumes:
-        - name: profiler-config
-          configMap:
-            name: {{ include "profiler.fullname" . }}-conf
-        - name: profiler-data
-          {{- if and .Values.persistence.enabled  }}
-          persistentVolumeClaim:
-            claimName: {{ include "profiler.fullname" . }}-data
-          {{- else }}
-          emptyDir: {}
-          {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -85,3 +80,37 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      volumes:
+        - name: profiler-config
+          configMap:
+            name: {{ include "profiler.fullname" . }}-conf
+        {{- if and .Values.persistence.enabled .Values.persistence.existingClaim }}
+        - name: {{ .Values.persistence.existingClaim }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.existingClaim }}
+        {{ end }}
+{{- if and .Values.persistence.enabled ( not .Values.persistence.existingClaim ) }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        labels:
+          {{- include "profiler.labels" . | nindent 10 }}
+      spec:
+        accessModes:
+        {{- range .Values.persistence.accessModes }}
+          - {{ . | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.persistence.size | quote }}
+      {{- if .Values.persistence.storageClass }}
+      {{- if (eq "-" .Values.persistence.storageClass) }}
+        storageClassName: ""
+      {{- else }}
+        storageClassName: {{ .Values.persistence.storageClass | quote }}
+      {{- end }}
+      {{- end }}
+{{- else }}
+        - name: "data"
+          emptyDir: {}
+{{- end }}

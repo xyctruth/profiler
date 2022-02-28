@@ -225,15 +225,19 @@ affinity: {}
 resources:
   limits:
     cpu: "400m"
-    memory: "500Mi"
+    memory: "1000Mi"
   requests:
-    cpu: "100m"
-    memory: "200Mi"
+    cpu: "200m"
+    memory: "300Mi"
 
 persistence:
   ## If true, use a Persistent Volume Claim, If false, use emptyDir
   ##
   enabled: true
+
+  ## Enable persistence using an existing PVC
+  ##
+  existingClaim: data-profiler-0
 
   storageClass: "alicloud-disk-essd"
   ## Persistent Volume Claim annotations
@@ -256,17 +260,17 @@ service:
 ingress:
   enabled: true
   className: ""
-  annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-nginx
   hosts:
     - host: profiler.jia-huang.com
       paths:
         - path: /
           pathType: Prefix
-  tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
+  tls:
+    - secretName: profiler-tls
+      hosts:
+        - profiler.jia-huang.com
 
 

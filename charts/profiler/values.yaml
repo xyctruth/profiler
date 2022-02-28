@@ -51,6 +51,8 @@ persistence:
   ##
   enabled: false
 
+#  existingClaim:
+
   storageClass: "alicloud-disk-essd"
   ## Persistent Volume Claim annotations
   ##
