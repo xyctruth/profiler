@@ -11,6 +11,9 @@ configuration: |-
         interval: 5m
         expiration: 168h
         host: localhost:9000
+        labels:
+          namespace: profiler-system
+          type: system
   
       # prod-green--------------------------------------------------------------------
       admin-gateway-prod-green:
