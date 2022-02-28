@@ -31,6 +31,7 @@ jobs:
             VERSION=${{ github.event.release.tag_name }}
           fi
           echo ::set-output name=VERSION::${VERSION}
+      - uses: actions/checkout@v1
       # TODO 修改为使用 Helm 部署应用程序
       - name: 'Deploy'
         uses: 'deliverybot/helm@v1'
