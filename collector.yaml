@@ -4,6 +4,7 @@ collector:
     profiler-server: # server name
       interval: 15s
       expiration: 0  # no expiration time
+      # TODO 支持 kubernetes 下服务多个 endpoint
       host: localhost:9000
       labels:
         namespace: profiler-system

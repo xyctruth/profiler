@@ -12,192 +12,193 @@ configuration: |-
         expiration: 168h
         host: localhost:9000
   
-      # f008dev--------------------------------------------------------------------
-      admin-gateway-f008dev:
+      # prod-green--------------------------------------------------------------------
+      admin-gateway-prod-green:
         interval: 5m
         expiration: 168h
-        host: admin-gateway.f008dev:9000
+        host: admin-gateway.prod-green:9000
         labels:
-          namespace: f008dev
+          namespace: prod-green
           type: gateway
-      app-businesses-gateway-f008dev:
+      app-businesses-gateway-prod-green:
         interval: 5m
         expiration: 168h
-        host: app-businesses-gateway.f008dev:9000
+        host: app-businesses-gateway.prod-green:9000
         labels:
-          namespace: f008dev
+          namespace: prod-green
           type: gateway
-      app-gateway-f008dev:
+      app-gateway-prod-green:
         interval: 5m
         expiration: 168h
-        host: app-gateway.f008dev:9000
+        host: app-gateway.prod-green:9000
         labels:
-          namespace: f008dev
+          namespace: prod-green
           type: gateway
-      app-gymnasiums-gateway-f008dev:
+      app-gymnasiums-gateway-prod-green:
         interval: 5m
         expiration: 168h
-        host: app-gymnasiums-gateway.f008dev:9000
+        host: app-gymnasiums-gateway.prod-green:9000
         labels:
-          namespace: f008dev
+          namespace: prod-green
           type: gateway
-      app-supplychain-gateway-f008dev:
+      app-supplychain-gateway-prod-green:
         interval: 5m
         expiration: 168h
-        host: app-supplychain-gateway.f008dev:9000
+        host: app-supplychain-gateway.prod-green:9000
         labels:
-          namespace: f008dev
+          namespace: prod-green
           type: gateway
   
   
-      app-awards-svc-f008dev:
+      app-awards-svc-prod-green:
         interval: 5m
         expiration: 168h
-        host: app-awards-svc.f008dev:9000
+        host: app-awards-svc.prod-green:9000
         labels:
-          namespace: f008dev
+          namespace: prod-green
           type: svc
-      app-businesses-b-svc-f008dev:
+      app-businesses-b-svc-prod-green:
         interval: 5m
         expiration: 168h
-        host: app-businesses-b-svc.f008dev:9000
+        host: app-businesses-b-svc.prod-green:9000
         labels:
-          namespace: f008dev
+          namespace: prod-green
           type: svc
-      app-channel-b-svc-f008dev:
+      app-channel-b-svc-prod-green:
         interval: 5m
         expiration: 168h
-        host: app-channel-b-svc.f008dev:9000
+        host: app-channel-b-svc.prod-green:9000
         labels:
-          namespace: f008dev
+          namespace: prod-green
           type: svc
-      app-coupon-b-svc-f008dev:
+      app-coupon-b-svc-prod-green:
         interval: 5m
         expiration: 168h
-        host: app-coupon-b-svc.f008dev:9000
+        host: app-coupon-b-svc.prod-green:9000
         labels:
-          namespace: f008dev
+          namespace: prod-green
           type: svc
-      app-coupon-c-svc-f008dev:
+      app-coupon-c-svc-prod-green:
         interval: 5m
         expiration: 168h
-        host: app-coupon-c-svc.f008dev:9000
+        host: app-coupon-c-svc.prod-green:9000
         labels:
-          namespace: f008dev
+          namespace: prod-green
           type: svc
-      app-fitness-b-svc-f008dev:
+      app-fitness-b-svc-prod-green:
         interval: 5m
         expiration: 168h
-        host: app-fitness-b-svc.f008dev:9000
+        host: app-fitness-b-svc.prod-green:9000
         labels:
-          namespace: f008dev
+          namespace: prod-green
           type: svc
-      app-fitness-c-svc-f008dev:
+      app-fitness-c-svc-prod-green:
         interval: 5m
         expiration: 168h
-        host: app-fitness-c-svc.f008dev:9000
+        host: app-fitness-c-svc.prod-green:9000
         labels:
-          namespace: f008dev
+          namespace: prod-green
           type: svc
-      app-gymnasiums-b-svc-f008dev:
+      app-gymnasiums-b-svc-prod-green:
         interval: 5m
         expiration: 168h
-        host: app-gymnasiums-b-svc.f008dev:9000
+        host: app-gymnasiums-b-svc.prod-green:9000
         labels:
-          namespace: f008dev
+          namespace: prod-green
           type: svc
       app-knowledge-svc:
         interval: 5m
         expiration: 168h
-        host: app-knowledge-svc.f008dev:9000
+        host: app-knowledge-svc.prod-green:9000
         labels:
-          namespace: f008dev
+          namespace: prod-green
           type: svc
-      app-lotteries-svc-f008dev:
+      app-lotteries-svc-prod-green:
         interval: 5m
         expiration: 168h
-        host: app-lotteries-svc.f008dev:9000
+        host: app-lotteries-svc.prod-green:9000
         labels:
-          namespace: f008dev
+          namespace: prod-green
           type: svc
-      app-media-c-svc-f008dev:
+      app-media-c-svc-prod-green:
         interval: 5m
         expiration: 168h
-        host: app-media-c-svc.f008dev:9000
+        host: app-media-c-svc.prod-green:9000
         labels:
-          namespace: f008dev
+          namespace: prod-green
           type: svc
-      app-media-m-svc-f008dev:
+      app-media-m-svc-prod-green:
         interval: 5m
         expiration: 168h
-        host: app-media-m-svc.f008dev:9000
+        host: app-media-m-svc.prod-green:9000
         labels:
-          namespace: f008dev
+          namespace: prod-green
           type: svc
-      app-split-svc-f008dev:
+      app-split-svc-prod-green:
         interval: 5m
         expiration: 168h
-        host: app-split-svc.f008dev:9000
+        host: app-split-svc.prod-green:9000
         labels:
-          namespace: f008dev
+          namespace: prod-green
           type: svc
-      app-supplychain-b-svc-f008dev:
+      app-supplychain-b-svc-prod-green:
         interval: 5m
         expiration: 168h
-        host: app-supplychain-b-svc.f008dev:9000
+        host: app-supplychain-b-svc.prod-green:9000
         labels:
-          namespace: f008dev
+          namespace: prod-green
           type: svc
-      app-supplychain-c-svc-f008dev:
+      app-supplychain-c-svc-prod-green:
         interval: 5m
         expiration: 168h
-        host: app-supplychain-c-svc.f008dev:9000
+        host: app-supplychain-c-svc.prod-green:9000
         labels:
-          namespace: f008dev
+          namespace: prod-green
           type: svc
-      app-vip-svc-f008dev:
+      app-vip-svc-prod-green:
         interval: 5m
         expiration: 168h
-        host: app-vip-svc.f008dev:9000
+        host: app-vip-svc.prod-green:9000
         labels:
-          namespace: f008dev
+          namespace: prod-green
           type: svc
-      basic-common-svc-f008dev:
+      basic-common-svc-prod-green:
         interval: 5m
         expiration: 168h
-        host: basic-common-svc.f008dev:9000
+        host: basic-common-svc.prod-green:9000
         labels:
-          namespace: f008dev
+          namespace: prod-green
           type: svc
-      basic-notification-svc-f008dev:
+      basic-notification-svc-prod-green:
         interval: 5m
         expiration: 168h
-        host: basic-notification-svc.f008dev:9000
+        host: basic-notification-svc.prod-green:9000
         labels:
-          namespace: f008dev
+          namespace: prod-green
           type: svc
-      basic-pay-svc-f008dev:
+      basic-pay-svc-prod-green:
         interval: 5m
         expiration: 168h
-        host: basic-pay-svc.f008dev:9000
+        host: basic-pay-svc.prod-green:9000
         labels:
-          namespace: f008dev
+          namespace: prod-green
           type: svc
-      basic-tag-svc-f008dev:
+      basic-tag-svc-prod-green:
         interval: 5m
         expiration: 168h
-        host: basic-tag-svc.f008dev:9000
+        host: basic-tag-svc.prod-green:9000
         labels:
-          namespace: f008dev
+          namespace: prod-green
           type: svc
-      basic-user-svc-f008dev:
+      basic-user-svc-prod-green:
         interval: 5m
         expiration: 168h
-        host: basic-user-svc.f008dev:9000
+        host: basic-user-svc.prod-green:9000
         labels:
-          namespace: f008dev
+          namespace: prod-green
           type: svc
  
+
 
 image:
   repository: xyctruth/profiler
