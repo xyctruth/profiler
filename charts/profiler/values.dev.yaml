@@ -207,7 +207,7 @@ image:
   repository: xyctruth/profiler
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "v0.2.5"
+  tag: "latest"
 
 imagePullSecrets: []
 nameOverride: ""

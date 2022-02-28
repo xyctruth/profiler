@@ -32,6 +32,21 @@ jobs:
           fi
           echo ::set-output name=VERSION::${VERSION}
       # TODO 修改为使用 Helm 部署应用程序
+      - name: 'Deploy'
+        uses: 'deliverybot/helm@v1'
+        with:
+          release: 'profiler-dev'
+          namespace: 'profiler-system'
+          chart: 'profiler'
+          token: '${{ github.token }}'
+          values: |
+            image.tag: ${{ steps.get_version.outputs.VERSION }}
+          value-files: >-
+          [
+            "values.dev.yaml"
+          ]
+        env:
+          KUBECONFIG_FILE: '${{ secrets.KUBE_CONFIG_DATA }}'
       - name: deploy to cluster
         uses: steebchen/kubectl@v2.0.0
         with: # defaults to latest kubectl binary version
