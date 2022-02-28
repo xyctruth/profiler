@@ -41,20 +41,6 @@ jobs:
           token: '${{ github.token }}'
           values: |
             image.tag: ${{ steps.get_version.outputs.VERSION }}
-          value-files: >-
-          [
-            "values.dev.yaml"
-          ]
+          value-files: "values.dev.yaml"
         env:
           KUBECONFIG_FILE: '${{ secrets.KUBE_CONFIG_DATA }}'
-      - name: deploy to cluster
-        uses: steebchen/kubectl@v2.0.0
-        with: # defaults to latest kubectl binary version
-          config: ${{ secrets.KUBE_CONFIG_DATA }}
-          command: set image --record deployment/profiler profiler=xyctruth/profiler:${{ steps.get_version.outputs.VERSION }}  -n profiler-system
-      - name: verify deployment
-        uses: steebchen/kubectl@v2.0.0
-        with:
-          config: ${{ secrets.KUBE_CONFIG_DATA }}
-          version: v1.21.0 # specify kubectl binary version explicitly
-          command: rollout status deployment/profiler -n profiler-system
