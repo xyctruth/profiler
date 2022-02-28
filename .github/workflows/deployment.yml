@@ -38,10 +38,10 @@ jobs:
         with:
           release: 'profiler-dev'
           namespace: 'profiler-system'
-          chart: 'profiler'
+          chart: 'charts/profiler'
           token: '${{ github.token }}'
           values: |
             image.tag: ${{ steps.get_version.outputs.VERSION }}
-          value-files: "values.dev.yaml"
+          value-files: "charts/profiler/values.dev.yaml"
         env:
           KUBECONFIG_FILE: '${{ secrets.KUBE_CONFIG_DATA }}'
