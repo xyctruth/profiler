@@ -32,10 +32,10 @@ jobs:
           fi
           echo ::set-output name=VERSION::${VERSION}
       - uses: actions/checkout@v1
-    - name: deploy postgres to cluster
-      uses: wahyd4/kubectl-helm-action@master
-      env:
-        KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
-      with:
-        args: |
-          helm upgrade profiler-dev charts/profiler --install --wait --namespace=profiler-system --set=image.tag=${{ steps.get_version.outputs.VERSION }} --values=charts/profiler/values.dev.yaml  --atomic
+      - name: deploy postgres to cluster
+        uses: wahyd4/kubectl-helm-action@master
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        with:
+          args: |
+            helm upgrade profiler-dev charts/profiler --install --wait --namespace=profiler-system --set=image.tag=${{ steps.get_version.outputs.VERSION }} --values=charts/profiler/values.dev.yaml  --atomic
