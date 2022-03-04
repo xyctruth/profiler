@@ -76,25 +76,25 @@ func init() {
 }
 
 func initMateData(s storage.Store, t *testing.T) {
-	err := s.SaveProfileMeta(profileMetas, time.Second*3)
+	err := s.SaveProfileMeta(profileMetas, time.Hour)
 	require.Equal(t, nil, err)
 }
 
 func initProfileData(s storage.Store, t *testing.T) (string, string, string, string) {
-	invalidId, err := s.SaveProfile("", []byte{}, time.Second*10)
+	invalidId, err := s.SaveProfile("", []byte{}, time.Hour)
 	require.Equal(t, nil, err)
 
-	invalidId2, err := s.SaveProfile("", []byte("haha"), time.Second*10)
+	invalidId2, err := s.SaveProfile("", []byte("haha"), time.Hour)
 	require.Equal(t, nil, err)
 
 	profileBytes, err := ioutil.ReadFile("./testdata/profile.out.testdata")
 	require.Equal(t, nil, err)
-	id, err := s.SaveProfile("", profileBytes, time.Second*10)
+	id, err := s.SaveProfile("", profileBytes, time.Hour)
 	require.Equal(t, nil, err)
 
 	traceBytes, err := ioutil.ReadFile("./testdata/trace.out.testdata")
 	require.Equal(t, nil, err)
-	traceID, err := s.SaveProfile("", traceBytes, time.Second*3)
+	traceID, err := s.SaveProfile("", traceBytes, time.Hour)
 	require.Equal(t, nil, err)
 	return invalidId, invalidId2, id, traceID
 }
@@ -142,20 +142,6 @@ func TestBasisAPI(t *testing.T) {
 		Status(http.StatusOK).JSON().Object()
 	res.Path("$").Object().Keys().Length().Equal(1)
 	res.Path("$.heap").Array().Contains("heap_alloc_objects", "heap_alloc_space", "heap_inuse_space", "heap_inuse_space")
-
-	time.Sleep(3 * time.Second)
-
-	e.GET("/api/targets").
-		Expect().
-		Status(http.StatusOK).JSON().Array().Length().Equal(0)
-
-	e.GET("/api/sample_types").
-		Expect().
-		Status(http.StatusOK).JSON().Array().Length().Equal(0)
-
-	e.GET("/api/group_sample_types").
-		Expect().
-		Status(http.StatusOK).JSON().Object().Path("$").Object().Keys().Length().Equal(0)
 }
 
 func TestListProfileMeta(t *testing.T) {

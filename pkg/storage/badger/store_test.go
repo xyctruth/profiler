@@ -136,7 +136,7 @@ func TestProfile(t *testing.T) {
 	defer s.Release()
 	require.NotEqual(t, nil, s)
 
-	id, err := s.SaveProfile("", []byte{}, 1*time.Second)
+	id, err := s.SaveProfile("", []byte{}, 3*time.Second)
 	require.Equal(t, nil, err)
 	require.NotEqual(t, 0, id)
 
@@ -144,7 +144,7 @@ func TestProfile(t *testing.T) {
 	require.Equal(t, nil, err)
 
 	// Waiting for the overdue
-	time.Sleep(1 * time.Second)
+	time.Sleep(3 * time.Second)
 	_, _, err = s.GetProfile(id)
 	require.NotEqual(t, nil, err)
 }
@@ -165,7 +165,7 @@ func TestProfileMeta(t *testing.T) {
 			},
 		},
 	}
-	err = s.SaveProfileMeta([]*storage.ProfileMeta{profileMeta}, time.Second*2)
+	err = s.SaveProfileMeta([]*storage.ProfileMeta{profileMeta}, time.Second*3)
 	require.Equal(t, nil, err)
 
 	min := time.Now().Add(-1 * time.Hour)
@@ -188,7 +188,7 @@ func TestProfileMeta(t *testing.T) {
 	require.Equal(t, 1, len(profileMetasNoFilters))
 
 	// Waiting for the overdue
-	time.Sleep(2 * time.Second)
+	time.Sleep(3 * time.Second)
 
 	{
 		ttlTargets, err := s.ListTarget()
