@@ -133,6 +133,8 @@ collector:
 
 `profileConfigs` 默认配置
 
+默认 trace 分析关闭, 因为 trace 文件过大,大约在(500KB ~ 2M), 需要开启 trace 分析在 `collector.yaml` 设置覆盖默认的 trace 配置.
+
 ```yaml
 profileConfigs:
   profile:
@@ -140,9 +142,6 @@ profileConfigs:
     enable: true
   fgprof:
     path: /debug/fgprof?seconds=10
-    enable: true
-  trace:
-    path: /debug/pprof/trace?seconds=10
     enable: true
   mutex:
     path: /debug/pprof/mutex
@@ -162,4 +161,7 @@ profileConfigs:
   threadcreate:
     path: /debug/pprof/threadcreate
     enable: true
+  trace:
+    path: /debug/pprof/trace?seconds=10
+    enable: false
 ```
