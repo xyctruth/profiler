@@ -10,7 +10,7 @@
 
 # Introduction
 
-**Profiler is a continuous profiling tool that base go pprof and go trace**
+**Profiler is a continuous profiling tool that based on `go pprof` and `go trace`**
 
 - **Supported Sample**
   - `trace` `fgprof` `profile` `mutex` `heap` `goroutine` `allocs` `block` `threadcreate`
