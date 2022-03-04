@@ -1,29 +1,14 @@
 package trace
 
 import (
-	"bytes"
-	"compress/gzip"
-	"io/ioutil"
 	"net/http"
 	"path"
-	"strings"
 
 	"github.com/xyctruth/profiler/pkg/internal/v1175/traceui"
 )
 
 func Driver(basePath string, mux *http.ServeMux, id string, data []byte) error {
-	buf := bytes.NewBuffer(data)
-	gzipReader, err := gzip.NewReader(buf)
-	if err != nil {
-		return err
-	}
-	defer gzipReader.Close()
-	b, err := ioutil.ReadAll(gzipReader)
-	if err != nil && !strings.Contains(err.Error(), "unexpected EOF") {
-		return err
-	}
-
-	ui, err := traceui.NewUI(b)
+	ui, err := traceui.NewUI(data)
 	if err != nil {
 		return err
 	}

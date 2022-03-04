@@ -1,11 +1,9 @@
 package apiserver
 
 import (
-	"bytes"
-	"compress/gzip"
 	"context"
 	"errors"
-	"io/ioutil"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -52,8 +50,7 @@ func NewAPIServer(opt Options) *APIServer {
 	router.Use(HandleCors).GET("/api/sample_types", apiServer.listSampleTypes)
 	router.Use(HandleCors).GET("/api/group_sample_types", apiServer.listGroupSampleTypes)
 	router.Use(HandleCors).GET("/api/profile_meta/:sample_type", apiServer.listProfileMeta)
-	router.Use(HandleCors).GET("/api/profile/:id", apiServer.getProfile)
-	router.Use(HandleCors).GET("/api/trace/:id", apiServer.getTrace)
+	router.Use(HandleCors).GET("/api/download/:id", apiServer.downloadProfile)
 
 	// register pprof page
 	router.Use(HandleCors).GET(pprofPath+"/*any", apiServer.webPProf)
@@ -187,9 +184,9 @@ func (s *APIServer) listProfileMeta(c *gin.Context) {
 	c.JSON(http.StatusOK, metas)
 }
 
-func (s *APIServer) getProfile(c *gin.Context) {
+func (s *APIServer) downloadProfile(c *gin.Context) {
 	id := c.Param("id")
-	data, err := s.store.GetProfile(id)
+	name, data, err := s.store.GetProfile(id)
 	if err != nil {
 		if errors.Is(err, storage.ErrProfileNotFound) {
 			c.String(http.StatusNotFound, "Profile not found")
@@ -198,39 +195,8 @@ func (s *APIServer) getProfile(c *gin.Context) {
 		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
-
-	c.Writer.Header().Set("Content-Encoding", "gzip")
-	c.Writer.Header().Set("Content-Disposition", "attachment;filename=profile_"+id+".pb.gz")
-	c.Data(200, "application/vnd.google.protobuf+gzip", data)
-}
-
-func (s *APIServer) getTrace(c *gin.Context) {
-	id := c.Param("id")
-	data, err := s.store.GetProfile(id)
-	if err != nil {
-		if errors.Is(err, storage.ErrProfileNotFound) {
-			c.String(http.StatusNotFound, "Profile not found")
-			return
-		}
-		c.String(http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	buf := bytes.NewBuffer(data)
-	gzipReader, err := gzip.NewReader(buf)
-	if err != nil {
-		c.String(http.StatusInternalServerError, err.Error())
-		return
-	}
-	defer gzipReader.Close()
-	b, err := ioutil.ReadAll(gzipReader)
-	if err != nil && !strings.Contains(err.Error(), "unexpected EOF") {
-		c.String(http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	c.Writer.Header().Set("Content-Disposition", "attachment;filename=trace_"+id+".out")
-	c.Data(200, "application/octet-stream", b)
+	c.Writer.Header().Set("Content-Disposition", fmt.Sprintf("attachment;filename=%s-%s.out", name, id))
+	c.Data(200, "application/octet-stream", data)
 }
 
 func (s *APIServer) webPProf(c *gin.Context) {

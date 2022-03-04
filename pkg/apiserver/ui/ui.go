@@ -79,7 +79,7 @@ func (s *Server) register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, err := s.store.GetProfile(id)
+	_, data, err := s.store.GetProfile(id)
 	if err != nil {
 		if errors.Is(err, storage.ErrProfileNotFound) {
 			http.Error(w, "Profile not found", http.StatusNotFound)
