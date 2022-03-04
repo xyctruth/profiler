@@ -90,10 +90,6 @@ func defaultProfileConfigs() map[string]ProfileConfig {
 			Path:   "/debug/fgprof?seconds=10",
 			Enable: utils.BoolPtr(true),
 		},
-		"trace": {
-			Path:   "/debug/pprof/trace?seconds=10",
-			Enable: utils.BoolPtr(true),
-		},
 		"mutex": {
 			Path:   "/debug/pprof/mutex",
 			Enable: utils.BoolPtr(true),
@@ -118,6 +114,10 @@ func defaultProfileConfigs() map[string]ProfileConfig {
 			Path:   "/debug/pprof/threadcreate",
 			Enable: utils.BoolPtr(true),
 		},
+		"trace": {
+			Path:   "/debug/pprof/trace?seconds=10",
+			Enable: utils.BoolPtr(false),
+		},
 	}
 }
 
@@ -137,11 +137,9 @@ func buildProfileConfigs(profileConfig map[string]ProfileConfig) map[string]Prof
 			if config.Enable == nil {
 				config.Enable = defaultConfig.Enable
 			}
-
 			profiles[key] = config
 			continue
 		}
-
 		profiles[key] = defaultConfig
 	}
 	return profiles

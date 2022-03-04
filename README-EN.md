@@ -133,6 +133,8 @@ collector:
 
 default configuration of `profileConfigs`
 
+The default trace analysis is turned off, because the trace file is too large, about (500KB ~ 2M), you need to open the trace analysis in the `collector.yaml` setting to override the default trace configuration.
+
 ```yaml
 profileConfigs:
   profile:
@@ -140,9 +142,6 @@ profileConfigs:
     enable: true
   fgprof:
     path: /debug/fgprof?seconds=10
-    enable: true
-  trace:
-    path: /debug/pprof/trace?seconds=10
     enable: true
   mutex:
     path: /debug/pprof/mutex
@@ -162,4 +161,7 @@ profileConfigs:
   threadcreate:
     path: /debug/pprof/threadcreate
     enable: true
+  trace:
+    path: /debug/pprof/trace?seconds=10
+    enable: false
 ```
