@@ -136,16 +136,16 @@ func TestProfile(t *testing.T) {
 	defer s.Release()
 	require.NotEqual(t, nil, s)
 
-	id, err := s.SaveProfile([]byte{}, 1*time.Second)
+	id, err := s.SaveProfile("", []byte{}, 1*time.Second)
 	require.Equal(t, nil, err)
 	require.NotEqual(t, 0, id)
 
-	_, err = s.GetProfile(id)
+	_, _, err = s.GetProfile(id)
 	require.Equal(t, nil, err)
 
 	// Waiting for the overdue
 	time.Sleep(1 * time.Second)
-	_, err = s.GetProfile(id)
+	_, _, err = s.GetProfile(id)
 	require.NotEqual(t, nil, err)
 }
 
@@ -384,7 +384,7 @@ func BenchmarkBadger1(b *testing.B) {
 	}
 
 	for i := 0; i < b.N; i++ {
-		_, err = s.SaveProfile(res, time.Hour*24*7)
+		_, err = s.SaveProfile("", res, time.Hour*24*7)
 		if err != nil {
 			panic(err)
 		}
@@ -428,7 +428,7 @@ func BenchmarkBadger2(b *testing.B) {
 	}
 
 	for i := 0; i < b.N; i++ {
-		_, err = s.SaveProfile(res, time.Hour*24*7)
+		_, err = s.SaveProfile("", res, time.Hour*24*7)
 		if err != nil {
 			panic(err)
 		}

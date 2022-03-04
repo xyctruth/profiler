@@ -2,7 +2,6 @@ package collector
 
 import (
 	"bytes"
-	"compress/gzip"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -168,6 +167,7 @@ func (collector *Collector) analysis(profileType string, profileBytes []byte) er
 		return errors.New("sample type is nil")
 	}
 
+	// Set profile name , Display it on the Profile UI
 	if len(p.Mapping) > 0 {
 		p.Mapping[0].File = collector.TargetName
 	}
@@ -177,7 +177,7 @@ func (collector *Collector) analysis(profileType string, profileBytes []byte) er
 		return err
 	}
 
-	profileID, err := collector.store.SaveProfile(b.Bytes(), collector.Expiration)
+	profileID, err := collector.store.SaveProfile(fmt.Sprintf("%s-%s", collector.TargetName, profileType), b.Bytes(), collector.Expiration)
 	if err != nil {
 		return err
 	}
@@ -213,22 +213,11 @@ func (collector *Collector) analysis(profileType string, profileBytes []byte) er
 }
 
 func (collector *Collector) analysisTrace(profileType string, profileBytes []byte) error {
-	var compressData bytes.Buffer
-	gzipWriter := gzip.NewWriter(&compressData)
-	defer gzipWriter.Close()
-	_, err := gzipWriter.Write(profileBytes)
-	if err != nil {
-		return err
-	}
-	err = gzipWriter.Flush()
+	profileID, err := collector.store.SaveProfile(fmt.Sprintf("%s-%s", collector.TargetName, profileType), profileBytes, collector.Expiration)
 	if err != nil {
 		return err
 	}
 
-	profileID, err := collector.store.SaveProfile(compressData.Bytes(), collector.Expiration)
-	if err != nil {
-		return err
-	}
 	metas := make([]*storage.ProfileMeta, 0, 1)
 	meta := &storage.ProfileMeta{}
 	meta.Timestamp = time.Now().UnixNano() / time.Millisecond.Nanoseconds()

@@ -1,8 +1,6 @@
 package apiserver
 
 import (
-	"bytes"
-	"compress/gzip"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -13,7 +11,6 @@ import (
 	"github.com/gavv/httpexpect/v2"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"
-	"github.com/xyctruth/profiler/pkg/internal/v1175/trace"
 	"github.com/xyctruth/profiler/pkg/storage"
 	"github.com/xyctruth/profiler/pkg/storage/badger"
 )
@@ -84,20 +81,20 @@ func initMateData(s storage.Store, t *testing.T) {
 }
 
 func initProfileData(s storage.Store, t *testing.T) (string, string, string, string) {
-	invalidId, err := s.SaveProfile([]byte{}, time.Second*10)
+	invalidId, err := s.SaveProfile("", []byte{}, time.Second*10)
 	require.Equal(t, nil, err)
 
-	invalidId2, err := s.SaveProfile([]byte("haha"), time.Second*10)
+	invalidId2, err := s.SaveProfile("", []byte("haha"), time.Second*10)
 	require.Equal(t, nil, err)
 
-	profileBytes, err := ioutil.ReadFile("./testdata/profile.gz")
+	profileBytes, err := ioutil.ReadFile("./testdata/profile.out.testdata")
 	require.Equal(t, nil, err)
-	id, err := s.SaveProfile(profileBytes, time.Second*10)
+	id, err := s.SaveProfile("", profileBytes, time.Second*10)
 	require.Equal(t, nil, err)
 
-	traceBytes, err := ioutil.ReadFile("./testdata/trace.gz")
+	traceBytes, err := ioutil.ReadFile("./testdata/trace.out.testdata")
 	require.Equal(t, nil, err)
-	traceID, err := s.SaveProfile(traceBytes, time.Second*3)
+	traceID, err := s.SaveProfile("", traceBytes, time.Second*3)
 	require.Equal(t, nil, err)
 	return invalidId, invalidId2, id, traceID
 }
@@ -208,7 +205,7 @@ func TestListProfileMeta(t *testing.T) {
 		Status(http.StatusOK).JSON().Array().Length().Equal(0)
 }
 
-func TestGetProfile(t *testing.T) {
+func TestDownloadProfile(t *testing.T) {
 	dir, err := ioutil.TempDir("./", "temp-*")
 	require.Equal(t, nil, err)
 	defer os.RemoveAll(dir)
@@ -218,19 +215,19 @@ func TestGetProfile(t *testing.T) {
 	apiServer := NewAPIServer(DefaultOptions(s))
 	e := getExpect(apiServer, t)
 
-	e.GET("/api/profile/999").
+	e.GET("/api/download/999").
 		Expect().
 		Status(http.StatusNotFound)
 
-	e.GET(fmt.Sprintf("/api/profile/%s", id)).
+	e.GET(fmt.Sprintf("/api/download/%s", id)).
 		Expect().
-		Status(http.StatusOK).Header("Content-Type").Equal("application/vnd.google.protobuf+gzip")
+		Status(http.StatusOK).Header("Content-Type").Equal("application/octet-stream")
 
 	e.GET("/api/trace/999").
 		Expect().
 		Status(http.StatusNotFound)
 
-	e.GET(fmt.Sprintf("/api/trace/%s", traceID)).
+	e.GET(fmt.Sprintf("/api/download/%s", traceID)).
 		Expect().
 		Status(http.StatusOK).Header("Content-Type").Equal("application/octet-stream")
 }
@@ -271,16 +268,4 @@ func getExpect(apiServer *APIServer, t *testing.T) *httpexpect.Expect {
 		},
 		Reporter: httpexpect.NewAssertReporter(t),
 	})
-}
-
-func TestGZIP(t *testing.T) {
-	f1, err := os.Open("./testdata/trace.gz")
-	require.Equal(t, nil, err)
-	gzipReader, _ := gzip.NewReader(f1)
-	defer gzipReader.Close()
-	b, err := ioutil.ReadAll(gzipReader)
-	buf := bytes.NewReader(b)
-	_, err = trace.Parse(buf, "")
-	require.Equal(t, nil, err)
-
 }

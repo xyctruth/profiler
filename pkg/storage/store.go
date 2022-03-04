@@ -9,12 +9,12 @@ import (
 
 type Store interface {
 	// GetProfile Get profile binaries by profile id, return profile binaries
-	GetProfile(id string) ([]byte, error)
+	GetProfile(id string) (string, []byte, error)
 
 	// SaveProfile Save profile，return profile id
 	// binary data
 	// ttl profile expiration time
-	SaveProfile(data []byte, ttl time.Duration) (string, error)
+	SaveProfile(name string, data []byte, ttl time.Duration) (string, error)
 
 	// SaveProfileMeta Save profile meta data
 	SaveProfileMeta(metas []*ProfileMeta, ttl time.Duration) error

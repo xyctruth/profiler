@@ -1,7 +1,10 @@
 package badger
 
 import (
+	"bytes"
+	"compress/gzip"
 	"errors"
+	"io/ioutil"
 	"strconv"
 	"strings"
 	"time"
@@ -67,8 +70,8 @@ func (s *store) gc() {
 	s.gc()
 }
 
-func (s *store) GetProfile(id string) ([]byte, error) {
-	var date []byte
+func (s *store) GetProfile(id string) (string, []byte, error) {
+	var data []byte
 	err := s.db.View(func(txn *badger.Txn) error {
 		item, err := txn.Get(buildProfileKey(id))
 		if err != nil {
@@ -76,25 +79,49 @@ func (s *store) GetProfile(id string) ([]byte, error) {
 		}
 
 		return item.Value(func(val []byte) error {
-			date = val
+			data = val
 			return nil
 		})
 	})
 
 	if errors.Is(err, badger.ErrKeyNotFound) {
-		return nil, storage.ErrProfileNotFound
+		return "", nil, storage.ErrProfileNotFound
 	}
-	return date, err
+
+	buf := bytes.NewBuffer(data)
+	gzipReader, err := gzip.NewReader(buf)
+	if err != nil {
+		return "", nil, err
+	}
+	defer gzipReader.Close()
+	b, err := ioutil.ReadAll(gzipReader)
+	if err != nil && !strings.Contains(err.Error(), "unexpected EOF") {
+		return "", nil, err
+	}
+	return gzipReader.Header.Name, b, nil
 }
 
-func (s *store) SaveProfile(profileData []byte, ttl time.Duration) (string, error) {
+func (s *store) SaveProfile(name string, profileData []byte, ttl time.Duration) (string, error) {
+	var compressData bytes.Buffer
+	gzipWriter, _ := gzip.NewWriterLevel(&compressData, gzip.BestCompression)
+	gzipWriter.Header.Name = name
+	defer gzipWriter.Close()
+	_, err := gzipWriter.Write(profileData)
+	if err != nil {
+		return "", err
+	}
+	err = gzipWriter.Flush()
+	if err != nil {
+		return "", err
+	}
+
 	id, err := s.profileSeq.Next()
 	if err != nil {
 		return "", err
 	}
 	idStr := strconv.FormatUint(id, 10)
 	err = s.db.Update(func(txn *badger.Txn) error {
-		return txn.SetEntry(newProfileEntry(idStr, profileData, ttl))
+		return txn.SetEntry(newProfileEntry(idStr, compressData.Bytes(), ttl))
 	})
 
 	return idStr, err
