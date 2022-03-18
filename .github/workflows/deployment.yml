@@ -31,7 +31,7 @@ jobs:
             VERSION=${{ github.event.release.tag_name }}
           fi
           echo ::set-output name=VERSION::${VERSION}
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
       - name: deploy postgres to cluster
         uses: wahyd4/kubectl-helm-action@master
         env:
