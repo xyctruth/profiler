@@ -4,7 +4,7 @@ WORKDIR /workspace
 COPY ./ ./
 ARG VERSION
 ARG GITVERSION
-RUN GOPROXY="https://goproxy.io,direct"  CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on \
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on \
     go build -a -ldflags "-s -w -X github.com/xyctruth/profiler/version.Version=${VERSION:-undefined} -X github.com/xyctruth/profiler/version.GitRevision=${GITVERSION:-undefined}" \
     -o profiler ./server/main.go
 
