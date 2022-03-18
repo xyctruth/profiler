@@ -24,7 +24,7 @@ jobs:
           go-version: '^1.17'
 
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: go mod package cache
         uses: actions/cache@v2
