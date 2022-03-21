@@ -8,7 +8,7 @@
 
 > [English](./README-EN.md) / [中文](./README-ZH.md)
 
-# 简介
+## 简介
 
 **Profiler 是一个基于 go pprof 与 go trace 持续性能剖析工具**
 
@@ -23,7 +23,7 @@
 - **详细分析**
   - 点击图表中的气泡跳转到 Profile 与 Trace 的详细页面进行进一步详细的分析
 
-## [演示](https://profiler.jia-huang.com/)
+### [演示](https://profiler.jia-huang.com/)
 
 <table>
   <tr>
@@ -44,9 +44,9 @@
   </tr>
 </table>
 
-# 入门
+## 入门
 
-## 本地
+### 本地
 
 启动服务端 端口为:8080
 ```bash
@@ -60,7 +60,7 @@ npm install --registry=https://registry.npm.taobao.org
 npm run dev --base_api_url=http://localhost:8080
 ```
 
-## Docker
+### Docker
 
 ```bash
 docker run -d -p 80:80 --name profiler xyctruth/profiler:latest
@@ -80,7 +80,7 @@ docker run -d -p 80:80 -v ~/profiler-config/:/profiler/config/ --name profiler x
 docker run -d -p 80:80 -v ~/profiler-data/:/profiler/data/ --name profiler xyctruth/profiler:latest
 ```
 
-## Helm
+### Helm
 
 安装 Profiler chart:
 
@@ -90,7 +90,7 @@ helm install --create-namespace -n profiler-system profiler ./charts/profiler
 
 更多说明在 [Helm docs](https://github.com/xyctruth/profiler/blob/master/charts/profiler/README.ZH.md) 中
 
-## 收集配置
+### 收集配置
 
 需要被收集分析的 `golang` 程序,需要提供 `net/http/pprof` 端点，并配置在 `./collector.yaml` 配置文件中。
 
@@ -165,3 +165,7 @@ profileConfigs:
     path: /debug/pprof/trace?seconds=10
     enable: false
 ```
+
+## JetBrains OSS License
+
+[![JetBrains Logo (Main) logo](https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png)](https://jb.gg/OpenSourceSupport)

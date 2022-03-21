@@ -8,7 +8,7 @@
 
 > [English](./README-EN.md) / [中文](./README-ZH.md)
 
-# Introduction
+## Introduction
 
 **Profiler is a continuous profiling tool that based on `go pprof` and `go trace`**
 
@@ -23,7 +23,7 @@
 - **Detailed Analysis**
   - Click the bubbles in the charts to jump to the detailed page of Profile and Trace for further detailed analysis
 
-## [Demo](https://profiler.jia-huang.com/)
+### [Demo](https://profiler.jia-huang.com/)
 
 <table>
   <tr>
@@ -44,9 +44,9 @@
   </tr>
 </table>
 
-# Getting Started
+## Getting Started
 
-## Local
+### Local
 
 Run server on port 8080
 ```bash
@@ -60,7 +60,7 @@ npm install --registry=https://registry.npm.taobao.org
 npm run dev --base_api_url=http://localhost:8080
 ```
 
-## Docker
+### Docker
 
 ```bash
 docker run -d -p 80:80 --name profiler xyctruth/profiler:latest
@@ -80,7 +80,7 @@ Using persistent data
 docker run -d -p 80:80 -v ~/profiler-data/:/profiler/data/ --name profiler xyctruth/profiler:latest
 ```
 
-## Helm
+### Helm
 
 Install the Profiler chart:
 
@@ -90,7 +90,7 @@ helm install --create-namespace -n profiler-system profiler ./charts/profiler
 
 More on [Helm docs](https://github.com/xyctruth/profiler/blob/master/charts/profiler/README.EN.md) 
 
-## Collector configuration
+### Collector configuration
 
 The `golang` program that needs to be collected and analyzed needs to provide the `net/http/pprof` endpoint and configure it in the `./collector.yaml` configuration file.
 
@@ -165,3 +165,9 @@ profileConfigs:
     path: /debug/pprof/trace?seconds=10
     enable: false
 ```
+
+## JetBrains OSS License
+
+[![JetBrains Logo (Main) logo](https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png)](https://jb.gg/OpenSourceSupport)
+
+
