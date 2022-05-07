@@ -11,6 +11,7 @@ linters:
     - asciicheck
     - depguard
     - dogsled
+    - durationcheck
     - errcheck
     - errorlint
     - exportloopref
