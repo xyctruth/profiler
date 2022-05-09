@@ -39,7 +39,7 @@ jobs:
           username: xyctruth
           password: ${{ secrets.DOCKER_TOKEN }}
 
-      - uses: docker/build-push-action@v2
+      - uses: docker/build-push-action@v3
         name: Build & Pushing
         with:
           context: .
