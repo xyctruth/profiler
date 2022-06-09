@@ -349,13 +349,13 @@ ingress:
     kubernetes.io/ingress.class: nginx
     cert-manager.io/cluster-issuer: letsencrypt-nginx
   hosts:
-    - host: profiler.jia-huang.com
+    - host: profiler.gytycn.com
       paths:
         - path: /
           pathType: Prefix
   tls:
     - secretName: profiler-tls
       hosts:
-        - profiler.jia-huang.com
+        - profiler.gytycn.com
 
 
