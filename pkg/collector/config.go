@@ -24,8 +24,7 @@ func LoadConfig(configPath string, fn func(CollectorConfig)) error {
 		return fmt.Errorf("Fatal error config file: %w", err)
 	}
 
-	if err = conf.UnmarshalKey(""+
-		"settingvar probe probe.Probe", &config); err != nil {
+	if err = conf.UnmarshalKey("collector", &config); err != nil {
 		return fmt.Errorf("Fatal error config CollectorConfig: %w", err)
 	}
 
