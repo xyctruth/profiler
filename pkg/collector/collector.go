@@ -104,20 +104,22 @@ func (collector *Collector) scrape() {
 	collector.log.Info("collector start scrape")
 	for profileType, profileConfig := range collector.ProfileConfigs {
 		if *profileConfig.Enable {
-			collector.wg.Add(1)
-			go collector.fetch(profileType, profileConfig)
+			for _, instance := range collector.Instances {
+				collector.wg.Add(1)
+				go collector.fetch(instance, profileType, profileConfig)
+			}
 		}
 	}
 	collector.wg.Wait()
 }
 
-func (collector *Collector) fetch(profileType string, profileConfig ProfileConfig) {
+func (collector *Collector) fetch(instance string, profileType string, profileConfig ProfileConfig) {
 	defer collector.wg.Done()
 
 	logEntry := collector.log.WithFields(logrus.Fields{"profile_type": profileType, "profile_url": profileConfig.Path})
 	logEntry.Info("collector start fetch")
 
-	req, err := http.NewRequest("GET", "http://"+collector.Host+profileConfig.Path, nil)
+	req, err := http.NewRequest("GET", "http://"+instance+profileConfig.Path, nil)
 	if err != nil {
 		logEntry.WithError(err).Error("invoke task error")
 		return
@@ -143,7 +145,7 @@ func (collector *Collector) fetch(profileType string, profileConfig ProfileConfi
 	}
 
 	if profileType == "trace" {
-		err = collector.analysisTrace(profileType, profileBytes)
+		err = collector.analysisTrace(instance, profileType, profileBytes)
 		if err != nil {
 			logEntry.WithError(err).Error("analysis result error")
 			return
@@ -151,14 +153,14 @@ func (collector *Collector) fetch(profileType string, profileConfig ProfileConfi
 		return
 	}
 
-	err = collector.analysis(profileType, profileBytes)
+	err = collector.analysis(instance, profileType, profileBytes)
 	if err != nil {
 		logEntry.WithError(err).Error("analysis result error")
 		return
 	}
 }
 
-func (collector *Collector) analysis(profileType string, profileBytes []byte) error {
+func (collector *Collector) analysis(instance string, profileType string, profileBytes []byte) error {
 	p, err := profile.ParseData(profileBytes)
 	if err != nil {
 		return err
@@ -188,7 +190,8 @@ func (collector *Collector) analysis(profileType string, profileBytes []byte) er
 		meta.Timestamp = time.Now().UnixNano() / time.Millisecond.Nanoseconds()
 		meta.ProfileID = profileID
 		meta.ProfileType = profileType
-		meta.TargetName = collector.TargetName
+		meta.TargetName = collector.TargetName + "/" + instance
+		meta.OriginalTargetName = collector.TargetName
 
 		meta.Duration = p.DurationNanos
 		meta.SampleTypeUnit = p.SampleType[i].Unit
@@ -212,7 +215,7 @@ func (collector *Collector) analysis(profileType string, profileBytes []byte) er
 	return nil
 }
 
-func (collector *Collector) analysisTrace(profileType string, profileBytes []byte) error {
+func (collector *Collector) analysisTrace(instance string, profileType string, profileBytes []byte) error {
 	profileID, err := collector.store.SaveProfile(fmt.Sprintf("%s-%s", collector.TargetName, profileType), profileBytes, collector.Expiration)
 	if err != nil {
 		return err
@@ -224,7 +227,8 @@ func (collector *Collector) analysisTrace(profileType string, profileBytes []byt
 	meta.ProfileID = profileID
 	meta.ProfileType = profileType
 	meta.SampleType = profileType
-	meta.TargetName = collector.TargetName
+	meta.TargetName = collector.TargetName + "/" + instance
+	meta.OriginalTargetName = collector.TargetName
 
 	meta.Labels = collector.Labels.ToArray()
 	metas = append(metas, meta)

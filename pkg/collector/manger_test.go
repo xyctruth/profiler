@@ -32,7 +32,7 @@ func TestManger(t *testing.T) {
 
 	s2 := config.TargetConfigs["server2"]
 	s2.Interval = time.Second * 1
-	s2.Host = "localhost:9000"
+	s2.Instances = []string{"localhost:9000"}
 	s2.ProfileConfigs["heap"] = ProfileConfig{
 		Enable: utils.Bool(true),
 		Path:   "/test/path?s=123",

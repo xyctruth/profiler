@@ -36,15 +36,16 @@ type Store interface {
 }
 
 type ProfileMeta struct {
-	ProfileID      string
-	ProfileType    string
-	SampleType     string
-	TargetName     string
-	SampleTypeUnit string
-	Value          int64
-	Timestamp      int64
-	Duration       int64
-	Labels         []Label
+	ProfileID          string
+	ProfileType        string
+	SampleType         string
+	TargetName         string // target + "/" + instance
+	OriginalTargetName string
+	SampleTypeUnit     string
+	Value              int64
+	Timestamp          int64
+	Duration           int64
+	Labels             []Label
 }
 
 func (meta *ProfileMeta) Encode() ([]byte, error) {
