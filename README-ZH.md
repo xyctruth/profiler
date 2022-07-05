@@ -105,7 +105,7 @@ collector:
     profiler-server:        # 目标名称
       interval: 15s         # 抓取间隔
       expiration: 0         # 无过期时间
-      host: localhost:9000  # 目标服务host
+      instances: ["localhost:9000"]  # 目标服务host
       labels:
         namespace: f005
         type: gateway
@@ -114,7 +114,7 @@ collector:
     server2:
       interval: 10s
       expiration: 168h      # 过期时间7天
-      host: localhost:9000
+      instances: ["localhost:9000"]
       labels:
         namespace: f004
         type: svc

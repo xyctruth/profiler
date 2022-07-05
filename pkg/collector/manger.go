@@ -25,7 +25,7 @@ func NewManger(store storage.Store) *Manger {
 	return c
 }
 
-// NewManger stop Manger instance
+// Stop Manger instance
 func (manger *Manger) Stop() {
 	manger.mu.Lock()
 	defer manger.mu.Unlock()
@@ -36,7 +36,7 @@ func (manger *Manger) Stop() {
 	log.Info("collector manger exit ")
 }
 
-// NewManger Loading collector configuration
+// Load  collector configuration
 // It can be called multiple times, and the collector updates the configuration
 func (manger *Manger) Load(config CollectorConfig) {
 	manger.mu.Lock()
@@ -56,7 +56,7 @@ func (manger *Manger) Load(config CollectorConfig) {
 		if !ok {
 			// add collector
 			log.Info("add collector ", k)
-			collector := newCollector(k, target, manger.store, manger.wg)
+			collector = newCollector(k, target, manger.store, manger.wg)
 			manger.collectors[k] = collector
 			collector.run()
 			continue

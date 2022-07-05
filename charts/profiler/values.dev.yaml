@@ -10,7 +10,7 @@ configuration: |-
       profiler-server:
         interval: 5m
         expiration: 168h
-        host: localhost:9000
+        instances: ["localhost:9000"]
         profileConfigs:
           trace:
             enable: true
@@ -19,269 +19,36 @@ configuration: |-
           type: system
   
       # prod-green--------------------------------------------------------------------
-      admin-gateway-prod-green:
+      admin-gateway:
         interval: 5m
         expiration: 168h
-        host: admin-gateway.prod-green:9000
+        instances: ["admin-gateway.prod-green:9000"]
         profileConfigs:
           trace:
             enable: true
         labels:
           namespace: prod-green
           type: gateway
-      app-businesses-gateway-prod-green:
+      app-businesses-gateway:
         interval: 5m
         expiration: 168h
-        host: app-businesses-gateway.prod-green:9000
+        instances: ["app-businesses-gateway.prod-green:9000"]
         profileConfigs:
           trace:
             enable: true
         labels:
           namespace: prod-green
           type: gateway
-      app-gateway-prod-green:
+      app-gateway:
         interval: 5m
         expiration: 168h
-        host: app-gateway.prod-green:9000
+        instances: ["app-gateway.prod-green:9000"]
         profileConfigs:
           trace:
             enable: true
         labels:
           namespace: prod-green
           type: gateway
-      app-gymnasiums-gateway-prod-green:
-        interval: 5m
-        expiration: 168h
-        host: app-gymnasiums-gateway.prod-green:9000
-        profileConfigs:
-          trace:
-            enable: true
-        labels:
-          namespace: prod-green
-          type: gateway
-      app-supplychain-gateway-prod-green:
-        interval: 5m
-        expiration: 168h
-        host: app-supplychain-gateway.prod-green:9000
-        profileConfigs:
-          trace:
-            enable: true
-        labels:
-          namespace: prod-green
-          type: gateway
-  
-  
-      app-awards-svc-prod-green:
-        interval: 5m
-        expiration: 168h
-        host: app-awards-svc.prod-green:9000
-        profileConfigs:
-          trace:
-            enable: true
-        labels:
-          namespace: prod-green
-          type: svc
-      app-businesses-b-svc-prod-green:
-        interval: 5m
-        expiration: 168h
-        host: app-businesses-b-svc.prod-green:9000
-        profileConfigs:
-          trace:
-            enable: true
-        labels:
-          namespace: prod-green
-          type: svc
-      app-channel-b-svc-prod-green:
-        interval: 5m
-        expiration: 168h
-        host: app-channel-b-svc.prod-green:9000
-        profileConfigs:
-          trace:
-            enable: true
-        labels:
-          namespace: prod-green
-          type: svc
-      app-coupon-b-svc-prod-green:
-        interval: 5m
-        expiration: 168h
-        host: app-coupon-b-svc.prod-green:9000
-        profileConfigs:
-          trace:
-            enable: true
-        labels:
-          namespace: prod-green
-          type: svc
-      app-coupon-c-svc-prod-green:
-        interval: 5m
-        expiration: 168h
-        host: app-coupon-c-svc.prod-green:9000
-        profileConfigs:
-          trace:
-            enable: true
-        labels:
-          namespace: prod-green
-          type: svc
-      app-fitness-b-svc-prod-green:
-        interval: 5m
-        expiration: 168h
-        host: app-fitness-b-svc.prod-green:9000
-        profileConfigs:
-          trace:
-            enable: true
-        labels:
-          namespace: prod-green
-          type: svc
-      app-fitness-c-svc-prod-green:
-        interval: 5m
-        expiration: 168h
-        host: app-fitness-c-svc.prod-green:9000
-        profileConfigs:
-          trace:
-            enable: true
-        labels:
-          namespace: prod-green
-          type: svc
-      app-gymnasiums-b-svc-prod-green:
-        interval: 5m
-        expiration: 168h
-        host: app-gymnasiums-b-svc.prod-green:9000
-        profileConfigs:
-          trace:
-            enable: true
-        labels:
-          namespace: prod-green
-          type: svc
-      app-knowledge-svc:
-        interval: 5m
-        expiration: 168h
-        host: app-knowledge-svc.prod-green:9000
-        profileConfigs:
-          trace:
-            enable: true
-        labels:
-          namespace: prod-green
-          type: svc
-      app-lotteries-svc-prod-green:
-        interval: 5m
-        expiration: 168h
-        host: app-lotteries-svc.prod-green:9000
-        profileConfigs:
-          trace:
-            enable: true
-        labels:
-          namespace: prod-green
-          type: svc
-      app-media-c-svc-prod-green:
-        interval: 5m
-        expiration: 168h
-        host: app-media-c-svc.prod-green:9000
-        profileConfigs:
-          trace:
-            enable: true
-        labels:
-          namespace: prod-green
-          type: svc
-      app-media-m-svc-prod-green:
-        interval: 5m
-        expiration: 168h
-        host: app-media-m-svc.prod-green:9000
-        profileConfigs:
-          trace:
-            enable: true
-        labels:
-          namespace: prod-green
-          type: svc
-      app-split-svc-prod-green:
-        interval: 5m
-        expiration: 168h
-        host: app-split-svc.prod-green:9000
-        profileConfigs:
-          trace:
-            enable: true
-        labels:
-          namespace: prod-green
-          type: svc
-      app-supplychain-b-svc-prod-green:
-        interval: 5m
-        expiration: 168h
-        host: app-supplychain-b-svc.prod-green:9000
-        profileConfigs:
-          trace:
-            enable: true
-        labels:
-          namespace: prod-green
-          type: svc
-      app-supplychain-c-svc-prod-green:
-        interval: 5m
-        expiration: 168h
-        host: app-supplychain-c-svc.prod-green:9000
-        profileConfigs:
-          trace:
-            enable: true
-        labels:
-          namespace: prod-green
-          type: svc
-      app-vip-svc-prod-green:
-        interval: 5m
-        expiration: 168h
-        host: app-vip-svc.prod-green:9000
-        profileConfigs:
-          trace:
-            enable: true
-        labels:
-          namespace: prod-green
-          type: svc
-      basic-common-svc-prod-green:
-        interval: 5m
-        expiration: 168h
-        host: basic-common-svc.prod-green:9000
-        profileConfigs:
-          trace:
-            enable: true
-        labels:
-          namespace: prod-green
-          type: svc
-      basic-notification-svc-prod-green:
-        interval: 5m
-        expiration: 168h
-        host: basic-notification-svc.prod-green:9000
-        profileConfigs:
-          trace:
-            enable: true
-        labels:
-          namespace: prod-green
-          type: svc
-      basic-pay-svc-prod-green:
-        interval: 5m
-        expiration: 168h
-        host: basic-pay-svc.prod-green:9000
-        profileConfigs:
-          trace:
-            enable: true
-        labels:
-          namespace: prod-green
-          type: svc
-      basic-tag-svc-prod-green:
-        interval: 5m
-        expiration: 168h
-        host: basic-tag-svc.prod-green:9000
-        profileConfigs:
-          trace:
-            enable: true
-        labels:
-          namespace: prod-green
-          type: svc
-      basic-user-svc-prod-green:
-        interval: 5m
-        expiration: 168h
-        host: basic-user-svc.prod-green:9000
-        profileConfigs:
-          trace:
-            enable: true
-        labels:
-          namespace: prod-green
-          type: svc
- 
 
 
 image:

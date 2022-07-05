@@ -132,6 +132,9 @@ func (s *store) SaveProfileMeta(metas []*storage.ProfileMeta, ttl time.Duration)
 
 		now := time.Now()
 		for _, meta := range metas {
+			if meta.OriginalTargetName == "" {
+				meta.OriginalTargetName = meta.TargetName
+			}
 			id, err := s.metaSeq.Next()
 			if err != nil {
 				return err
@@ -157,7 +160,7 @@ func (s *store) SaveProfileMeta(metas []*storage.ProfileMeta, ttl time.Duration)
 			// 添加默认target Index
 			meta.Labels = append(meta.Labels, storage.Label{
 				Key:   TargetLabel,
-				Value: meta.TargetName,
+				Value: meta.OriginalTargetName,
 			})
 
 			labelEnters := newLabelEntry(meta.Labels, ttl)

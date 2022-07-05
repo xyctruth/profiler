@@ -4,7 +4,7 @@ collector:
     profiler-server: # server name
       interval: 1s
       expiration: 0  # no expiration time
-      host: localhost:9000
+      instances: ["localhost:9000"]
       profileConfigs: # default scrape  (profile, fgprof, mutex, heap, goroutine, allocs, block, threadcreate, trace)
         profile:
           path: /debug/pprof/profile?seconds=10

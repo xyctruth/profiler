@@ -105,7 +105,7 @@ collector:
     profiler-server:        # Target name
       interval: 15s         # Scrape interval
       expiration: 0         # No expiration time
-      host: localhost:9000  # Target service host
+      instances: ["localhost:9000"]  # Target service host
       labels:
         namespace: f005
         type: gateway
@@ -114,7 +114,7 @@ collector:
     server2:
       interval: 10s
       expiration: 168h      # Expiration time seven days
-      host: localhost:9000
+      instances: ["localhost:9000"]
       labels:
         namespace: f004
         type: svc

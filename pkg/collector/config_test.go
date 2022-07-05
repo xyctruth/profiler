@@ -20,7 +20,7 @@ collector:
     profiler-server:
       interval: 2s
       expiration: 0  # no expiration time. unit day
-      host: localhost:9000
+      instances: ["localhost:9000"]
       labels:
         env: test
         haha: 1
@@ -38,7 +38,7 @@ collector:
     server2:
       interval: 2s
       expiration: 30000h
-      host: localhost:9000
+      instances: ["localhost:9000"]
       profileConfigs: # rewrite default profile config
         trace:
           enable: false
@@ -57,7 +57,7 @@ collector:
     profiler-server:
       interval: 2s
       expiration: 0  # no expiration time. unit day
-      host: localhost:9000
+      instances: ["localhost:9000"]
       profileConfigs: # default scrape (profile, heap, allocs, black, mutex, fgprof)
         profile:
           enable: false
@@ -86,7 +86,7 @@ collector:
     profiler-server:
       interval: 1s
       expiration: 0  # no expiration time. unit day
-      host: localhost:9000
+      instances: ["localhost:9000"]
       profileConfigs: # default scrape (profile, heap, allocs, black, mutex, fgprof)
         profile:
           path: /debug/pprof/profile?seconds=1
@@ -101,7 +101,7 @@ collector:
     server2:
       interval: 1s
       expiration: 0  # no expiration time. unit day
-      host: localhost:9000
+      instances: ["localhost:9000"]
 `
 
 	errHostConfigYAML = `
@@ -172,7 +172,7 @@ func TestLoadConfig(t *testing.T) {
 		require.Equal(t, ok, true)
 		require.Equal(t, 2*time.Second, serverConfig.Interval)
 		require.Equal(t, time.Duration(0), serverConfig.Expiration)
-		require.Equal(t, "localhost:9000", serverConfig.Host)
+		require.Equal(t, []string{"localhost:9000"}, serverConfig.Instances)
 		require.Equal(t, 3, len(serverConfig.ProfileConfigs))
 		require.Equal(t, 2, len(serverConfig.Labels))
 		require.Equal(t, "test", serverConfig.Labels["env"])

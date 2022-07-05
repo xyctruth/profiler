@@ -57,7 +57,7 @@ type TargetConfig struct {
 	ProfileConfigs map[string]ProfileConfig `yaml:"profileConfigs"`
 	Interval       time.Duration            `yaml:"interval"`
 	Expiration     time.Duration            `yaml:"expiration"`
-	Host           string                   `yaml:"host"`
+	Instances      []string                 `yaml:"instances"`
 	Labels         LabelConfig              `yaml:"labels"`
 }
 

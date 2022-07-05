@@ -1,12 +1,11 @@
 collector:
   targetConfigs:
-
     profiler-server: # server name
       interval: 15s
       expiration: 0  # no expiration time
-      # TODO 支持 kubernetes 下服务多个 endpoint
-      host: localhost:9000
+      instances: ["localhost:9000"]
       labels:
         namespace: profiler-system
         type: system
-      profileConfigs: # default scrape  (profile, fgprof, mutex, heap, goroutine, allocs, block, threadcreate, trace)
+      profileConfigs: # default scrape (profile, fgprof, mutex, heap, goroutine, allocs, block, threadcreate, trace)
+
