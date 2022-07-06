@@ -46,10 +46,10 @@ func main() {
 
 	// New Store
 	store := badger.NewStore(badger.DefaultOptions(dataPath).WithGCInternal(dataGCInternal))
-	// Run collector
-	collectorManger := runCollector(configPath, store)
 	// Run api server
 	apiServer := runAPIServer(store, uiGCInternal)
+	// Run collector
+	collectorManger := runCollector(configPath, store)
 
 	// receive signal exit
 	quit := make(chan os.Signal)
@@ -68,6 +68,7 @@ func runAPIServer(store storage.Store, gcInternal time.Duration) *apiserver.APIS
 			WithAddr(":8080").
 			WithGCInternal(gcInternal))
 
+	log.Infof("api server run on :8080")
 	apiServer.Run()
 	return apiServer
 }
