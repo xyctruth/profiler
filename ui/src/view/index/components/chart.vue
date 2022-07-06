@@ -136,18 +136,18 @@
           count++
           const item = {
             ...baseSetting,
-            name: meta.TargetName,
+            name: meta.key,
             data: [],
           }
-          for (const p of meta.ProfileMetas) {
+          for (const p of meta.profile_metas) {
             if (!unit){
-              unit = p.SampleTypeUnit
+              unit = p.sample_type_unit
             }
-            let label = moment(p.Timestamp).format('YYYY-MM-DD HH:mm:ss')
+            let label = moment(p.timestamp).format('YYYY-MM-DD HH:mm:ss')
             if (label) {
               item.data.push({
                 sourceData: p,
-                value: [label, p.Value]
+                value: [label, p.value]
               })
             }
           }
@@ -165,9 +165,9 @@
         });
         chart.on('click', function (params) {
           if (title === "trace") {
-            window.open(`${baseConfig.reqUrl}/api/trace/ui/${params.data.sourceData.ProfileID}`)
+            window.open(`${baseConfig.reqUrl}/api/trace/ui/${params.data.sourceData.profile_id}`)
           }else{
-            window.open(`${baseConfig.reqUrl}/api/pprof/ui/${params.data.sourceData.ProfileID}?si=${title}`)
+            window.open(`${baseConfig.reqUrl}/api/pprof/ui/${params.data.sourceData.profile_id}?si=${title}`)
 
           }
         });

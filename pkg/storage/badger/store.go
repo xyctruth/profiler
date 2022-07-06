@@ -132,9 +132,6 @@ func (s *store) SaveProfileMeta(metas []*storage.ProfileMeta, ttl time.Duration)
 
 		now := time.Now()
 		for _, meta := range metas {
-			if meta.OriginalTargetName == "" {
-				meta.OriginalTargetName = meta.TargetName
-			}
 			id, err := s.metaSeq.Next()
 			if err != nil {
 				return err
@@ -160,7 +157,7 @@ func (s *store) SaveProfileMeta(metas []*storage.ProfileMeta, ttl time.Duration)
 			// 添加默认target Index
 			meta.Labels = append(meta.Labels, storage.Label{
 				Key:   TargetLabel,
-				Value: meta.OriginalTargetName,
+				Value: meta.TargetName,
 			})
 
 			labelEnters := newLabelEntry(meta.Labels, ttl)
@@ -219,13 +216,15 @@ func (s *store) ListProfileMeta(sampleType string, startTime, endTime time.Time,
 					return err
 				}
 
-				if metas, ok := targetMap[meta.TargetName]; ok {
+				mKey := meta.TargetName + "/" + meta.Instance
+
+				if metas, ok := targetMap[mKey]; ok {
 					metas = append(metas, meta)
-					targetMap[meta.TargetName] = metas
+					targetMap[mKey] = metas
 				} else {
 					metas = make([]*storage.ProfileMeta, 0)
 					metas = append(metas, meta)
-					targetMap[meta.TargetName] = metas
+					targetMap[mKey] = metas
 				}
 				return nil
 			})
@@ -238,8 +237,8 @@ func (s *store) ListProfileMeta(sampleType string, startTime, endTime time.Time,
 	})
 
 	res := make([]*storage.ProfileMetaByTarget, 0)
-	for targetName, metas := range targetMap {
-		res = append(res, &storage.ProfileMetaByTarget{TargetName: targetName, ProfileMetas: metas})
+	for key, metas := range targetMap {
+		res = append(res, &storage.ProfileMetaByTarget{Key: key, ProfileMetas: metas})
 	}
 
 	return res, err

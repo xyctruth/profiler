@@ -48,7 +48,7 @@
         }
 
         for (const p of res[key]) {
-          l.children.push({value: p.Value, label: p.Value})
+          l.children.push({value: p.value, label: p.value})
         }
         data.push(l)
       }

@@ -190,8 +190,8 @@ func (collector *Collector) analysis(instance string, profileType string, profil
 		meta.Timestamp = time.Now().UnixNano() / time.Millisecond.Nanoseconds()
 		meta.ProfileID = profileID
 		meta.ProfileType = profileType
-		meta.TargetName = collector.TargetName + "/" + instance
-		meta.OriginalTargetName = collector.TargetName
+		meta.TargetName = collector.TargetName
+		meta.Instance = instance
 
 		meta.Duration = p.DurationNanos
 		meta.SampleTypeUnit = p.SampleType[i].Unit
@@ -227,8 +227,8 @@ func (collector *Collector) analysisTrace(instance string, profileType string, p
 	meta.ProfileID = profileID
 	meta.ProfileType = profileType
 	meta.SampleType = profileType
-	meta.TargetName = collector.TargetName + "/" + instance
-	meta.OriginalTargetName = collector.TargetName
+	meta.TargetName = collector.TargetName
+	meta.Instance = instance
 
 	meta.Labels = collector.Labels.ToArray()
 	metas = append(metas, meta)
