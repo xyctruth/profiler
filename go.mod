@@ -7,7 +7,7 @@ require (
 	github.com/felixge/fgprof v0.9.2
 	github.com/fsnotify/fsnotify v1.5.4
 	github.com/gavv/httpexpect/v2 v2.3.1
-	github.com/gin-gonic/gin v1.8.0
+	github.com/gin-gonic/gin v1.8.1
 	github.com/google/pprof v0.0.0-20211214055906-6f57359322fd
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/viper v1.11.0
