@@ -83,6 +83,12 @@
           top: 20,
           bottom: 20,
           selectedMode: 'multiple',
+          formatter: function (name) {
+            return echarts.format.truncateText(name, 280, '14px Microsoft Yahei', '…');
+          },
+          tooltip: {
+            show: true,
+          }
         },
         grid: {
           left: 100,
