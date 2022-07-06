@@ -12,8 +12,8 @@ type Store interface {
 	GetProfile(id string) (string, []byte, error)
 
 	// SaveProfile Save profile，return profile id
-	// binary data
-	// ttl profile expiration time
+	// data: binary profile data
+	// ttl: profile expiration time
 	SaveProfile(name string, data []byte, ttl time.Duration) (string, error)
 
 	// SaveProfileMeta Save profile meta data
@@ -31,21 +31,21 @@ type Store interface {
 	// ListLabel  Get collection target labels list
 	ListLabel() ([]Label, error)
 
-	// Release 释放 Store
+	// Release Store
 	Release()
 }
 
 type ProfileMeta struct {
-	ProfileID          string
-	ProfileType        string
-	SampleType         string
-	TargetName         string // target + "/" + instance
-	OriginalTargetName string
-	SampleTypeUnit     string
-	Value              int64
-	Timestamp          int64
-	Duration           int64
-	Labels             []Label
+	ProfileID      string  `json:"profile_id"`
+	ProfileType    string  `json:"profile_type"`
+	SampleType     string  `json:"sample_type"`
+	TargetName     string  `json:"target_name"`
+	Instance       string  `json:"instance"`
+	SampleTypeUnit string  `json:"sample_type_unit"`
+	Value          int64   `json:"value"`
+	Timestamp      int64   `json:"timestamp"`
+	Duration       int64   `json:"duration"`
+	Labels         []Label `json:"labels"`
 }
 
 func (meta *ProfileMeta) Encode() ([]byte, error) {
@@ -64,11 +64,11 @@ func (meta *ProfileMeta) Decode(v []byte) error {
 }
 
 type Label struct {
-	Key   string
-	Value string
+	Key   string `json:"key"`
+	Value string `json:"value"`
 }
 
 type ProfileMetaByTarget struct {
-	TargetName   string
-	ProfileMetas []*ProfileMeta
+	Key          string         `json:"key"`
+	ProfileMetas []*ProfileMeta `json:"profile_metas"`
 }
