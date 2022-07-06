@@ -3,6 +3,7 @@ package collector
 import (
 	"io/ioutil"
 	"os"
+	"sync"
 	"testing"
 	"time"
 
@@ -126,14 +127,17 @@ collector:
 )
 
 func TestChangeConfig(t *testing.T) {
-	file, err := ioutil.TempFile("./", "config-*.yaml")
-	require.Equal(t, err, nil)
-	defer os.Remove(file.Name())
+	file, err := ioutil.TempFile("./", "temp-*.yaml")
+	require.NoError(t, err)
+	//defer os.Remove(file.Name())
 	_, err = file.Write([]byte(generalConfigYAML))
-	require.Equal(t, err, nil)
+	require.NoError(t, err)
+	l := sync.Mutex{}
 	change := false
 
 	err = LoadConfig(file.Name(), func(config CollectorConfig) {
+		l.Lock()
+		defer l.Unlock()
 		if !change {
 			require.NotEqual(t, config, nil)
 			require.Equal(t, len(config.TargetConfigs), 2)
@@ -151,14 +155,16 @@ func TestChangeConfig(t *testing.T) {
 			require.Equal(t, utils.BoolPtr(true), profileConfig["fgprof"].Enable)
 		}
 	})
-	_, err = file.Write([]byte(changeConfigYAML))
-	require.Equal(t, err, nil)
-	require.Equal(t, err, nil)
+
+	err = file.Truncate(0)
+	require.NoError(t, err)
+	_, err = file.WriteAt([]byte(changeConfigYAML), 0)
+	require.NoError(t, err)
 	time.Sleep(1 * time.Second)
 }
 
 func TestLoadConfig(t *testing.T) {
-	file, err := ioutil.TempFile("./", "config-*.yaml")
+	file, err := ioutil.TempFile("./", "temp-*.yaml")
 	require.Equal(t, err, nil)
 	defer os.Remove(file.Name())
 	_, err = file.Write([]byte(generalConfigYAML))
@@ -191,7 +197,7 @@ func TestErrorLoadConfig(t *testing.T) {
 	})
 	require.NotEqual(t, err, nil)
 
-	file, err := ioutil.TempFile("./", "config-*.yaml")
+	file, err := ioutil.TempFile("./", "temp-*.yaml")
 	require.Equal(t, err, nil)
 	defer os.Remove(file.Name())
 	_, err = file.Write([]byte(errConfigYAML))

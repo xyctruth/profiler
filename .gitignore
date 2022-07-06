@@ -23,7 +23,7 @@
 _test
 
 data
-temp-*/
+temp-*
 node_modules
 .DS_Store
 dist
