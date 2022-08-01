@@ -372,9 +372,9 @@ memoize-one@^6.0.0:
   version "6.0.0"
   resolved "https://registry.npmmirror.com/memoize-one/download/memoize-one-6.0.0.tgz?cache=0&sync_timestamp=1634697208428&other_urls=https%3A%2F%2Fregistry.npmmirror.com%2Fmemoize-one%2Fdownload%2Fmemoize-one-6.0.0.tgz"
 
-moment@^2.29.2:
-  version "2.29.2"
-  resolved "https://registry.yarnpkg.com/moment/-/moment-2.29.2.tgz#00910c60b20843bcba52d37d58c628b47b1f20e4"
+moment@^2.29.4:
+  version "2.29.4"
+  resolved "https://registry.yarnpkg.com/moment/-/moment-2.29.4.tgz#3dbe052889fe7c1b2ed966fcb3a77328964ef108"
 
 nanoid@3.1.31, nanoid@^3.1.30:
   version "3.1.31"
