@@ -129,7 +129,7 @@ collector:
 func TestChangeConfig(t *testing.T) {
 	file, err := ioutil.TempFile("./", "temp-*.yaml")
 	require.NoError(t, err)
-	//defer os.Remove(file.Name())
+	defer os.Remove(file.Name())
 	_, err = file.Write([]byte(generalConfigYAML))
 	require.NoError(t, err)
 	l := sync.Mutex{}
