@@ -10,6 +10,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/xyctruth/stream"
+
 	"github.com/google/pprof/profile"
 	"github.com/sirupsen/logrus"
 	"github.com/xyctruth/profiler/pkg/storage"
@@ -104,10 +106,10 @@ func (collector *Collector) scrape() {
 	collector.log.Info("collector start scrape")
 	for profileType, profileConfig := range collector.ProfileConfigs {
 		if *profileConfig.Enable {
-			for _, instance := range collector.Instances {
+			stream.NewSlice(collector.Instances).Parallel(len(collector.Instances)).ForEach(func(i int, instance string) {
 				collector.wg.Add(1)
-				go collector.fetch(instance, profileType, profileConfig)
-			}
+				collector.fetch(instance, profileType, profileConfig)
+			})
 		}
 	}
 	collector.wg.Wait()

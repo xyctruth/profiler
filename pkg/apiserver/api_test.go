@@ -177,8 +177,8 @@ func TestListProfileMeta(t *testing.T) {
 		Expect().
 		Status(http.StatusBadRequest).Text().Contains("The time format must be RFC3339")
 
-	startTime := time.Now().Add(-1 * time.Minute).Format(time.RFC3339)
-	endTime := time.Now().Format(time.RFC3339)
+	startTime := time.Now().Local().Add(-1 * time.Minute).Format(time.RFC3339)
+	endTime := time.Now().Local().Add(time.Second).Format(time.RFC3339)
 
 	e.GET("/api/profile_meta/heap_inuse_space").
 		WithQuery("start_time", startTime).WithQuery("end_time", endTimestamp).
@@ -188,7 +188,7 @@ func TestListProfileMeta(t *testing.T) {
 	e.GET("/api/profile_meta/heap_inuse_space").
 		WithQuery("start_time", startTime).WithQuery("end_time", endTime).
 		Expect().
-		Status(http.StatusOK).JSON().Array().Length().Equal(0)
+		Status(http.StatusOK).JSON().Array().Length().Equal(2)
 }
 
 func TestDownloadProfile(t *testing.T) {
