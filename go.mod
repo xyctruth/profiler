@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/dgraph-io/badger/v3 v3.2103.2
 	github.com/felixge/fgprof v0.9.2
-	github.com/fsnotify/fsnotify v1.5.4
+	github.com/fsnotify/fsnotify v1.6.0
 	github.com/gavv/httpexpect/v2 v2.3.1
 	github.com/gin-gonic/gin v1.8.1
 	github.com/google/pprof v0.0.0-20220729232143-a41b82acbcb1
@@ -74,7 +74,7 @@ require (
 	golang.org/x/crypto v0.0.0-20220411220226-7b82a4e95df4 // indirect
 	golang.org/x/exp v0.0.0-20220303212507-bbda1eaf7a17 // indirect
 	golang.org/x/net v0.0.0-20220520000938-2e3eb7b945c2 // indirect
-	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a // indirect
+	golang.org/x/sys v0.0.0-20220908164124-27713097b956 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
 	gopkg.in/ini.v1 v1.66.4 // indirect
