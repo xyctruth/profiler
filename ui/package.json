@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "dev": "vite",
-    "test": "npm run dev --base_api_url=https://profiler.gytycn.com/",
+    "test": "npm run dev --base_api_url=https://profiler.xyctruth.work/",
     "build": "vite build",
     "preview": "vite preview"
   },

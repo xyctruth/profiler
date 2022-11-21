@@ -23,7 +23,7 @@
 - **详细分析**
   - 点击图表中的气泡跳转到 Profile 与 Trace 的详细页面进行进一步详细的分析
 
-### [演示](https://profiler.gytycn.com/)
+### [演示](https://profiler.xyctruth.work/)
 
 <table>
   <tr>
