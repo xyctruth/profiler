@@ -2,7 +2,7 @@ collector:
   targetConfigs:
     profiler-server: # server name
       interval: 15s
-      expiration: 0  # no expiration time
+      expiration: 24h  # no expiration time
       instances: ["localhost:9000"]
       labels:
         namespace: profiler-system
