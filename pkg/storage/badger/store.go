@@ -26,6 +26,7 @@ func NewStore(opt Options) storage.Store {
 		badger.DefaultOptions(opt.Path).
 			WithLoggingLevel(3).
 			WithBypassLockGuard(true).
+			WithNumVersionsToKeep(0).
 			WithValueThreshold(1 << 10))
 
 	if err != nil {
