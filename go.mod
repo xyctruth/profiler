@@ -11,7 +11,7 @@ require (
 	github.com/google/pprof v0.0.0-20220729232143-a41b82acbcb1
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/viper v1.12.0
-	github.com/stretchr/testify v1.8.0
+	github.com/stretchr/testify v1.8.1
 	github.com/vmihailenco/msgpack/v5 v5.3.5
 	github.com/xyctruth/stream v0.0.0-20220801054713-e6d11cda2f60
 	gopkg.in/yaml.v2 v2.4.0
