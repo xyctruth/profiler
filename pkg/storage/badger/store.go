@@ -9,6 +9,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/dgraph-io/badger/v3/options"
+
 	"github.com/dgraph-io/badger/v3"
 	log "github.com/sirupsen/logrus"
 	"github.com/xyctruth/profiler/pkg/storage"
@@ -24,10 +26,8 @@ type store struct {
 func NewStore(opt Options) storage.Store {
 	db, err := badger.Open(
 		badger.DefaultOptions(opt.Path).
-			WithLoggingLevel(3).
-			WithBypassLockGuard(true).
-			WithNumVersionsToKeep(0).
-			WithValueThreshold(1 << 10))
+			WithCompression(options.ZSTD).
+			WithValueThreshold(1 << 20))
 
 	if err != nil {
 		panic(err)
