@@ -213,7 +213,7 @@ func TestProfileMetaArray(t *testing.T) {
 	dir, err := ioutil.TempDir("./", "temp-*")
 	defer os.RemoveAll(dir)
 	require.Equal(t, nil, err)
-	s := NewStore(DefaultOptions(dir).WithGCInternal(time.Second))
+	s := NewStore(DefaultOptions(dir).WithGCInternal(time.Minute))
 	defer s.Release()
 	require.NotEqual(t, nil, s)
 
