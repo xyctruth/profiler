@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/dgraph-io/badger/v3 v3.2103.4
-	github.com/felixge/fgprof v0.9.2
+	github.com/felixge/fgprof v0.9.3
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/gavv/httpexpect/v2 v2.3.1
 	github.com/gin-gonic/gin v1.8.1
