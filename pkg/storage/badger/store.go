@@ -28,8 +28,7 @@ func NewStore(opt Options) storage.Store {
 		badger.DefaultOptions(opt.Path).
 			WithCompression(options.Snappy).
 			WithNumLevelZeroTables(1).
-			WithNumLevelZeroTablesStall(1).
-			WithMemTableSize(1 << 20).
+			WithNumLevelZeroTablesStall(2).
 			WithNumMemtables(1).
 			WithValueThreshold(1 << 20))
 
