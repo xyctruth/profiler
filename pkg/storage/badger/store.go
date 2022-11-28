@@ -26,7 +26,11 @@ type store struct {
 func NewStore(opt Options) storage.Store {
 	db, err := badger.Open(
 		badger.DefaultOptions(opt.Path).
-			WithCompression(options.ZSTD).
+			WithCompression(options.Snappy).
+			WithNumLevelZeroTables(1).
+			WithNumLevelZeroTablesStall(1).
+			WithMemTableSize(1 << 20).
+			WithNumMemtables(1).
 			WithValueThreshold(1 << 20))
 
 	if err != nil {
