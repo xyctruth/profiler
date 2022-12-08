@@ -27,15 +27,12 @@ func NewStore(opt Options) storage.Store {
 	db, err := badger.Open(
 		badger.DefaultOptions(opt.Path).
 			WithCompression(options.Snappy).
-			WithNumLevelZeroTables(1).
-			WithNumLevelZeroTablesStall(2).
-			WithNumMemtables(1).
-			WithValueThreshold(1 << 20))
+			WithValueThreshold(1 << 10))
 
 	if err != nil {
 		panic(err)
 	}
-
+	err = db.Flatten(10)
 	s := &store{
 		db:  db,
 		opt: opt,

@@ -10,21 +10,18 @@ func TestTTL(t *testing.T) {
 	//	err := os.Mkdir(dir, 0777)
 	//	require.Equal(t, nil, err)
 	//}
-	//s := NewStore(DefaultOptions(dir))
-	//
-	////for i := 0; true; i++ {
-	////	a, s, err := s.GetProfile(fmt.Sprintf("%d", i))
-	////	fmt.Sprintln(a, s, err)
-	////}
-	//
+	//s := NewStore(DefaultOptions(dir).WithGCInternal(time.Second * 10))
 	//for i := 0; true; i++ {
 	//	res, err := os.ReadFile("./trace_119091.gz")
 	//	if err != nil {
 	//		panic(err)
 	//	}
-	//	s, err := s.SaveProfile(fmt.Sprintf("%d", i), res, 10*time.Second)
+	//	s, err := s.SaveProfile(fmt.Sprintf("%d", i), res, 1*time.Minute)
 	//	if err != nil {
 	//		fmt.Println(s, err)
+	//	}
+	//	if i%1000 == 0 {
+	//		time.Sleep(time.Second * 10)
 	//	}
 	//}
 }

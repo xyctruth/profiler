@@ -1,10 +1,13 @@
 package badger
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"testing"
 	"time"
+
+	"github.com/dgraph-io/badger/v3/options"
 
 	"github.com/dgraph-io/badger/v3"
 	"github.com/stretchr/testify/require"
@@ -358,11 +361,7 @@ func BenchmarkBadger1(b *testing.B) {
 	}
 	defer os.RemoveAll(dir)
 
-	db, err := badger.Open(
-		badger.DefaultOptions(dir).
-			WithLoggingLevel(3).
-			WithBypassLockGuard(true))
-
+	db, err := badger.Open(badger.DefaultOptions(dir))
 	if err != nil {
 		panic(err)
 	}
@@ -377,6 +376,11 @@ func BenchmarkBadger1(b *testing.B) {
 		panic(err)
 	}
 
+	s.metaSeq, err = s.db.GetSequence(MetaSequence, 1000)
+	if err != nil {
+		panic(err)
+	}
+
 	defer s.Release()
 	res, err := os.ReadFile("./trace_119091.gz")
 	if err != nil {
@@ -384,7 +388,7 @@ func BenchmarkBadger1(b *testing.B) {
 	}
 
 	for i := 0; i < b.N; i++ {
-		_, err = s.SaveProfile("", res, time.Hour*24*7)
+		_, err = s.SaveProfile(fmt.Sprintf("%d", i), res, time.Hour*24*7)
 		if err != nil {
 			panic(err)
 		}
@@ -400,12 +404,11 @@ func BenchmarkBadger2(b *testing.B) {
 
 	db, err := badger.Open(
 		badger.DefaultOptions(dir).
-			WithLoggingLevel(3).
-			WithBypassLockGuard(true).
-			//WithNumMemtables(1).
-			//WithNumLevelZeroTables(1).
-			//WithNumLevelZeroTablesStall(2).
-			WithValueLogFileSize(64 << 20))
+			WithCompression(options.Snappy).
+			WithNumLevelZeroTables(1).
+			WithNumLevelZeroTablesStall(2).
+			WithNumMemtables(1).
+			WithValueThreshold(1 << 20))
 
 	if err != nil {
 		panic(err)
@@ -421,6 +424,11 @@ func BenchmarkBadger2(b *testing.B) {
 		panic(err)
 	}
 
+	s.metaSeq, err = s.db.GetSequence(MetaSequence, 1000)
+	if err != nil {
+		panic(err)
+	}
+
 	defer s.Release()
 	res, err := os.ReadFile("./trace_119091.gz")
 	if err != nil {
@@ -428,7 +436,7 @@ func BenchmarkBadger2(b *testing.B) {
 	}
 
 	for i := 0; i < b.N; i++ {
-		_, err = s.SaveProfile("", res, time.Hour*24*7)
+		_, err = s.SaveProfile(fmt.Sprintf("%d", i), res, time.Hour*24*7)
 		if err != nil {
 			panic(err)
 		}
