@@ -52,7 +52,6 @@ func (collector *Collector) run() {
 	defer collector.mu.Unlock()
 
 	collector.log.Info("collector run")
-
 	collector.mangerWg.Add(1)
 
 	go collector.scrapeLoop(collector.Interval)
@@ -102,6 +101,11 @@ func (collector *Collector) exit() {
 func (collector *Collector) scrape() {
 	collector.mu.RLock()
 	defer collector.mu.RUnlock()
+
+	if collector.Instances == nil {
+		collector.log.Warn("collector instances is empty")
+		return
+	}
 
 	collector.log.Info("collector start scrape")
 	for profileType, profileConfig := range collector.ProfileConfigs {
