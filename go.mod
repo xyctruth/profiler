@@ -3,7 +3,7 @@ module github.com/xyctruth/profiler
 go 1.18
 
 require (
-	github.com/dgraph-io/badger/v3 v3.2103.4
+	github.com/dgraph-io/badger/v3 v3.2103.5
 	github.com/felixge/fgprof v0.9.3
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/gavv/httpexpect/v2 v2.3.1
