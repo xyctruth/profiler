@@ -6,7 +6,7 @@ require (
 	github.com/dgraph-io/badger/v3 v3.2103.5
 	github.com/felixge/fgprof v0.9.3
 	github.com/fsnotify/fsnotify v1.6.0
-	github.com/gavv/httpexpect/v2 v2.9.0
+	github.com/gavv/httpexpect/v2 v2.12.0
 	github.com/gin-gonic/gin v1.8.2
 	github.com/google/pprof v0.0.0-20220729232143-a41b82acbcb1
 	github.com/sirupsen/logrus v1.9.0
