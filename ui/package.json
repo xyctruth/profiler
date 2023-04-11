@@ -12,7 +12,7 @@
     "chart.js": "^3.6.2",
     "chartjs-plugin-autocolors": "0.0.4",
     "echarts": "^5.2.2",
-    "element-plus": "^1.2.0-beta.5",
+    "element-plus": "^2.1.0",
     "moment": "^2.29.4",
     "nanoid": "3.1.31",
     "vue": "^3.2.23",
