@@ -21,11 +21,11 @@ func LoadConfig(configPath string, fn func(CollectorConfig)) error {
 	conf.SetConfigType("yaml")
 
 	if err = conf.ReadInConfig(); err != nil {
-		return fmt.Errorf("Fatal error config file: %w", err)
+		return fmt.Errorf("fatal error config file: %w", err)
 	}
 
 	if err = conf.UnmarshalKey("collector", &config); err != nil {
-		return fmt.Errorf("Fatal error config CollectorConfig: %w", err)
+		return fmt.Errorf("fatal error config CollectorConfig: %w", err)
 	}
 
 	conf.OnConfigChange(func(in fsnotify.Event) {
